@@ -1,0 +1,55 @@
+#!/bin/bash
+
+set -euo pipefail
+
+PROG=$(basename "$0")
+
+DisplayUsage()
+{
+    cat <<EOF
+Usage: $PROG [options]
+Options
+    all              compile the program
+    specs [PATTERN]  run specified tests
+    clean            clean directory
+
+EOF
+}
+
+Compile()
+{
+    make;
+}
+
+Specs()
+{
+    cat << __EOF__ > specs.mk 
+SPECS_SRCS := \$(shell find . -name "spec.${1}.c")
+__EOF__
+
+    make specs;
+}
+
+Clean()
+{
+    make fclean;
+    rm specs.mk
+}
+
+EntryPoint()
+{
+    case $1 in
+        all )    Compile ;;
+        specs )  Specs "${2:-"*"}";;
+        clean )  Clean ;;
+        * )      DisplayUsage ;;
+    esac
+}
+
+if [[ "$#" -eq 0 ]] ;
+    then
+        DisplayUsage
+	      exit 1
+    else
+        EntryPoint "$@"
+fi
