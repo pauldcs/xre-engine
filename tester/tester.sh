@@ -18,10 +18,14 @@ readonly  DEFAULT_INPUT_DIRECTORY="infiles"
 readonly DEFAULT_OUTPUT_DIRECTORY="outfiles"
 readonly          DEFAULT_TIMEOUT=2
 
-readonly       OK_COLOR=$(tput setaf 2) # green
-readonly    ERROR_COLOR=$(tput setaf 1) # red
-readonly BOLD_UNDERLINE=$(tput bold)$(tput smul)
-readonly       NO_COLOR=$(tput sgr0)
+# readonly       OK_COLOR=$(tput setaf 2) # green
+# readonly    ERROR_COLOR=$(tput setaf 1) # red
+# readonly BOLD_UNDERLINE=$(tput bold)$(tput smul)
+# readonly       NO_COLOR=$(tput sgr0)
+readonly       OK_COLOR="\e[32m"
+readonly    ERROR_COLOR="\e[31m"
+readonly BOLD_UNDERLINE=""
+readonly       NO_COLOR="\e[0m"
 
 #	/*------------------------------------------------------------*/
 #	/*--- Display help message                                 ---*/

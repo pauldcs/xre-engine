@@ -1,4 +1,4 @@
-name: Test Compile
+name: tests
 
 on:
   push:
@@ -18,3 +18,31 @@ jobs:
       - uses: actions/checkout@v3
       - name: make
         run: make
+
+  tester:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: make
+        uses: actions/checkout@v2
+
+      - name: build xre
+        run: make
+
+      - name: run tester.sh
+        working-directory: tester
+        run: chmod +x run && mv ../xre . && chmod +x xre && ./run
+
+  leaks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: make
+        uses: actions/checkout@v2
+
+      - name: build xre
+        run: make g
+
+      - name: run tester.sh
+        working-directory: tester
+        run: chmod +x run && mv ../xre . && chmod +x xre && ./run
