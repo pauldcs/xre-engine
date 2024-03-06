@@ -11,7 +11,7 @@ on:
       - develop
 
 jobs:
-  build:
+  compile:
     runs-on: ubuntu-latest
 
     steps:
@@ -33,7 +33,7 @@ jobs:
         working-directory: tester
         run: chmod +x run && mv ../xre . && chmod +x xre && ./run
 
-  leaks:
+  memory:
     runs-on: ubuntu-latest
 
     steps:
@@ -46,3 +46,13 @@ jobs:
       - name: run tester.sh
         working-directory: tester
         run: chmod +x run && mv ../xre . && chmod +x xre && ./run
+
+  syntax:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: install sparse
+        uses: actions/checkout@v2
+
+      - name: run sparse
+        run: sudo apt-get install sparse && sparse -I ./incs $(find . -name "*.c")
