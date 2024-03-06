@@ -56,6 +56,25 @@ ast_show (t_xre_ast *ast) {
 	inner(ast, 0);
 }
 
+void
+ast_free(t_xre_ast *ast) {
+    if (ast->token._type
+        & (EXPR_OP_TYPE_BINOP
+            | EXPR_TYPE_CONDITION
+            | EXPR_TYPE_LOOP
+            | EXPR_TYPE_SEQUENCE
+        )) {
+		ast_free(ast->binop.left);
+        ast_free(ast->binop.right);
+    } else if (ast->token._type & EXPR_OP_TYPE_UNIOP) {
+		ast_free(ast->binop.left);
+    } else if (ast->token._kind == __IDENTIFIER__
+            || ast->token._kind == __STRING_LITERAL__) {
+        free((void *)ast->string);
+    }
+    free(ast);
+}
+
 const char *
 expr_kind_to_string(t_xre_expr_kind kind) {
     switch (kind) {

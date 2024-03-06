@@ -11,48 +11,105 @@ on:
       - develop
 
 jobs:
-  compile:
-    runs-on: ubuntu-latest
+  syntax:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
 
     steps:
-      - uses: actions/checkout@v3
-      - name: make
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
+            sudo apt-get install sparse
+          elif [ "${{ matrix.os }}" = "macos-latest" ]; then
+            brew install sparse
+          fi
+
+      - name: Run sparse
+        run: >
+          sparse      \
+            -Wno-decl \
+            -I ./incs \
+            $(find . -name "*.c" -not -path "*/unit-tests/*")
+
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build xre
         run: make
 
   tester:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
 
     steps:
-      - name: make
+      - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: build xre
+      - name: Build xre
         run: make
 
-      - name: run tester.sh
+      - name: Run tester.sh
         working-directory: tester
-        run: chmod +x run && mv ../xre . && chmod +x xre && ./run
+        run: >
+          chmod +x run
+          && mv ../xre .
+          && chmod +x xre
+          && ./run
 
   memory:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
 
     steps:
-      - name: make
+      - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: build xre
+      - name: Build xre (debug)
         run: make g
 
-      - name: run tester.sh
+      - name: Run tester.sh
         working-directory: tester
-        run: chmod +x run && mv ../xre . && chmod +x xre && ./run
+        run: >
+          chmod +x run
+          && mv ../xre .
+          && chmod +x xre
+          && ./run
 
-  syntax:
+  valgrind:
     runs-on: ubuntu-latest
 
     steps:
-      - name: install sparse
+      - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: run sparse
-        run: sudo apt-get install sparse && sparse -I ./incs $(find . -name "*.c")
+      - name: Install Valgrind
+        run: sudo apt-get install valgrind
+
+      - name: Build xre
+        run: make
+
+      - name: Run Valgrind
+        run: >
+          valgrind                \
+            --leak-check=full     \
+            --track-origins=yes   \
+            --show-leak-kinds=all \
+            --track-fds=yes       \
+            --error-exitcode=1    \
+            ./xre ./tester/infiles/prime_numbers.in

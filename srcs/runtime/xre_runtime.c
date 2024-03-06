@@ -192,6 +192,9 @@ bool xre_runtime(t_xre_ast *ast) {
     frame_block_print(result);
   }
 
+  if (result->_type & IF_SEQUENCE)
+    array_kill(result->_data.array);
+  
   frame_block_free(&result);
   runtime_stack_deinit();
 

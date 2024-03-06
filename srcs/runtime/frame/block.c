@@ -269,7 +269,7 @@ void frame_block_free(frame_block_t **block) {
     free(frame_block->_error);
     frame_block->_error = NULL;
   }
-  
+
   free(*block);
   n_blocks_freed++;
   *block = NULL;

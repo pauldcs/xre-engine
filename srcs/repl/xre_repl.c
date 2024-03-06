@@ -14,10 +14,10 @@ bool xre_process_block(const char *block) {
     return (true);
 
   t_xre_ast *ast = xre_ast_compose(block);
-  if (ast)
-    return (xre_runtime(ast));
+  (void)xre_runtime(ast);
+  ast_free(ast);
 
-  return (false);
+  return (true);
 }
 
 // void print_hist(array_t *hist) {

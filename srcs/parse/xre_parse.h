@@ -102,5 +102,5 @@ t_xre_ast  *xre_expr_parse (array_t *tokens);
 t_xre_expr_type  expr_type_by_kind(t_xre_expr_kind kind);
 const char      *expr_kind_to_string(t_xre_expr_kind kind);
 void             ast_show (t_xre_ast *ast);
-
+void             ast_free(t_xre_ast *ast);
 #endif /* __XRE_PARSE_H__ */
