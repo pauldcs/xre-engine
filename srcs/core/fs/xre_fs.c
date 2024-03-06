@@ -218,108 +218,108 @@ bool xre_fd_read(int fd, void *dest, size_t n) {
     return (true);
 }
 
-#ifdef __linux__
+// #ifdef __linux__
 
-void print_mode(struct stat *sb) {
-    char mode[11] = "----------";  // Initialize with default values for no permission
+// void print_mode(struct stat *sb) {
+//     char mode[11] = "----------";  // Initialize with default values for no permission
 
-    if (S_ISDIR(sb->st_mode)) mode[0] = 'd';  // Directory
-    if (S_ISCHR(sb->st_mode)) mode[0] = 'c';  // Character device
-    if (S_ISBLK(sb->st_mode)) mode[0] = 'b';  // Block device
-    if (S_ISFIFO(sb->st_mode)) mode[0] = 'p'; // FIFO or pipe
-    if (S_ISLNK(sb->st_mode)) mode[0] = 'l';  // Symbolic link
-    if (S_ISSOCK(sb->st_mode)) mode[0] = 's'; // Socket
+//     if (S_ISDIR(sb->st_mode)) mode[0] = 'd';  // Directory
+//     if (S_ISCHR(sb->st_mode)) mode[0] = 'c';  // Character device
+//     if (S_ISBLK(sb->st_mode)) mode[0] = 'b';  // Block device
+//     if (S_ISFIFO(sb->st_mode)) mode[0] = 'p'; // FIFO or pipe
+//     if (S_ISLNK(sb->st_mode)) mode[0] = 'l';  // Symbolic link
+//     if (S_ISSOCK(sb->st_mode)) mode[0] = 's'; // Socket
 
-    if (sb->st_mode & S_IRUSR) mode[1] = 'r'; // User read
-    if (sb->st_mode & S_IWUSR) mode[2] = 'w'; // User write
-    if (sb->st_mode & S_IXUSR) mode[3] = 'x'; // User execute
-    if (sb->st_mode & S_IRGRP) mode[4] = 'r'; // Group read
-    if (sb->st_mode & S_IWGRP) mode[5] = 'w'; // Group write
-    if (sb->st_mode & S_IXGRP) mode[6] = 'x'; // Group execute
-    if (sb->st_mode & S_IROTH) mode[7] = 'r'; // Others read
-    if (sb->st_mode & S_IWOTH) mode[8] = 'w'; // Others write
-    if (sb->st_mode & S_IXOTH) mode[9] = 'x'; // Others execute
+//     if (sb->st_mode & S_IRUSR) mode[1] = 'r'; // User read
+//     if (sb->st_mode & S_IWUSR) mode[2] = 'w'; // User write
+//     if (sb->st_mode & S_IXUSR) mode[3] = 'x'; // User execute
+//     if (sb->st_mode & S_IRGRP) mode[4] = 'r'; // Group read
+//     if (sb->st_mode & S_IWGRP) mode[5] = 'w'; // Group write
+//     if (sb->st_mode & S_IXGRP) mode[6] = 'x'; // Group execute
+//     if (sb->st_mode & S_IROTH) mode[7] = 'r'; // Others read
+//     if (sb->st_mode & S_IWOTH) mode[8] = 'w'; // Others write
+//     if (sb->st_mode & S_IXOTH) mode[9] = 'x'; // Others execute
 
-    printf("Protection Mode:         %s\n", mode);
-}
+//     printf("Protection Mode:         %s\n", mode);
+// }
 
-void print_time(const char *label, time_t time) {
-    char buffer[20];
-    struct tm tm;
-    if (strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", localtime_r(&time, &tm))) {
-        printf("%s: %s\n", label, buffer);
-    }
-}
+// void print_time(const char *label, time_t time) {
+//     char buffer[20];
+//     struct tm tm;
+//     if (strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", localtime_r(&time, &tm))) {
+//         printf("%s: %s\n", label, buffer);
+//     }
+// }
 
-void xre_file_print(struct stat *sb) {
-    printf("File Type:               ");
-    switch (sb->st_mode & S_IFMT) {
-        case S_IFBLK:  printf("block_special\n"); break;
-        case S_IFCHR:  printf("character_special\n"); break;
-        case S_IFDIR:  printf("directory\n"); break;
-        case S_IFIFO:  printf("fifo\n"); break;
-        case S_IFREG:  printf("regular_file\n"); break;
-        case S_IFLNK:  printf("symbolic_link\n"); break;
-        case S_IFSOCK: printf("socket\n"); break;
-        default:       printf("???\n"); break;
-    }
-    printf("Device:                  0x%lx\n", sb->st_dev);
-    printf("Inode Number:            0x%llx\n", (unsigned long long)sb->st_ino);
-    printf("Hard Links:              %d\n", sb->st_nlink);
-    printf("Owner's User ID:         %d\n", sb->st_uid);
-    printf("Group ID:                %d\n", sb->st_gid);
-    printf("Device Type:             %lu\n", sb->st_rdev);
-    printf("File Size:               %lld bytes\n", (long long)sb->st_size);
-    print_mode(sb);
-    print_time("Creation Time", sb->st_ctime);
-    print_time("Last Access Time", sb->st_atime);
-    print_time("Last Modification Time", sb->st_mtime);
-    printf("Optimal Blocksize:       %d\n", sb->st_blksize);
-    printf("Blocks Allocated:        %lld\n", (long long)sb->st_blocks);
-}
+// void xre_file_print(struct stat *sb) {
+//     printf("File Type:               ");
+//     switch (sb->st_mode & S_IFMT) {
+//         case S_IFBLK:  printf("block_special\n"); break;
+//         case S_IFCHR:  printf("character_special\n"); break;
+//         case S_IFDIR:  printf("directory\n"); break;
+//         case S_IFIFO:  printf("fifo\n"); break;
+//         case S_IFREG:  printf("regular_file\n"); break;
+//         case S_IFLNK:  printf("symbolic_link\n"); break;
+//         case S_IFSOCK: printf("socket\n"); break;
+//         default:       printf("???\n"); break;
+//     }
+//     printf("Device:                  0x%lx\n", sb->st_dev);
+//     printf("Inode Number:            0x%llx\n", (unsigned long long)sb->st_ino);
+//     printf("Hard Links:              %d\n", sb->st_nlink);
+//     printf("Owner's User ID:         %d\n", sb->st_uid);
+//     printf("Group ID:                %d\n", sb->st_gid);
+//     printf("Device Type:             %lu\n", sb->st_rdev);
+//     printf("File Size:               %lld bytes\n", (long long)sb->st_size);
+//     print_mode(sb);
+//     print_time("Creation Time", sb->st_ctime);
+//     print_time("Last Access Time", sb->st_atime);
+//     print_time("Last Modification Time", sb->st_mtime);
+//     printf("Optimal Blocksize:       %d\n", sb->st_blksize);
+//     printf("Blocks Allocated:        %lld\n", (long long)sb->st_blocks);
+// }
 
-# else
+// # else
 
-void xre_file_print(struct stat *sb) {
-	char mode[32]  = {0};
-	char dateb[64] = {0};
-	char datea[64] = {0};
-	char datem[64] = {0};
-	char dates[64] = {0};
+// void xre_file_print(struct stat *sb) {
+// 	char mode[32]  = {0};
+// 	char dateb[64] = {0};
+// 	char datea[64] = {0};
+// 	char datem[64] = {0};
+// 	char dates[64] = {0};
 
-	(void)st_mode_to_string(sb->st_mode,           (char*)mode, 32);
-	(void)timespec_to_string(sb->st_birthtimespec, (char*)dateb, "%Y-%m-%d %H:%M:%S", 32);
-	(void)timespec_to_string(sb->st_atimespec,     (char*)datea, "%Y-%m-%d %H:%M:%S", 32);
-	(void)timespec_to_string(sb->st_mtimespec,     (char*)datem, "%Y-%m-%d %H:%M:%S", 32);
-	(void)timespec_to_string(sb->st_ctimespec,     (char*)dates, "%Y-%m-%d %H:%M:%S", 32);
+// 	(void)st_mode_to_string(sb->st_mode,           (char*)mode, 32);
+// 	(void)timespec_to_string(sb->st_birthtimespec, (char*)dateb, "%Y-%m-%d %H:%M:%S", 32);
+// 	(void)timespec_to_string(sb->st_atimespec,     (char*)datea, "%Y-%m-%d %H:%M:%S", 32);
+// 	(void)timespec_to_string(sb->st_mtimespec,     (char*)datem, "%Y-%m-%d %H:%M:%S", 32);
+// 	(void)timespec_to_string(sb->st_ctimespec,     (char*)dates, "%Y-%m-%d %H:%M:%S", 32);
 
-	printf("\nFile Type:               ");
-	switch (sb->st_mode & S_IFMT) {
-        case S_IFBLK:  printf ("block_special\n"); break;
-        case S_IFCHR:  printf ("character_special\n"); break;
-        case S_IFDIR:  printf ("directory\n"); break;
-        case S_IFIFO:  printf ("fifo\n"); break;
-        case S_IFREG:  printf ("regular_file\n"); break;
-        case S_IFLNK:  printf ("symbolic_link\n"); break;
-        case S_IFSOCK: printf ("socket\n"); break;
-        default:       printf ("???\n"); break;
-    }
-	printf("Device:                  0x%x\n", sb->st_dev);
-	printf("Inode Number:            0x%llx\n", sb->st_ino);
-	printf("Protection Mode:         %s\n", mode);
-	printf("Hard Links:              %d\n", sb->st_nlink);
-	printf("Owner's User ID:         %d\n", sb->st_uid);
-	printf("Group ID:                %d\n", sb->st_gid);
-	printf("Device Type:             %d\n", sb->st_rdev);
-	printf("File Size:               %lld bytes\n", sb->st_size);
-	printf("Creation Time:           %s\n", dateb);
-	printf("Last Access Time:        %s\n", datea);
-	printf("Last Modification Time:  %s\n", datem);
-	printf("Last Status Change Time: %s\n", dates);
-	printf("Optimal Blocksize:       %d\n", sb->st_blksize);
-	printf("Blocks Allocated:        %lld\n", sb->st_blocks);
-	printf("File Flags:              %d\n", sb->st_flags);
-	printf("Generation Number:       %d\n\n", sb->st_gen);
-}
+// 	printf("\nFile Type:               ");
+// 	switch (sb->st_mode & S_IFMT) {
+//         case S_IFBLK:  printf ("block_special\n"); break;
+//         case S_IFCHR:  printf ("character_special\n"); break;
+//         case S_IFDIR:  printf ("directory\n"); break;
+//         case S_IFIFO:  printf ("fifo\n"); break;
+//         case S_IFREG:  printf ("regular_file\n"); break;
+//         case S_IFLNK:  printf ("symbolic_link\n"); break;
+//         case S_IFSOCK: printf ("socket\n"); break;
+//         default:       printf ("???\n"); break;
+//     }
+// 	printf("Device:                  0x%x\n", sb->st_dev);
+// 	printf("Inode Number:            0x%llx\n", sb->st_ino);
+// 	printf("Protection Mode:         %s\n", mode);
+// 	printf("Hard Links:              %d\n", sb->st_nlink);
+// 	printf("Owner's User ID:         %d\n", sb->st_uid);
+// 	printf("Group ID:                %d\n", sb->st_gid);
+// 	printf("Device Type:             %d\n", sb->st_rdev);
+// 	printf("File Size:               %lld bytes\n", sb->st_size);
+// 	printf("Creation Time:           %s\n", dateb);
+// 	printf("Last Access Time:        %s\n", datea);
+// 	printf("Last Modification Time:  %s\n", datem);
+// 	printf("Last Status Change Time: %s\n", dates);
+// 	printf("Optimal Blocksize:       %d\n", sb->st_blksize);
+// 	printf("Blocks Allocated:        %lld\n", sb->st_blocks);
+// 	printf("File Flags:              %d\n", sb->st_flags);
+// 	printf("Generation Number:       %d\n\n", sb->st_gen);
+// }
 
-#endif
+// #endif
