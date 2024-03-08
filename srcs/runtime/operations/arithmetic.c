@@ -15,7 +15,6 @@ frame_block_t *add_op(frame_block_t *lv, frame_block_t *rv) {
   // }
 
   lv->_data.value = lv->_data.value + rv->_data.value;
-  lv->_src = NULL;
   frame_block_free(&rv);
   return (lv);
 }
@@ -46,7 +45,6 @@ frame_block_t *mul_op(frame_block_t *lv, frame_block_t *rv) {
 
   lv->_data.value = lv->_data.value * rv->_data.value;
   frame_block_free(&rv);
-  lv->_src = NULL;
   return (lv);
 }
 
@@ -59,7 +57,6 @@ frame_block_t *div_op(frame_block_t *lv, frame_block_t *rv) {
 
   lv->_data.value = lv->_data.value / rv->_data.value;
   frame_block_free(&rv);
-  lv->_src = NULL;
   return (lv);
 }
 
@@ -72,7 +69,6 @@ frame_block_t *mod_op(frame_block_t *lv, frame_block_t *rv) {
 
   lv->_data.value = lv->_data.value % rv->_data.value;
   frame_block_free(&rv);
-  lv->_src = NULL;
   return (lv);
 }
 

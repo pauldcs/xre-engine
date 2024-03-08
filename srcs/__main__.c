@@ -97,13 +97,16 @@ club:
 	}
 
 	t_xre_ast *ast = xre_ast_compose(buffer);
-	if (!xre_runtime(ast)) {
+	if (!ast) {
 		free(buffer);
-		ast_free(ast);
 		return (false);
 	}
 
-	ast_free(ast);
+	if (!xre_runtime(ast)) {
+		free(buffer);
+		return (false);
+	}
+
 	free(buffer);
  	return (true);
 }

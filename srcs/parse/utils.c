@@ -58,21 +58,22 @@ ast_show (t_xre_ast *ast) {
 
 void
 ast_free(t_xre_ast *ast) {
-    if (ast->token._type
-        & (EXPR_OP_TYPE_BINOP
-            | EXPR_TYPE_CONDITION
-            | EXPR_TYPE_LOOP
-            | EXPR_TYPE_SEQUENCE
-        )) {
-		ast_free(ast->binop.left);
-        ast_free(ast->binop.right);
-    } else if (ast->token._type & EXPR_OP_TYPE_UNIOP) {
-		ast_free(ast->binop.left);
-    } else if (ast->token._kind == __IDENTIFIER__
-            || ast->token._kind == __STRING_LITERAL__
-            || ast->token._kind == __SEPARATOR__) {
-        free((void *)ast->string);
+
+    switch(ast->kind) {
+        case __STRING_LITERAL__:
+        case __IDENTIFIER__:
+            free((void *)ast->string);
+            break;
+
+        case __NOT__:
+            ast_free(ast->uniop);
+            break;
+        
+        default:
+            ast_free(ast->binop.left);
+            ast_free(ast->binop.right);          
     }
+
     free(ast);
 }
 

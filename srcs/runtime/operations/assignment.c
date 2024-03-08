@@ -8,11 +8,12 @@ static frame_block_t *simple_assignment(t_xre_ast *node, frame_block_t *rv) {
     && !runtime_stack_add(node->string, rv)) 
     return (copy_block_alloc(rv));
 
-  rv->_src = NULL;
   return (rv);
 }
 
 static frame_block_t *reassignement(t_xre_ast *node, frame_block_t *rv) {
+  rv->_src = node;
+
   if (runtime_stack_set(node->string, rv))
     return (copy_block_alloc(rv));
   
