@@ -12,7 +12,7 @@ void xre_error(t_xre_error *report, const t_xre_token *token) {
   static char err_buff[4096];
   size_t i = 0;
 
-  if (__xre_args__.flags & MINIMAL_ERRORS) {
+  if (!(__xre_args__.flags & SHOW_ERRORS)) {
     i += cpyf(&err_buff[i], 4096 - i, "error: ");
     i += cpyf(&err_buff[i], 4096 - i, "%s: ", err_type_to_string(report->error.type));
     i += cpyf(&err_buff[i], token->_line_len, "%s", token->_line_ptr);
