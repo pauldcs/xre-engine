@@ -52,5 +52,5 @@ frame_block_t *separator_op(t_xre_ast *node) {
 
   frame_block_free(&left);
 
-  return (true_block_with(right));
+  return (is_truthy_block(right) ? true_block_with(right) : false_block_with(right));
 }

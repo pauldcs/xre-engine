@@ -29,7 +29,7 @@ typedef enum {
 typedef struct {
 	t_flags   flags;
 	uint32_t  argument_a;
-	char 	   *argument_b;
+	char 	   *code;
 }	t_xre_args;
 
 extern t_xre_args   __xre_args__;
