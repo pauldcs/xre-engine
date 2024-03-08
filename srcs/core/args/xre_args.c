@@ -15,11 +15,12 @@ void __attribute__((noreturn)) usage(void) {
 		"XRE Interpreter v%s\n"
 		"usage: %s [-hdrsm] [INFILES] ...\n\n"
 		"options:\n"
-		"    -h  show this help message\n"
-		"    -r  print command results\n"
-		"    -s  print command statistics\n"
-		"    -m  minimal error messages\n"
-		"    -d  enable ast debug mode\n\n",
+		"    -h         show this help message\n"
+		"    -r         print command results\n"
+		"    -x  [CODE] execute code from command line\n"
+		"    -s         print command statistics\n"
+		"    -m         minimal error messages\n"
+		"    -d         enable ast debug mode\n\n",
 
 	__xre_state__.version,
 	__xre_state__.title
@@ -172,7 +173,7 @@ t_xre_args *xre_args_parse(int ac, char *av[]) {
 		return (NULL);
 		
 	bzero(args, sizeof(t_xre_args));
-	xre_getopts_init(&xopts, ac, (const char **)av, "drsmh");
+	xre_getopts_init(&xopts, ac, (const char **)av, "drsmhx:");
 
 	while ((c = xre_getopts_next(&xopts)) != (char)-1)
 	{
@@ -188,8 +189,8 @@ t_xre_args *xre_args_parse(int ac, char *av[]) {
 						NULL);
 			
 			break;
-			case 'B':
-				if (!string_parse(xopts.arg, &args->argument_b))
+			case 'x':
+				if (!string_parse(xopts.arg, &args->code))
 					return (
 						free(args),
 						NULL);

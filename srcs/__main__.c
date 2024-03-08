@@ -25,6 +25,8 @@ t_xre_state  __xre_state__ = {
 // 	free_ast()
 // }
 
+
+
 static bool
 init_source_file(t_xre_args *args, const char *path) {	
 
@@ -133,9 +135,20 @@ main(int ac, char *av[]) {
 				return (free(args), false);
 			}
 		} else {
-	
-			if (!xre_repl_entrypoint()) {
-				return (free(args), false);
+			if (args->code) {
+					t_xre_ast *ast = xre_ast_compose(args->code);
+					if (!ast) {
+						return (free(args), false);
+					}
+					if (!xre_runtime(ast)) {
+						ast_free(ast);
+						return (free(args), false);
+					}
+					return (true);
+			} else {
+				if (!xre_repl_entrypoint()) {
+					return (free(args), false);
+				}
 			}
 		}
 
