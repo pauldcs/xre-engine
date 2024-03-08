@@ -18,14 +18,11 @@ readonly  DEFAULT_INPUT_DIRECTORY="infiles"
 readonly DEFAULT_OUTPUT_DIRECTORY="outfiles"
 readonly          DEFAULT_TIMEOUT=2
 
-# readonly       OK_COLOR=$(tput setaf 2) # green
-# readonly    ERROR_COLOR=$(tput setaf 1) # red
-# readonly BOLD_UNDERLINE=$(tput bold)$(tput smul)
-# readonly       NO_COLOR=$(tput sgr0)
-readonly       OK_COLOR=""
-readonly    ERROR_COLOR=""
-readonly BOLD_UNDERLINE=""
-readonly       NO_COLOR=""
+readonly       OK_COLOR=$(tput -T "xterm" setaf 2) # green
+readonly    ERROR_COLOR=$(tput -T "xterm" setaf 1) # red
+readonly BOLD_UNDERLINE=$(tput -T "xterm" bold)$(tput -T "xterm" smul)
+readonly           BOLD=$(tput -T "xterm" bold)
+readonly       NO_COLOR=$(tput -T "xterm" sgr0)
 
 #	/*------------------------------------------------------------*/
 #	/*--- Display help message                                 ---*/
@@ -314,21 +311,23 @@ function run_test() {
         then
             if cmp -s "$actual_output_file" "$expected_output_file";
                 then
-                    output "        └── Status: ${OK_COLOR}OK${NO_COLOR}"
+                    output "        └── Status: ${OK_COLOR}SUCCESS${NO_COLOR}"
                     ((passed++))
             else
-                output "        └── Status: ${ERROR_COLOR}KO${NO_COLOR}"
+                output "        └── Status: ${ERROR_COLOR}FAILURE${NO_COLOR}"
                 output "            └── Expected: $expected_output_file"
                 output "            └── Actual: $actual_output_file"
                 output "            └── Diff:"
+                output $BOLD
                 output \
                     "$(\
                         2>&1                    \
-                        diff -Tp                \
+                        diff -Tp --color        \
                         "$actual_output_file"   \
                         "$expected_output_file" \
                         | sed 's/^/                /'
                     )"
+                output $NO_COLOR
                 ((failed++))
             fi
     else

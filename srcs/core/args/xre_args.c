@@ -19,8 +19,8 @@ void __attribute__((noreturn)) usage(void) {
 		"    -r            Print command results\n"
 		"    -e            Show good error messages\n"
 		"    -s            Print command statistics\n"
-		"    -d            Enable ast debug mode\n\n"
-		"    -h            Show this help message\n",
+		"    -d            Enable ast debug mode\n"
+		"    -h            Show this help message\n\n",
 
 	__xre_state__.version,
 	__xre_state__.title

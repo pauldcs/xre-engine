@@ -11,25 +11,7 @@ on:
       - develop
 
 jobs:
-  syntax:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Install dependencies
-        run: sudo apt-get install sparse
-
-      - name: Run sparse
-        run: >
-          sparse      \
-            -Wno-decl \
-            -Wsparse-error \
-            -I ./incs \
-            $(find . -name "*.c" -not -path "*/unit-tests/*")
-
-  compile:
+  install-script:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -39,8 +21,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Build xre
-        run: make
+      - name: Install xre
+        run: ./install.sh
+
+      - name: Try xre
+        run: xre -h
 
   tester:
     runs-on: ${{ matrix.os }}
@@ -52,9 +37,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install timeout
-        if: matrix.os == 'macos-latest'
-        run: brew install coreutils
+      - name: Install timeout and ncurses
+        run: |
+          if [ "${{ matrix.os }}" = "macos-latest" ]; then
+            brew install coreutils && brew install ncurses
+          elif [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
+            sudo apt-get install libncurses5-dev
+          fi
 
       - name: Build xre
         run: make
@@ -91,6 +80,24 @@ jobs:
           && mv ../xre .
           && chmod +x xre
           && ./run
+
+  syntax:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: sudo apt-get install sparse
+
+      - name: Run sparse
+        run: >
+          sparse      \
+            -Wno-decl \
+            -Wsparse-error \
+            -I ./incs \
+            $(find . -name "*.c" -not -path "*/unit-tests/*")
 
   valgrind:
     runs-on: ubuntu-latest
