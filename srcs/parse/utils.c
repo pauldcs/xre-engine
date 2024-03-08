@@ -56,6 +56,26 @@ ast_show (t_xre_ast *ast) {
 	inner(ast, 0);
 }
 
+void
+ast_free(t_xre_ast *ast) {
+    if (ast->token._type
+        & (EXPR_OP_TYPE_BINOP
+            | EXPR_TYPE_CONDITION
+            | EXPR_TYPE_LOOP
+            | EXPR_TYPE_SEQUENCE
+        )) {
+		ast_free(ast->binop.left);
+        ast_free(ast->binop.right);
+    } else if (ast->token._type & EXPR_OP_TYPE_UNIOP) {
+		ast_free(ast->binop.left);
+    } else if (ast->token._kind == __IDENTIFIER__
+            || ast->token._kind == __STRING_LITERAL__
+            || ast->token._kind == __SEPARATOR__) {
+        free((void *)ast->string);
+    }
+    free(ast);
+}
+
 const char *
 expr_kind_to_string(t_xre_expr_kind kind) {
     switch (kind) {
@@ -98,6 +118,7 @@ expr_kind_to_string(t_xre_expr_kind kind) {
     case __EQ__:               return "equals";
     case __NE__:               return "not equal";
     case __SEQUENCE_POINT__:   return "sequence point";
+    case __SEPARATOR__:        return "separator";
     case __INJECT__:           return "injection";
     case __ANNOTATE__:         return "annotation";
     case __LOOP__:             return "loop";
@@ -147,6 +168,9 @@ expr_type_by_kind(t_xre_expr_kind kind) {
         case __ANNOTATE__:         
         case __SCOPE_RESOLUTION__:
             return (EXPR_OP_TYPE_BINOP);
+        
+        case __SEPARATOR__:
+            return (EXPR_TYPE_SEPARATOR);
         
         case __SEQUENCE_POINT__:
             return (EXPR_TYPE_SEQUENCE); 

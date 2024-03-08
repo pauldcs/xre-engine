@@ -18,10 +18,14 @@ readonly  DEFAULT_INPUT_DIRECTORY="infiles"
 readonly DEFAULT_OUTPUT_DIRECTORY="outfiles"
 readonly          DEFAULT_TIMEOUT=2
 
-readonly       OK_COLOR=$(tput setaf 2) # green
-readonly    ERROR_COLOR=$(tput setaf 1) # red
-readonly BOLD_UNDERLINE=$(tput bold)$(tput smul)
-readonly       NO_COLOR=$(tput sgr0)
+# readonly       OK_COLOR=$(tput setaf 2) # green
+# readonly    ERROR_COLOR=$(tput setaf 1) # red
+# readonly BOLD_UNDERLINE=$(tput bold)$(tput smul)
+# readonly       NO_COLOR=$(tput sgr0)
+readonly       OK_COLOR=""
+readonly    ERROR_COLOR=""
+readonly BOLD_UNDERLINE=""
+readonly       NO_COLOR=""
 
 #	/*------------------------------------------------------------*/
 #	/*--- Display help message                                 ---*/
@@ -318,7 +322,7 @@ function run_test() {
                 output \
                     "$(\
                         2>&1                    \
-                        diff --color -Tp        \
+                        diff -Tp                \
                         "$actual_output_file"   \
                         "$expected_output_file" \
                         | sed 's/^/                /'

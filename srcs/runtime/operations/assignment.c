@@ -5,7 +5,7 @@
 
 static frame_block_t *simple_assignment(t_xre_ast *node, frame_block_t *rv) {
   if (!runtime_stack_set(node->string, rv)
-    && !runtime_stack_add(node->string, rv))
+    && !runtime_stack_add(node->string, rv)) 
     return (copy_block_alloc(rv));
 
   rv->_src = NULL;
@@ -16,8 +16,7 @@ static frame_block_t *reassignement(t_xre_ast *node, frame_block_t *rv) {
   if (runtime_stack_set(node->string, rv))
     return (copy_block_alloc(rv));
   
-  frame_block_free(&rv);
-  return (error_block_alloc(XRE_RUNTIME_ERROR, XRE_UNBOUND_LOCAL_ERROR));
+  return (error_block_with(rv, XRE_RUNTIME_ERROR, XRE_UNBOUND_LOCAL_ERROR));
 }
 
 frame_block_t *assignment_op(t_xre_expr_kind kind, t_xre_ast *node, frame_block_t *rv) {
@@ -29,8 +28,7 @@ frame_block_t *assignment_op(t_xre_expr_kind kind, t_xre_ast *node, frame_block_
   }
   
   if (node->kind != __IDENTIFIER__) {
-    frame_block_free(&rv);
-    return error_block_alloc(XRE_TYPE_ERROR, XRE_INVALID_ASSIGMENT_ERROR);
+    return error_block_with(rv, XRE_TYPE_ERROR, XRE_INVALID_ASSIGMENT_ERROR);
   }
 
   if (kind == __ASSIGN__) {
@@ -40,13 +38,11 @@ frame_block_t *assignment_op(t_xre_expr_kind kind, t_xre_ast *node, frame_block_
   frame_block_t *block = runtime_stack_get(node->string);
   
   if (!block) {
-    frame_block_free(&rv);
-    return error_block_alloc(XRE_RUNTIME_ERROR, XRE_UNBOUND_LOCAL_ERROR);
+    return error_block_with(rv, XRE_RUNTIME_ERROR, XRE_UNBOUND_LOCAL_ERROR);
   }
 
   if (block->_type != IF_INTEGER) {
-    frame_block_free(&rv);
-    return error_block_alloc(XRE_TYPE_ERROR, XRE_INVALID_TYPE_FOR_OPERAND);
+    return error_block_with(rv, XRE_TYPE_ERROR, XRE_INVALID_TYPE_FOR_OPERAND);
   }
 
   switch (kind) {
@@ -65,7 +61,6 @@ frame_block_t *assignment_op(t_xre_expr_kind kind, t_xre_ast *node, frame_block_
     XRE_LOGGER(error, "Unrecognized arithmetic operation");
   }
 
-  frame_block_free(&rv);
   XRE_LOGGER(warning, "Confusing condition");
-  return (error_block_alloc(XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
+  return (error_block_with(rv, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
 }

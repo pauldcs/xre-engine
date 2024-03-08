@@ -44,10 +44,29 @@ frame_block_t *error_block_alloc(t_xre_error_type type, t_xre_error_subtype subt
   return (block);
 }
 
+frame_block_t *error_block_with(frame_block_t *buffer, t_xre_error_type type, t_xre_error_subtype subtype) {
+  
+  buffer->_error = malloc(sizeof(t_xre_error));
+  memset(buffer->_error, 0, sizeof(t_xre_error));
+  buffer->_error->error.type = type;
+  buffer->_error->error.subtype = subtype;
+
+  return (buffer);
+}
+
 frame_block_t *value_block_alloc(int64_t value) {
   frame_block_t *block = NULL;
   
   (void)frame_block_allocate_or_die(&block);
+
+  block->_type = IF_INTEGER;
+  block->_data.value = value;
+
+  return (block);
+}
+
+frame_block_t *value_block_with(frame_block_t *buffer, int64_t value) {
+  frame_block_t *block = buffer;
 
   block->_type = IF_INTEGER;
   block->_data.value = value;
@@ -63,6 +82,15 @@ frame_block_t *true_block_alloc(void) {
   return (block);
 }
 
+frame_block_t *true_block_with(frame_block_t *buffer) {
+  frame_block_t *block = buffer;
+
+  block->_type = IF_BOOL;
+  block->_data.value = true;
+
+  return (block);
+}
+
 frame_block_t *false_block_alloc(void) {
   frame_block_t *block = value_block_alloc(false);
 
@@ -71,8 +99,28 @@ frame_block_t *false_block_alloc(void) {
   return (block);
 }
 
+frame_block_t *false_block_with(frame_block_t *buffer) {
+  frame_block_t *block = buffer;
+
+  block->_type = IF_BOOL;
+  block->_data.value = false;
+
+  return (block);
+}
+
 frame_block_t *sequence_block_alloc(array_t *array) {
   frame_block_t *block = NULL;
+
+  (void)frame_block_allocate_or_die(&block);
+
+  block->_type = IF_SEQUENCE;
+  block->_data.array = array;
+
+  return (block);
+}
+
+frame_block_t *sequence_block_with(frame_block_t *buffer, array_t *array) {
+  frame_block_t *block = buffer;
 
   (void)frame_block_allocate_or_die(&block);
 
@@ -111,6 +159,35 @@ frame_block_t *copy_block_alloc(frame_block_t *src) {
   return (NULL); 
 }
 
+frame_block_t *copy_block_with(frame_block_t *src) {
+
+  if (src->_type == IF_ARRAY) {
+    return (array_block_alloc(src->_data.array));
+  }
+
+  if (src->_type == IF_STRING) {
+    return (string_block_with(src, src->_data.string));
+  }
+
+  if (src->_type == IF_INTEGER) {
+    return (value_block_with(src, src->_data.value));
+  }
+
+  if (src->_type == IF_BOOL) {
+    return (src->_data.value
+      ? true_block_with(src)
+      : false_block_with(src)
+    );
+  }
+
+  if (src->_type == IF_SEQUENCE) {
+   return (sequence_block_with(src, src->_data.array));
+  }
+  
+  XRE_LOGGER(error, "Unknown operand type");
+  return (NULL); 
+}
+
 frame_block_t *array_block_alloc(array_t *array) {
   frame_block_t *block = NULL;
 
@@ -128,6 +205,7 @@ frame_block_t *array_block_alloc(array_t *array) {
 
   return (block);
 }
+
 
 // frame_block_t *array_block_from_string_alloc(const char *string) {
 //   frame_block_t *block = NULL;
@@ -154,6 +232,16 @@ frame_block_t *array_block_alloc(array_t *array) {
 frame_block_t *string_block_alloc(const char *string) {
   frame_block_t *block = NULL;
   (void)frame_block_allocate_or_die(&block);
+
+  block->_type = IF_STRING;
+  block->_data.string = string;
+
+  //XRE_LOGGER(info, "array_block (string): %d bytes", array_size(array));
+  return (block);
+}
+
+frame_block_t *string_block_with(frame_block_t *buffer, const char *string) {
+  frame_block_t *block = buffer;
 
   block->_type = IF_STRING;
   block->_data.string = string;
@@ -269,7 +357,7 @@ void frame_block_free(frame_block_t **block) {
     free(frame_block->_error);
     frame_block->_error = NULL;
   }
-  
+
   free(*block);
   n_blocks_freed++;
   *block = NULL;

@@ -49,33 +49,32 @@ frame_block_t *relational_op(t_xre_expr_kind kind, frame_block_t *lv,
       equality = array_cmp(lv->_data.array, rv->_data.array);
   }
 
-  frame_block_free(&rv);
   frame_block_free(&lv);
 
   if (kind == __EQ__) {
-    return ((matching_types && equality == 0) ? true_block_alloc() : false_block_alloc());
+    return ((matching_types && equality == 0) ? true_block_with(rv) : false_block_with(rv));
 
   } else if (kind == __NE__) {
-    return ((!matching_types || equality != 0) ? true_block_alloc() : false_block_alloc());
+    return ((!matching_types || equality != 0) ? true_block_with(rv) : false_block_with(rv));
 
   } else {
     if (matching_types) {
       switch (kind) {
       case __LT__:
-        return (equality < 0 ? true_block_alloc() : false_block_alloc());
+        return (equality < 0 ? true_block_with(rv) : false_block_with(rv));
       case __GT__:
-        return (equality > 0 ? true_block_alloc() : false_block_alloc());
+        return (equality > 0 ? true_block_with(rv) : false_block_with(rv));
       case __LE__:
-        return (equality <= 0 ? true_block_alloc() : false_block_alloc());
+        return (equality <= 0 ? true_block_with(rv) : false_block_with(rv));
       case __GE__:
-        return (equality >= 0 ? true_block_alloc() : false_block_alloc());
+        return (equality >= 0 ? true_block_with(rv) : false_block_with(rv));
       default:
         break;
       }
     }
-    return (error_block_alloc(XRE_TYPE_ERROR, XRE_TYPE_MISSMATCH_ERROR));
+    return (error_block_with(rv, XRE_TYPE_ERROR, XRE_TYPE_MISSMATCH_ERROR));
   }
 
   XRE_LOGGER(error, "Unrecognized comparison");
-  return (error_block_alloc(XRE_INTERNAL_ERROR, XRE_NOT_IMPLEMENTED_ERROR));
+  return (error_block_with(rv, XRE_INTERNAL_ERROR, XRE_NOT_IMPLEMENTED_ERROR));
 }

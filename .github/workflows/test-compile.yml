@@ -1,4 +1,4 @@
-name: Test Compile
+name: tests
 
 on:
   push:
@@ -11,10 +11,105 @@ on:
       - develop
 
 jobs:
-  build:
+  syntax:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - name: make
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: sudo apt-get install sparse
+
+      - name: Run sparse
+        run: >
+          sparse      \
+            -Wno-decl \
+            -I ./incs \
+            $(find . -name "*.c" -not -path "*/unit-tests/*")
+
+  compile:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build xre
         run: make
+
+  tester:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install timeout
+        if: matrix.os == 'macos-latest'
+        run: brew install coreutils
+
+      - name: Build xre
+        run: make
+
+      - name: Run tester.sh
+        working-directory: tester
+        run: >
+          chmod +x run
+          && mv ../xre .
+          && chmod +x xre
+          && ./run
+
+  sanitized-tester:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install timeout
+        if: matrix.os == 'macos-latest'
+        run: brew install coreutils
+
+      - name: Build xre (debug)
+        run: make g
+
+      - name: Run tester.sh
+        working-directory: tester
+        run: >
+          chmod +x run
+          && mv ../xre .
+          && chmod +x xre
+          && ./run
+
+  valgrind:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Valgrind
+        run: sudo apt-get install valgrind
+
+      - name: Build xre
+        run: make
+
+      - name: Run Valgrind
+        run: >
+          valgrind                \
+            --leak-check=full     \
+            --track-origins=yes   \
+            --show-leak-kinds=all \
+            --track-fds=yes       \
+            --error-exitcode=1    \
+            ./xre ./tester/infiles/prime_numbers.in

@@ -17,7 +17,6 @@ frame_block_t *inject_op(t_xre_ast *node) {
 
   bool is_truthy = is_truthy_block(right);
 
-  frame_block_free(&right);
 
-  return (is_truthy ? true_block_alloc() : false_block_alloc());
+  return (is_truthy ? true_block_with(right) : false_block_with(right));
 }

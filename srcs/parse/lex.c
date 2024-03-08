@@ -169,6 +169,9 @@ not_a_constant_value:
         
         break;
         case ',': _token._kind = __SEQUENCE_POINT__; tf = 1;
+
+        break;
+        case ';': _token._kind = __SEPARATOR__; tf = 1;
         
         break;
         case ':':

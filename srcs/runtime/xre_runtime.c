@@ -129,6 +129,12 @@ static frame_block_t *sequence_exec(t_xre_ast *node) {
   return (return_frame_block(node, sequence_op(node)));
 }
 
+static frame_block_t *separator_exec(t_xre_ast *node) {
+  __return_val_if_fail__(node, NULL);
+
+  return (return_frame_block(node, separator_op(node)));
+}
+
 static frame_block_t *inject_exec(t_xre_ast *node) {
   __return_val_if_fail__(node, NULL);
 
@@ -150,6 +156,9 @@ frame_block_t *evaluate(t_xre_ast *ast) {
 
   case EXPR_TYPE_SEQUENCE:
     return sequence_exec(ast);
+
+  case EXPR_TYPE_SEPARATOR:
+    return separator_exec(ast);
 
   case EXPR_TYPE_INJECT:
     return inject_exec(ast);
@@ -192,7 +201,11 @@ bool xre_runtime(t_xre_ast *ast) {
     frame_block_print(result);
   }
 
+  if (result->_type & IF_SEQUENCE)
+    array_kill(result->_data.array);
+  
   frame_block_free(&result);
+  
   runtime_stack_deinit();
 
   if (__xre_args__.flags & SHOW_STATISTICS) {

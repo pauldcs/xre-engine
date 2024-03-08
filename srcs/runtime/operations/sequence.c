@@ -35,3 +35,22 @@ frame_block_t *sequence_op(t_xre_ast *node) {
 
   return (sequence_block_alloc(array));
 }
+
+frame_block_t *separator_op(t_xre_ast *node) {
+  __return_val_if_fail__(node, NULL);
+
+  frame_block_t *left = evaluate(node->binop.left);
+  if (left->_error != NULL) {
+    return (left);
+  }
+
+  frame_block_t *right = evaluate(node->binop.right);
+  if (right->_error != NULL) {
+    frame_block_free(&left);
+    return (right);
+  }
+
+  frame_block_free(&left);
+
+  return (true_block_with(right));
+}

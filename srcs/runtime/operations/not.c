@@ -10,6 +10,5 @@ frame_block_t* not_op(frame_block_t *block) {
 
   bool is_truthy = is_truthy_block(block);
   
-  frame_block_free(&block);
-  return (!is_truthy ? true_block_alloc() : false_block_alloc());
+  return (!is_truthy ? true_block_with(block) : false_block_with(block));
 }

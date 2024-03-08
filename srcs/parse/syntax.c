@@ -38,7 +38,7 @@ bool xre_expr_syntax(array_t *tokens) {
     case __STRING_LITERAL__:
     case __IDENTIFIER__:
 
-      if (PREV_TOKEN_TYPE & (EXPR_OP_TYPE_BINOP | EXPR_OP_TYPE_UNIOP |
+      if (PREV_TOKEN_TYPE & (EXPR_OP_TYPE_BINOP | EXPR_OP_TYPE_UNIOP | EXPR_TYPE_SEPARATOR |
                              EXPR_TYPE_CONDITION | EXPR_TYPE_LOOP | EXPR_TYPE_SEQUENCE | EXPR_TYPE_INJECT) ||
           PREV_TOKEN_KIND == __LPAREN__ || PREV_TOKEN_KIND == __START__)
         continue;
@@ -71,7 +71,7 @@ bool xre_expr_syntax(array_t *tokens) {
       goto syntax_error;
       
     case __NOT__:
-      if (PREV_TOKEN_TYPE & (EXPR_OP_TYPE_BINOP | EXPR_OP_TYPE_UNIOP |
+      if (PREV_TOKEN_TYPE & (EXPR_OP_TYPE_BINOP | EXPR_OP_TYPE_UNIOP | EXPR_TYPE_SEPARATOR |
                              EXPR_TYPE_CONDITION | EXPR_TYPE_LOOP | EXPR_TYPE_SEQUENCE | EXPR_TYPE_INJECT) ||
           PREV_TOKEN_KIND == __LPAREN__ || PREV_TOKEN_KIND == __START__)
         continue;
@@ -118,6 +118,7 @@ bool xre_expr_syntax(array_t *tokens) {
     case __BOR__:
     case __BXOR__:
     case __SEQUENCE_POINT__:
+    case __SEPARATOR__:
     case __INJECT__:
     case __LOOP__:
     case __ANNOTATE__:

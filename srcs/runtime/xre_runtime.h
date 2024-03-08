@@ -40,6 +40,7 @@ frame_block_t *assignment_op(t_xre_expr_kind kind, t_xre_ast *node, frame_block_
 frame_block_t* not_op(frame_block_t *block);
 frame_block_t *sequence_op(t_xre_ast *node);
 frame_block_t *inject_op(t_xre_ast *node);
+frame_block_t *separator_op(t_xre_ast *node);
 
 frame_block_t *add_op(frame_block_t *lv, frame_block_t *rv);
 frame_block_t *sub_op(frame_block_t *lv, frame_block_t *rv);

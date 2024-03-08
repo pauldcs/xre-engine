@@ -5,7 +5,6 @@
 
 array_t *runtime_stack = NULL;
 
-
 bool runtime_stack_init(void) {
   if (!runtime_stack) {
     runtime_stack = array_create(sizeof(stack_item_t), 8, NULL);
