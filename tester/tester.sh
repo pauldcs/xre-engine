@@ -144,7 +144,7 @@ function check_prerequisites() {
         exit_with_error "$input_directory: Not readable (-i argument)" 
     fi
     
-    if [ -z "$(ls -A $input_directory/*.$input_file_suffix 2> /dev/null)" ]; then
+    if [ -z "$(find . -name "*.$input_file_suffix" 2> /dev/null)" ]; then
         exit_with_error "$input_directory: Is empty (-i argument)" 
     fi
     
@@ -267,6 +267,8 @@ function run_test() {
     local valgrind_log_file="$4"
     local expected_output_file="$5"
 
+    mkdir -p ${actual_output_file%/*}
+    
     output "$((passed + failed + skipped)). $name"
     output "    └── Input: $input_file"
 
@@ -378,17 +380,29 @@ failed=0
 skipped=0
 memory_errors=0
 
-for file in "$input_directory"/*."$input_file_suffix"; 
+for file in $(find . -name "*.$input_file_suffix"); 
     do
-        filename=$(basename -- "$file")
-        test_name="${filename%.*}"
+        test_name="${file%.*}"
+        test_name="$(echo $test_name | cut -c 3-)"
 
-        run_test                                \
-            "$test_name"                        \
-            "$file"                             \
-            "$output_directory/$test_name.out"  \
-            "$output_directory/$test_name.valg" \
-            "$input_directory/$test_name.out"
+        name="$1"
+        input_file="$2"
+        actual_output_file="$3"
+        valgrind_log_file="$4"
+        expected_output_file="$5"
+
+        # echo name: $(basename -- "$test_name")
+        # echo input_file: $file 
+        # echo actual_output_file: $output_directory/${test_name#infiles/}.out
+        # echo valgrind_log_file: $output_directory/${test_name#infiles/}.valg
+        # echo expected_output_file: $test_name.out
+        # echo
+        run_test \
+            "$(basename -- "$test_name")"                  \
+            "$file"                                        \
+            "$output_directory/${test_name#infiles/}.out"  \
+            "$output_directory/${test_name#infiles/}.valg" \
+            "$test_name.out"
 done
 
 print_summary
