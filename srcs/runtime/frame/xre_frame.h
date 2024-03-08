@@ -46,7 +46,18 @@ frame_block_t *array_block_alloc(array_t *array);
 frame_block_t *copy_block_alloc(frame_block_t *src);
 frame_block_t *array_block_from_string_alloc(const char *string);
 frame_block_t *string_block_alloc(const char *string);
+
+frame_block_t *string_block_with(frame_block_t *buffer, const char *string);
+frame_block_t *error_block_with(frame_block_t *buffer, t_xre_error_type type, t_xre_error_subtype subtype);
+frame_block_t *value_block_with(frame_block_t *buffer, int64_t value);
+frame_block_t *true_block_with(frame_block_t *buffer);
+frame_block_t *false_block_with(frame_block_t *buffer);
+frame_block_t *sequence_block_with(frame_block_t *buffer, array_t *array);
+frame_block_t *array_block_with(frame_block_t *buffer, array_t *array);
+frame_block_t *string_block_with(frame_block_t *buffer, const char *string);
 bool           is_truthy_block(const frame_block_t *block);
+
+frame_block_t* operand_with(frame_block_t *buffer, t_xre_ast *ast);
 
 // COMMON
 void frame_block_print(const frame_block_t *block);

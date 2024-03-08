@@ -322,7 +322,7 @@ function run_test() {
                 output \
                     "$(\
                         2>&1                    \
-                        diff --color -Tp        \
+                        diff -Tp                \
                         "$actual_output_file"   \
                         "$expected_output_file" \
                         | sed 's/^/                /'

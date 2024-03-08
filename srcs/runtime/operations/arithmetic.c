@@ -15,6 +15,7 @@ frame_block_t *add_op(frame_block_t *lv, frame_block_t *rv) {
   // }
 
   lv->_data.value = lv->_data.value + rv->_data.value;
+  lv->_src = NULL;
   frame_block_free(&rv);
   return (lv);
 }
@@ -32,7 +33,6 @@ frame_block_t *sub_op(frame_block_t *lv, frame_block_t *rv) {
   // }
 
   lv->_data.value = lv->_data.value - rv->_data.value;
-  lv->_src = NULL;
   frame_block_free(&rv);
   return (lv);
 }
@@ -54,8 +54,7 @@ frame_block_t *mul_op(frame_block_t *lv, frame_block_t *rv) {
 frame_block_t *div_op(frame_block_t *lv, frame_block_t *rv) {
   if (rv->_data.value == 0) {
     frame_block_free(&lv);
-    frame_block_free(&rv);
-    return error_block_alloc(XRE_ARITHMETIC_ERROR, XRE_ZERO_DIVISION_ERROR);
+    return error_block_with(rv, XRE_ARITHMETIC_ERROR, XRE_ZERO_DIVISION_ERROR);
   }
 
   lv->_data.value = lv->_data.value / rv->_data.value;
@@ -68,8 +67,7 @@ frame_block_t *div_op(frame_block_t *lv, frame_block_t *rv) {
 frame_block_t *mod_op(frame_block_t *lv, frame_block_t *rv) {
   if (rv->_data.value == 0) {
     frame_block_free(&lv);
-    frame_block_free(&rv);
-    return error_block_alloc(XRE_ARITHMETIC_ERROR, XRE_ZERO_DIVISION_ERROR);
+    return error_block_with(rv, XRE_ARITHMETIC_ERROR, XRE_ZERO_DIVISION_ERROR);
   }
 
   lv->_data.value = lv->_data.value % rv->_data.value;
@@ -95,14 +93,12 @@ frame_block_t* arithmetic_op(t_xre_expr_kind kind, frame_block_t* lv, frame_bloc
 
   if (lv->_type != IF_INTEGER) {
     frame_block_free(&lv);
-    frame_block_free(&rv);
-    return (error_block_alloc(XRE_TYPE_ERROR, XRE_INVALID_TYPE_FOR_OPERAND));
+    return (error_block_with(rv, XRE_TYPE_ERROR, XRE_INVALID_TYPE_FOR_OPERAND));
   }
 
   if (lv->_type != rv->_type) {
     frame_block_free(&lv);
-    frame_block_free(&rv);
-    return (error_block_alloc(XRE_TYPE_ERROR, XRE_TYPE_MISSMATCH_ERROR));
+    return (error_block_with(rv, XRE_TYPE_ERROR, XRE_TYPE_MISSMATCH_ERROR));
   }
 
   switch (kind) {
@@ -128,7 +124,6 @@ frame_block_t* arithmetic_op(t_xre_expr_kind kind, frame_block_t* lv, frame_bloc
   }
 
   frame_block_free(&lv);
-  frame_block_free(&rv);
   XRE_LOGGER(warning, "Confusing condition");
-  return (error_block_alloc(XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
+  return (error_block_with(rv, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
 }

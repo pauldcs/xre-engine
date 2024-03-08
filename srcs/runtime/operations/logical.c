@@ -41,15 +41,13 @@ frame_block_t *and_op(frame_block_t *condition, t_xre_ast *consequence) {
       return (block);
 
     if (is_truthy_block(block)) {
-      frame_block_free(&block);
-      return (true_block_alloc());
+      return (true_block_with(block));
     }
 
-    frame_block_free(&block);
-    return (false_block_alloc());
+    return (false_block_with(block));
   }
 
-  return (false_block_alloc());
+  return (false_block_with(condition));
 }
 
 frame_block_t *or_op(frame_block_t *condition, t_xre_ast *consequence) {
@@ -66,15 +64,13 @@ frame_block_t *or_op(frame_block_t *condition, t_xre_ast *consequence) {
       return (block);
 
     if (is_truthy_block(block)) {
-      frame_block_free(&block);
-      return (true_block_alloc());
+      return (true_block_with(block));
     }
 
-    frame_block_free(&block);
-    return (false_block_alloc());
+    return (false_block_with(block));
   }
 
-  return (true_block_alloc());
+  return (true_block_with(condition));
 }
 
 frame_block_t *logical_op(t_xre_ast *node) {

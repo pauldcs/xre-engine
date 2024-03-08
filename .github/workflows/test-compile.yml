@@ -12,22 +12,14 @@ on:
 
 jobs:
   syntax:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Install dependencies
-        run: |
-          if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
-            sudo apt-get install sparse
-          elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-            brew install sparse
-          fi
+        run: sudo apt-get install sparse
 
       - name: Run sparse
         run: >
@@ -36,7 +28,7 @@ jobs:
             -I ./incs \
             $(find . -name "*.c" -not -path "*/unit-tests/*")
 
-  build:
+  compile:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -59,6 +51,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Install timeout
+        if: matrix.os == 'macos-latest'
+        run: brew install coreutils
+
       - name: Build xre
         run: make
 
@@ -70,7 +66,7 @@ jobs:
           && chmod +x xre
           && ./run
 
-  memory:
+  sanitized-tester:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -79,6 +75,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Install timeout
+        if: matrix.os == 'macos-latest'
+        run: brew install coreutils
 
       - name: Build xre (debug)
         run: make g

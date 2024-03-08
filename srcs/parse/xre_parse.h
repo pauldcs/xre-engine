@@ -41,6 +41,7 @@ typedef enum {
 	/*    <<= */ __LSHIFT_ASSIGN__,
 	/*    >>= */ __RSHIFT_ASSIGN__,
 	/*      , */ __SEQUENCE_POINT__,
+	/*      ; */ __SEPARATOR__,
 	/*     <- */ __INJECT__,
 	/*      : */ __ANNOTATE__,
 	/*   loop */ __LOOP__,
@@ -60,7 +61,8 @@ typedef enum {
 	EXPR_TYPE_LOOP      = 1 << 5,
 	EXPR_TYPE_SEQUENCE  = 1 << 6,
 	EXPR_TYPE_INJECT    = 1 << 7,
-	EXPR_TYPE_OTHER     = 1 << 8,
+	EXPR_TYPE_SEPARATOR = 1 << 8,
+	EXPR_TYPE_OTHER     = 1 << 9,
 }	t_xre_expr_type;
 
 typedef struct s_xre_expr_token {

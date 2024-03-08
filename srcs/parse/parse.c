@@ -140,6 +140,9 @@ get_expr_precedence (t_xre_expr_kind kind) {
 
 	  case __SEQUENCE_POINT__:
       return (-16);
+    
+    case __SEPARATOR__:
+      return (-16);
   
 		case __LPAREN__:
     case __RPAREN__:

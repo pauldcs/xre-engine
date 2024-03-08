@@ -32,6 +32,5 @@ frame_block_t *loop_op(t_xre_ast *node) {
     frame_block_free(&consequence);
   }
 
-  frame_block_free(&condition);
-  return (true_block_alloc());
+  return (true_block_with(condition));
 }
