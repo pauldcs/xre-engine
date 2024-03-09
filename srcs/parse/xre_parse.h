@@ -56,13 +56,8 @@ typedef enum {
 typedef enum {
 	EXPR_OP_TYPE_BINOP  = 1 << 1,
 	EXPR_OP_TYPE_UNIOP  = 1 << 2,
-	EXPR_TYPE_OPERAND   = 1 << 3,
-	EXPR_TYPE_CONDITION = 1 << 4,
-	EXPR_TYPE_LOOP      = 1 << 5,
-	EXPR_TYPE_SEQUENCE  = 1 << 6,
-	EXPR_TYPE_INJECT    = 1 << 7,
-	EXPR_TYPE_SEPARATOR = 1 << 8,
-	EXPR_TYPE_OTHER     = 1 << 9,
+	EXPR_TYPE_VALUE     = 1 << 3,
+	EXPR_TYPE_OTHER     = 1 << 4,
 }	t_xre_expr_type;
 
 typedef struct s_xre_expr_token {
@@ -75,34 +70,71 @@ typedef struct s_xre_expr_token {
 	size_t          _len;
 	const char *    _line_ptr;
 	size_t          _line_len;
-}	t_xre_token;
+}	xre_token_t;
 
-typedef struct s_ast t_xre_ast;
+typedef struct s_ast xre_ast_t;
+
+typedef enum {
+	STATE_ARRAY,
+	STATE_NUMBER,
+	STATE_STRING,
+}	exp_event_e;
+
+typedef struct {
+  exp_event_e  type;
+  union {
+    int64_t    value;
+    array_t    *array;
+    const char *string;
+};
+} state_t;
 
 struct s_ast {
-	t_xre_expr_type	type;
-	t_xre_expr_kind	kind;
-	const t_xre_token  token;
-
+	t_xre_expr_type	   type;
+	t_xre_expr_kind	   kind;
+	const xre_token_t  token;
+	state_t            event;
 	union {
-		int64_t value;
+		int64_t    value;
 		const char *string;
+		xre_ast_t  *uniop;
 		struct {
-			t_xre_ast *left;	
-			t_xre_ast *right;
-		}	binop;
-		t_xre_ast *uniop;
+			xre_ast_t *left;	
+			xre_ast_t *right;
+		}	_binop;
 	};
 };
 
-t_xre_ast  *xre_ast_compose(const char *expr);
+xre_ast_t  *xre_ast_compose(const char *expr);
 bool        xre_expr_lex (const char *expr, array_t *tokens);
 bool        xre_expr_syntax (array_t *tokens);
-t_xre_ast  *xre_expr_parse (array_t *tokens);
+xre_ast_t  *xre_expr_parse (array_t *tokens);
 
 /*---      UTILS      ---*/
 t_xre_expr_type  expr_type_by_kind(t_xre_expr_kind kind);
 const char      *expr_kind_to_string(t_xre_expr_kind kind);
-void             ast_show (t_xre_ast *ast);
-void             ast_free(t_xre_ast *ast);
+void             ast_show (xre_ast_t *ast);
+void             ast_free(xre_ast_t *ast);
+
+typedef struct {
+  const char  *key;
+  state_t     state;
+} stack_item_t;
+
+extern array_t *runtime_stack;
+
+// FRAME
+bool    runtime_stack_init(void);
+void    runtime_stack_deinit(void);
+
+state_t *runtime_stack_get(const char *key);
+
+bool runtime_stack_add(const char *key, state_t state);
+bool runtime_stack_set(const char *key, state_t state);
+
+bool is_truthy_state(xre_ast_t *node);
+
+// COMMON
+void state_print(xre_ast_t *node);
+
 #endif /* __XRE_PARSE_H__ */

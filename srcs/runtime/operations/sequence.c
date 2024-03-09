@@ -1,56 +1,42 @@
 #include "xre_runtime.h"
-#include "xre_frame.h"
+#include "xre_parse.h"
 #include "xre_assert.h"
 
-frame_block_t *sequence_op(t_xre_ast *node) {
+bool sequence_op(xre_ast_t *node) {
   __return_val_if_fail__(node, NULL);
+
+  xre_ast_t *left = node->_binop.left;
+  xre_ast_t *right = node->_binop.right;
 
   array_t *array = NULL;
 
-  frame_block_t *left = evaluate(node->binop.left);
-  if (left->_error != NULL) {
-    return (left);
+  if (!evaluate(left)
+    || !evaluate(right)) {
+    return (false);
   }
 
-  frame_block_t *right = evaluate(node->binop.right);
-  if (right->_error != NULL) {
-    frame_block_free(&left);
-    return (right);
-  }
-
-  if (left->_type & IF_SEQUENCE) {
-    array = left->_data.array;
-    free(left);
+  if (left->event.type & STATE_ARRAY) {
+    array = left->event.array;
   
   } else {
-    array = array_create(sizeof(frame_block_t), 10, NULL);
-    array_push(array, left);
-    frame_block_free(&left);
-  
-    n_arrays_allocd++;
+    array = array_create(sizeof(state_t), 10, NULL);
+    array_push(array, &left->event);
   }
   
-  array_push(array, right);
-  frame_block_free(&right);
+  array_push(array, &right->event);
 
-  return (sequence_block_alloc(array));
+  return (change_state_array(node, array));
 }
 
-frame_block_t *separator_op(t_xre_ast *node) {
+bool separator_op(xre_ast_t *node) {
   __return_val_if_fail__(node, NULL);
 
-  frame_block_t *left = evaluate(node->binop.left);
-  if (left->_error != NULL) {
-    return (left);
-  }
+  xre_ast_t *left = node->_binop.left;
+  xre_ast_t *right = node->_binop.right;
 
-  frame_block_t *right = evaluate(node->binop.right);
-  if (right->_error != NULL) {
-    frame_block_free(&left);
-    return (right);
-  }
+  if (!evaluate(left) || !evaluate(right)) {
+      return (false);
+    }
 
-  frame_block_free(&left);
-
-  return (is_truthy_block(right) ? true_block_with(right) : false_block_with(right));
+  return (change_state_copy(node, right));
 }

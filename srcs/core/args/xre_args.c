@@ -18,7 +18,6 @@ void __attribute__((noreturn)) usage(void) {
 		"    -x   [CODE]   Execute code from command line\n"
 		"    -r            Print command results\n"
 		"    -e            Show good error messages\n"
-		"    -s            Print command statistics\n"
 		"    -d            Enable ast debug mode\n"
 		"    -h            Show this help message\n\n",
 
@@ -173,7 +172,7 @@ t_xre_args *xre_args_parse(int ac, char *av[]) {
 		return (NULL);
 		
 	bzero(args, sizeof(t_xre_args));
-	xre_getopts_init(&xopts, ac, (const char **)av, "drshex:");
+	xre_getopts_init(&xopts, ac, (const char **)av, "drhex:");
 
 	while ((c = xre_getopts_next(&xopts)) != (char)-1)
 	{
@@ -181,7 +180,6 @@ t_xre_args *xre_args_parse(int ac, char *av[]) {
 			case 'd': args->flags |= FLAGS_DEBUG; break;	
 			case 'e': args->flags |= SHOW_ERRORS; break;
 			case 'r': args->flags |= SHOW_EXPR_RESULT; break;
-			case 's': args->flags |= SHOW_STATISTICS; break;
 			case 'v':
 				if (!uint32_parse(xopts.arg, &args->argument_a))
 					return (

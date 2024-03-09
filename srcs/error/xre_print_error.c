@@ -8,7 +8,7 @@
 
 int __fdout__ = STDERR_FILENO;
 
-void xre_error(t_xre_error *report, const t_xre_token *token) {
+void xre_error(t_xre_error *report, const xre_token_t *token) {
   static char err_buff[4096];
   size_t i = 0;
 

@@ -1,14 +1,15 @@
 #include "xre_runtime.h"
 #include "xre_assert.h"
+#include "xre_parse.h"
 
-frame_block_t* not_op(frame_block_t *block) {
-  __return_val_if_fail__(block, NULL);
+bool not_op(xre_ast_t *node) {
+  __return_val_if_fail__(node, NULL);
 
-  if (block->_error) {
-    return (block);
+  xre_ast_t *uni = node->uniop;
+
+  if (!evaluate(uni)) {
+    return (false);
   }
 
-  bool is_truthy = is_truthy_block(block);
-  
-  return (!is_truthy ? true_block_with(block) : false_block_with(block));
+  return (change_state_value(node, !is_truthy_state(uni)));
 }

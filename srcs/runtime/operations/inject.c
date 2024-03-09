@@ -1,22 +1,24 @@
 #include "xre_runtime.h"
 #include "xre_assert.h"
+#include "xre_parse.h"
 
-frame_block_t *inject_op(t_xre_ast *node) {
+bool inject_op(xre_ast_t *node) {
   __return_val_if_fail__(node, NULL);
 
-  if (node->binop.left->kind != __IDENTIFIER__) {
-    return error_block_alloc(XRE_TYPE_ERROR, XRE_INVALID_ASSIGMENT_ERROR);
+  xre_ast_t *left = node->_binop.left;
+  xre_ast_t *right = node->_binop.right;
+
+  if (left->kind != __IDENTIFIER__) {
+    return set_error(node, XRE_TYPE_ERROR, XRE_INVALID_ASSIGMENT_ERROR);
   }
 
-  frame_block_t *right = evaluate(node->binop.right);
-  if (right->_error != NULL) {
-    return (right);
+  if (!evaluate(right)) {
+    return (false);
   }
 
-  frame_block_print(right);
+  state_print(right);
 
-  bool is_truthy = is_truthy_block(right);
+  bool is_truthy = is_truthy_state(right);
 
-
-  return (is_truthy ? true_block_with(right) : false_block_with(right));
+  return (change_state_value(node, is_truthy));
 }

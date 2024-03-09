@@ -1,36 +1,35 @@
 #include "xre_assert.h"
 #include "xre_runtime.h"
+#include "xre_parse.h"
 
-frame_block_t *loop_op(t_xre_ast *node) {
-  __return_val_if_fail__(node, NULL);
+bool loop_op(xre_ast_t *node) {
+  __return_val_if_fail__(node, false);
+
+  xre_ast_t *left = node->_binop.left;
+  xre_ast_t *right = node->_binop.right;
 
   size_t max_iterations = DEFAULT_MAX_ITERATIONS;
-  frame_block_t *condition = NULL;
-  frame_block_t *consequence = NULL;
 
   for (;;) {
     if (!max_iterations--) {
-      return (error_block_alloc(XRE_RUNTIME_ERROR, XRE_NOT_TERMINATED_ERROR));
+      return (set_error(node, XRE_RUNTIME_ERROR, XRE_NOT_TERMINATED_ERROR));
     }
 
-    condition = evaluate(node->binop.left);
-    if (condition->_error != NULL) {
-      return (condition);
+    if (!evaluate(left)) {
+      return (false);
     }
 
-    if (!is_truthy_block(condition)) {
+    if (!is_truthy_state(left)) {
       break;
     }
+    //printf("bite1\n");
 
-    frame_block_free(&condition);
-
-    consequence = evaluate(node->binop.right);
-    if (consequence->_error != NULL) {
-      return (consequence);
+    if (!evaluate(right)) {
+      return (false);
     }
-
-    frame_block_free(&consequence);
+  
+    (void)change_state_copy(node, right);
   }
 
-  return (true_block_with(condition));
+  return (change_state_copy(node, left));
 }

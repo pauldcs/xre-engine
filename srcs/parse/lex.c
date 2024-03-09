@@ -8,7 +8,7 @@
 
 t_xre_error __lexer_err_report__;
 
-t_xre_token _token;
+xre_token_t _token;
 size_t _line;
 size_t _cols;
 char *_token_ptr;

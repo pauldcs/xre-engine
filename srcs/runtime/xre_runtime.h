@@ -1,7 +1,6 @@
 #ifndef __XRE_RUNTIME_H__
 # define __XRE_RUNTIME_H__
 
-# include "xre_frame.h"
 # include "xre_parse.h"
 # include "xre_errors.h"
 # include "array.h"
@@ -17,7 +16,6 @@
 # define IF_STRING   1ULL << 3
 # define IF_ARRAY    1ULL << 4
 # define IF_BOOL     1ULL << 5
-# define IF_SEQUENCE 1ULL << 6
 # define IF_INJECT   1ULL << 7
 
 #define IS_ADDABBLE(a, b, max) (a <= max - b)
@@ -28,26 +26,37 @@
 #define I64_IS_ADDABBLE(a, b) IS_ADDABBLE(a, b, LLONG_MAX)
 #define I64_IS_SUBABBLE(a, b) IS_SUBABBLE(a, b, 0)
 
-bool           xre_runtime(t_xre_ast *ast);
-frame_block_t *evaluate(t_xre_ast *ast);
+extern bool        _has_error;
+extern t_xre_error _error;
+bool set_error(xre_ast_t*node, t_xre_error_type type, t_xre_error_subtype subtype);
+bool error_occurred(void);
 
-frame_block_t* arithmetic_op(t_xre_expr_kind kind, frame_block_t* lv, frame_block_t* rv);
-frame_block_t* relational_op(t_xre_expr_kind kind, frame_block_t* lv, frame_block_t* rv);
-frame_block_t* bitwise_op(t_xre_expr_kind kind, frame_block_t* lv, frame_block_t* rv);
-frame_block_t *loop_op(t_xre_ast *node);
-frame_block_t *logical_op(t_xre_ast *node);
-frame_block_t *assignment_op(t_xre_expr_kind kind, t_xre_ast *node, frame_block_t *rv);
-frame_block_t* not_op(frame_block_t *block);
-frame_block_t *sequence_op(t_xre_ast *node);
-frame_block_t *inject_op(t_xre_ast *node);
-frame_block_t *separator_op(t_xre_ast *node);
 
-frame_block_t *add_op(frame_block_t *lv, frame_block_t *rv);
-frame_block_t *sub_op(frame_block_t *lv, frame_block_t *rv);
-frame_block_t *mul_op(frame_block_t *lv, frame_block_t *rv);
-frame_block_t *div_op(frame_block_t *lv, frame_block_t *rv);
-frame_block_t *mod_op(frame_block_t *lv, frame_block_t *rv);
+bool xre_runtime(xre_ast_t *ast);
+bool evaluate(xre_ast_t *ast);
 
-frame_block_t* operand(t_xre_ast *ast);
+bool arithmetic_op(xre_ast_t *node);
+bool relational_op(xre_ast_t *node);
+bool bitwise_op(xre_ast_t *node);
+bool loop_op(xre_ast_t *node);
+bool logical_op(xre_ast_t *node);
+bool assignment_op(xre_ast_t *node);
+bool not_op(xre_ast_t *node);
+bool sequence_op(xre_ast_t *node);
+bool inject_op(xre_ast_t *node);
+bool separator_op(xre_ast_t *node);
+
+bool add_op(xre_ast_t *node);
+bool sub_op(xre_ast_t *node);
+bool mul_op(xre_ast_t *node);
+bool div_op(xre_ast_t *node);
+bool mod_op(xre_ast_t *node);
+
+bool operand(xre_ast_t *ast);
+
+bool change_state_value(xre_ast_t *node, int64_t value);
+bool change_state_array(xre_ast_t *node, array_t *array);
+bool change_state_string(xre_ast_t *node, const char *string);
+bool change_state_copy(xre_ast_t *this, xre_ast_t *that);
 
 #endif /* __XRE_RUNTIME_H__ */

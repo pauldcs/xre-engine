@@ -5,15 +5,15 @@
 #include <string.h>
 #include <sys/types.h>
 
-#define PREV_TOKEN_KIND ((t_xre_token *)array_at(tokens, idx - 2))->_kind
-#define PREV_TOKEN_TYPE ((t_xre_token *)array_at(tokens, idx - 2))->_type
+#define PREV_TOKEN_KIND ((xre_token_t *)array_at(tokens, idx - 2))->_kind
+#define PREV_TOKEN_TYPE ((xre_token_t *)array_at(tokens, idx - 2))->_type
 
 t_xre_error syntax_error;
 
 bool xre_expr_syntax(array_t *tokens) {
   __return_val_if_fail__(tokens, false);
 
-  t_xre_token *token = NULL;
+  xre_token_t *token = NULL;
   size_t size = tokens->_nmemb;
   size_t idx = 0;
   int open = 0;
@@ -21,7 +21,7 @@ bool xre_expr_syntax(array_t *tokens) {
   (void)memset(&syntax_error, 0, sizeof(syntax_error));
 
   while (size--) {
-    token = (t_xre_token *)array_at(tokens, idx++);
+    token = (xre_token_t *)array_at(tokens, idx++);
     if (!token)
       goto prison;
 
@@ -38,9 +38,8 @@ bool xre_expr_syntax(array_t *tokens) {
     case __STRING_LITERAL__:
     case __IDENTIFIER__:
 
-      if (PREV_TOKEN_TYPE & (EXPR_OP_TYPE_BINOP | EXPR_OP_TYPE_UNIOP | EXPR_TYPE_SEPARATOR |
-                             EXPR_TYPE_CONDITION | EXPR_TYPE_LOOP | EXPR_TYPE_SEQUENCE | EXPR_TYPE_INJECT) ||
-          PREV_TOKEN_KIND == __LPAREN__ || PREV_TOKEN_KIND == __START__)
+      if (PREV_TOKEN_TYPE & (EXPR_OP_TYPE_BINOP | EXPR_OP_TYPE_UNIOP)
+        || PREV_TOKEN_KIND == __LPAREN__ || PREV_TOKEN_KIND == __START__)
         continue;
 
       syntax_error.error.type = XRE_SYNTAX_ERROR;
@@ -71,9 +70,8 @@ bool xre_expr_syntax(array_t *tokens) {
       goto syntax_error;
       
     case __NOT__:
-      if (PREV_TOKEN_TYPE & (EXPR_OP_TYPE_BINOP | EXPR_OP_TYPE_UNIOP | EXPR_TYPE_SEPARATOR |
-                             EXPR_TYPE_CONDITION | EXPR_TYPE_LOOP | EXPR_TYPE_SEQUENCE | EXPR_TYPE_INJECT) ||
-          PREV_TOKEN_KIND == __LPAREN__ || PREV_TOKEN_KIND == __START__)
+      if (PREV_TOKEN_TYPE & (EXPR_OP_TYPE_BINOP | EXPR_OP_TYPE_UNIOP)
+          || PREV_TOKEN_KIND == __LPAREN__ || PREV_TOKEN_KIND == __START__)
         continue;
 
       syntax_error.error.type = XRE_SYNTAX_ERROR;
@@ -125,7 +123,7 @@ bool xre_expr_syntax(array_t *tokens) {
     case __SCOPE_RESOLUTION__:
     case __END__:
 
-      if (PREV_TOKEN_TYPE & EXPR_TYPE_OPERAND || PREV_TOKEN_KIND == __RPAREN__)
+      if (PREV_TOKEN_TYPE & EXPR_TYPE_VALUE || PREV_TOKEN_KIND == __RPAREN__)
         continue;
 
       syntax_error.error.type = XRE_SYNTAX_ERROR;

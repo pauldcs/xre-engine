@@ -1,6 +1,7 @@
 #include "xre_assert.h"
 #include "xre_log.h"
 #include "xre_runtime.h"
+#include "xre_parse.h"
 #include <stdbool.h>
 
 // VALUE CMP
@@ -24,57 +25,52 @@ static int array_cmp(const array_t *a, const array_t *b) {
 }
 
 // RELATIONAL OPERAITON
-frame_block_t *relational_op(t_xre_expr_kind kind, frame_block_t *lv,
-                             frame_block_t *rv) {
-  __return_val_if_fail__(lv, NULL);
-  __return_val_if_fail__(rv, NULL);
+bool relational_op(xre_ast_t *node) {
+  __return_val_if_fail__(node, false);
 
-  if (lv->_error != NULL) {
-    frame_block_free(&rv);
-    return (lv);
+  xre_ast_t *left = node->_binop.left;
+  xre_ast_t *right = node->_binop.right;
+
+  if (!evaluate(left)
+    || !evaluate(right)) {
+    return (false);
   }
 
-  if (rv->_error != NULL) {
-    frame_block_free(&lv);
-    return (rv);
-  }
+  bool matching_types = left->event.type == right->event.type;
 
-  bool matching_types = lv->_type == rv->_type;
   int equality = 0;
 
   if (matching_types) {
-    if (lv->_type & IF_INTEGER)
-      equality = value_cmp(lv->_data.value, rv->_data.value);
+    if (left->event.type == STATE_NUMBER)
+      equality = value_cmp(left->event.value, right->event.value);
     else
-      equality = array_cmp(lv->_data.array, rv->_data.array);
+      equality = array_cmp(left->event.array, right->event.array);
   }
 
-  frame_block_free(&lv);
+  if (node->kind == __EQ__) {
+    return (change_state_value(node, matching_types && equality == 0));
 
-  if (kind == __EQ__) {
-    return ((matching_types && equality == 0) ? true_block_with(rv) : false_block_with(rv));
-
-  } else if (kind == __NE__) {
-    return ((!matching_types || equality != 0) ? true_block_with(rv) : false_block_with(rv));
+  } else if (node->kind == __NE__) {
+    return (change_state_value(node, !matching_types || equality != 0));
 
   } else {
     if (matching_types) {
-      switch (kind) {
+      switch (node->kind) {
       case __LT__:
-        return (equality < 0 ? true_block_with(rv) : false_block_with(rv));
+        return (change_state_value(node, equality < 0));
       case __GT__:
-        return (equality > 0 ? true_block_with(rv) : false_block_with(rv));
+        return (change_state_value(node, equality > 0));
       case __LE__:
-        return (equality <= 0 ? true_block_with(rv) : false_block_with(rv));
+        return (change_state_value(node, equality <= 0));
       case __GE__:
-        return (equality >= 0 ? true_block_with(rv) : false_block_with(rv));
+        return (change_state_value(node, equality >= 0));
       default:
         break;
       }
     }
-    return (error_block_with(rv, XRE_TYPE_ERROR, XRE_TYPE_MISSMATCH_ERROR));
+    return (set_error(right, XRE_TYPE_ERROR, XRE_TYPE_MISSMATCH_ERROR));
   }
 
   XRE_LOGGER(error, "Unrecognized comparison");
-  return (error_block_with(rv, XRE_INTERNAL_ERROR, XRE_NOT_IMPLEMENTED_ERROR));
+  return (set_error(right, XRE_INTERNAL_ERROR, XRE_NOT_IMPLEMENTED_ERROR));
 }

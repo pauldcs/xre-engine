@@ -1,67 +1,95 @@
 #include "xre_runtime.h"
+#include "xre_parse.h"
 #include "xre_utils.h"
 #include "xre_assert.h"
 #include "xre_log.h"
 
-static frame_block_t *simple_assignment(t_xre_ast *node, frame_block_t *rv) {
-  if (!runtime_stack_set(node->string, rv)
-    && !runtime_stack_add(node->string, rv)) 
-    return (copy_block_alloc(rv));
+bool simple_assignment(xre_ast_t *node) {
+  __return_val_if_fail__(node, false);
 
-  return (rv);
+  xre_ast_t *left = node->_binop.left;
+  xre_ast_t *right = node->_binop.right;
+
+  if (!runtime_stack_set(left->string, right->event)
+    && !runtime_stack_add(left->string, right->event)) 
+    return (false);
+
+  return (change_state_copy(node, right));
 }
 
-static frame_block_t *reassignement(t_xre_ast *node, frame_block_t *rv) {
-  rv->_src = node;
+bool reassignement(xre_ast_t *node) {
+  __return_val_if_fail__(node, false);
 
-  if (runtime_stack_set(node->string, rv))
-    return (copy_block_alloc(rv));
+  xre_ast_t *left = node->_binop.left;
+
+  if (runtime_stack_set(left->string, node->event))
+    return (node);
   
-  return (error_block_with(rv, XRE_RUNTIME_ERROR, XRE_UNBOUND_LOCAL_ERROR));
+  return (set_error(left, XRE_RUNTIME_ERROR, XRE_UNBOUND_LOCAL_ERROR));
 }
 
-frame_block_t *assignment_op(t_xre_expr_kind kind, t_xre_ast *node, frame_block_t *rv) {
-  __return_val_if_fail__(rv, NULL);
+bool assignment_op(xre_ast_t *node) {
   __return_val_if_fail__(node, NULL);
 
-  if (rv->_error != NULL) {
-    return (rv);
-  }
+  xre_ast_t *left = node->_binop.left;
+  xre_ast_t *right = node->_binop.right;
+
   
-  if (node->kind != __IDENTIFIER__) {
-    return error_block_with(rv, XRE_TYPE_ERROR, XRE_INVALID_ASSIGMENT_ERROR);
+  if (left->kind != __IDENTIFIER__) {
+    return set_error(node, XRE_TYPE_ERROR, XRE_INVALID_ASSIGMENT_ERROR);
   }
 
-  if (kind == __ASSIGN__) {
-    return (simple_assignment(node, rv));
+  if (!evaluate(right)) {
+    return (false);
   }
 
-  frame_block_t *block = runtime_stack_get(node->string);
-  
-  if (!block) {
-    return error_block_with(rv, XRE_RUNTIME_ERROR, XRE_UNBOUND_LOCAL_ERROR);
+  if (node->kind == __ASSIGN__) {
+    return (simple_assignment(node));
   }
 
-  if (block->_type != IF_INTEGER) {
-    return error_block_with(rv, XRE_TYPE_ERROR, XRE_INVALID_TYPE_FOR_OPERAND);
+  state_t *state = runtime_stack_get(left->string);
+
+  if (!state) {
+    return set_error(right, XRE_RUNTIME_ERROR, XRE_UNBOUND_LOCAL_ERROR);
   }
 
-  switch (kind) {
+  if (state->type != STATE_NUMBER) {
+    return set_error(right, XRE_TYPE_ERROR, XRE_INVALID_TYPE_FOR_OPERAND);
+  }
+
+  change_state_value(left, state->value);
+
+  switch (node->kind) {
   case __ADD_ASSIGN__:
-    return (reassignement(node, add_op(block, rv)));
+    if (!add_op(node))
+      return (false);
+    break;
+  
   case __SUB_ASSIGN__:
-    return (reassignement(node, sub_op(block, rv)));
+    if (!sub_op(node))
+      return (false);
+    break;
+  
   case __MUL_ASSIGN__:
-    return (reassignement(node, mul_op(block, rv)));
+    if (!mul_op(node))
+      return (false);
+    break;
+  
   case __DIV_ASSIGN__:
-    return (reassignement(node, div_op(block, rv)));
+    if (!div_op(node))
+      return (false);
+    break;
+  
   case __MOD_ASSIGN__:
-    return (reassignement(node, mod_op(block, rv)));
+    if (!mod_op(node))
+      return (false);
+    break;
+  
   case __POW_ASSIGN__:
   default:
-    XRE_LOGGER(error, "Unrecognized arithmetic operation");
+    XRE_LOGGER(warning, "Confusing condition");
+    return (set_error(node, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
   }
 
-  XRE_LOGGER(warning, "Confusing condition");
-  return (error_block_with(rv, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
+  return (reassignement(node));
 }

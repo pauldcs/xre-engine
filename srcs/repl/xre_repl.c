@@ -13,7 +13,7 @@ bool xre_process_block(const char *block) {
   if (!block || *block == '\0')
     return (true);
 
-  t_xre_ast *ast = xre_ast_compose(block);
+  xre_ast_t *ast = xre_ast_compose(block);
   if (ast) {
     (void)xre_runtime(ast);
     return (true);

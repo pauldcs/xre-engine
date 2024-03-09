@@ -1,113 +1,157 @@
 #include "xre_assert.h"
 #include "xre_log.h"
 #include "xre_runtime.h"
+#include "xre_parse.h"
 
 // BITWISE AND OPERATION
-static frame_block_t *bitwise_and_op(frame_block_t *lv, frame_block_t *rv) {
+bool bitwise_and_op(xre_ast_t *node) {
+  __return_val_if_fail__(node, false);
 
-  lv->_data.value = lv->_data.value & rv->_data.value;
-  frame_block_free(&rv);
-  rv->_src = NULL;
-  return (lv);
+  xre_ast_t *left = node->_binop.left;
+  xre_ast_t *right = node->_binop.right;
+
+  __return_val_if_fail__(
+    left
+    && right
+    && left->event.type == STATE_NUMBER
+    && right->event.type == STATE_NUMBER,
+  false);
+
+  change_state_value(node, left->event.value & right->event.value);
+  return (true);
 }
 
 // BITWISE OR OPERATION
-static frame_block_t *bitwise_or_op(frame_block_t *lv, frame_block_t *rv) {
+bool bitwise_or_op(xre_ast_t *node) {
+  __return_val_if_fail__(node, false);
 
-  lv->_data.value = lv->_data.value | rv->_data.value;
-  frame_block_free(&rv);
-  rv->_src = NULL;
-  return (lv);
+  xre_ast_t *left = node->_binop.left;
+  xre_ast_t *right = node->_binop.right;
+
+  __return_val_if_fail__(
+    left
+    && right
+    && left->event.type == STATE_NUMBER
+    && right->event.type == STATE_NUMBER,
+  false);
+
+  return (change_state_value(node, left->event.value | right->event.value));
 }
 
 // BITWISE XOR OPERATION
-static frame_block_t *bitwise_xor_op(frame_block_t *lv, frame_block_t *rv) {
+bool bitwise_xor_op(xre_ast_t *node) {
+  __return_val_if_fail__(node, false);
 
-  lv->_data.value = lv->_data.value ^ rv->_data.value;
-  frame_block_free(&rv);
-  rv->_src = NULL;
-  return (lv);
+  xre_ast_t *left = node->_binop.left;
+  xre_ast_t *right = node->_binop.right;
+
+  __return_val_if_fail__(
+    left
+    && right
+    && left->event.type == STATE_NUMBER
+    && right->event.type == STATE_NUMBER,
+  false);
+
+  return (change_state_value(node, left->event.value ^ right->event.value));
 }
 
 // BITWISE LSHIFT OPERATION
-static frame_block_t *bitwise_lshift_op(frame_block_t *lv, frame_block_t *rv) {
-  if (rv->_data.value < 0) {
-    frame_block_free(&lv);
-    return error_block_with(rv, XRE_VALUE_ERROR, XRE_NEGATIVE_SHIFT_ERROR);
+bool bitwise_lshift_op(xre_ast_t *node) {
+  __return_val_if_fail__(node, false);
+
+  xre_ast_t *left = node->_binop.left;
+  xre_ast_t *right = node->_binop.right;
+
+  __return_val_if_fail__(
+    left
+    && right
+    && left->event.type == STATE_NUMBER
+    && right->event.type == STATE_NUMBER,
+  false);
+
+  if (right->event.value < 0) {
+    return set_error(right, XRE_VALUE_ERROR, XRE_NEGATIVE_SHIFT_ERROR);
   }
 
-  if (rv->_data.value > 64) {
-    frame_block_free(&lv);
-    return error_block_with(rv, XRE_VALUE_ERROR, XRE_EXCEEDS_SHIFT_LIMIT_ERROR);
+  if (right->event.value > 64) {
+    return set_error(right, XRE_VALUE_ERROR, XRE_EXCEEDS_SHIFT_LIMIT_ERROR);
   }
 
-  return value_block_with(rv, lv->_data.value << rv->_data.value);
+  return (change_state_value(node, left->event.value << right->event.value));
 }
 
 // BITWISE RSHIFT OPERATION
-static frame_block_t *bitwise_rshift_op(frame_block_t *lv, frame_block_t *rv) {
-  if (rv->_data.value < 0) {
-    frame_block_free(&lv);
-    return error_block_with(rv, XRE_VALUE_ERROR, XRE_NEGATIVE_SHIFT_ERROR);
+bool bitwise_rshift_op(xre_ast_t *node) {
+  __return_val_if_fail__(node, false);
+
+  xre_ast_t *left = node->_binop.left;
+  xre_ast_t *right = node->_binop.right;
+
+  __return_val_if_fail__(
+    left
+    && right
+    && left->event.type == STATE_NUMBER
+    && right->event.type == STATE_NUMBER,
+  false);
+
+  if (right->event.value < 0) {
+    return set_error(right, XRE_VALUE_ERROR, XRE_NEGATIVE_SHIFT_ERROR);
   }
 
-  if (rv->_data.value > 64) {
-    frame_block_free(&lv);
-    frame_block_free(&rv);
-    return error_block_with(rv, XRE_VALUE_ERROR, XRE_EXCEEDS_SHIFT_LIMIT_ERROR);
+  if (right->event.value > 64) {
+    return set_error(right, XRE_VALUE_ERROR, XRE_EXCEEDS_SHIFT_LIMIT_ERROR);
   }
 
-  lv->_data.value = lv->_data.value >> rv->_data.value;
-  frame_block_free(&rv);
-  rv->_src = NULL;
-  return (lv);
+  return (change_state_value(node, left->event.value >> right->event.value));
 }
 
 // BITWISE OPERAITON
-frame_block_t *bitwise_op(t_xre_expr_kind kind, frame_block_t *lv,
-                          frame_block_t *rv) {
-  __return_val_if_fail__(lv, NULL);
-  __return_val_if_fail__(rv, NULL);
+bool bitwise_op(xre_ast_t *node) {
+  __return_val_if_fail__(node, NULL);
 
-  if (lv->_error != NULL) {
-    frame_block_free(&rv);
-    return (lv);
+  xre_ast_t *left = node->_binop.left;
+  xre_ast_t *right = node->_binop.right;
+
+  if (!evaluate(left)) {
+    return (false);
   }
 
-  if (rv->_error != NULL) {
-    frame_block_free(&lv);
-    return (rv);
+  if (!evaluate(right)) {
+    return (false);
   }
 
-  if (!(lv->_type & IF_INTEGER)) {
-    frame_block_free(&lv);
-    return error_block_with(rv, XRE_TYPE_ERROR, XRE_INVALID_TYPE_FOR_OPERAND);
+  if (left->event.type != STATE_NUMBER) {
+    return (set_error(left, XRE_TYPE_ERROR, XRE_INVALID_TYPE_FOR_OPERAND));
   }
 
-  if (lv->_type != rv->_type) {
-    frame_block_free(&lv);
-    return error_block_with(rv, XRE_TYPE_ERROR, XRE_TYPE_MISSMATCH_ERROR);
+  if (left->event.type != right->event.type) {
+    return (set_error(right, XRE_TYPE_ERROR, XRE_TYPE_MISSMATCH_ERROR));
   }
 
-  switch (kind) {
+  switch (node->kind) {
   case __BAND__:
   case __AND_ASSIGN__:
-    return (bitwise_and_op(lv, rv));
+    return (bitwise_and_op(node));
+  
   case __BOR__:
   case __OR_ASSIGN__:
-    return (bitwise_or_op(lv, rv));
+    return (bitwise_or_op(node));
+  
   case __BXOR__:
-    return (bitwise_xor_op(lv, rv));
+    return (bitwise_xor_op(node));
+  
   case __LSHIFT__:
   case __LSHIFT_ASSIGN__:
-    return (bitwise_lshift_op(lv, rv));
+    return (bitwise_lshift_op(node));
+  
   case __RSHIFT__:
   case __RSHIFT_ASSIGN__:
-    return (bitwise_rshift_op(lv, rv));
+    return (bitwise_rshift_op(node));
+  
   default:
     XRE_LOGGER(error, "Unrecognized arithmetic operation");
   }
 
-  frame_block_free(&lv);
-  return (error_block_with(rv, XRE_INTERNAL_ERROR, XRE_NOT_IMPLEMENTED_ERROR));
+  XRE_LOGGER(warning, "Confusing condition");
+  return (set_error(node, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
 }
