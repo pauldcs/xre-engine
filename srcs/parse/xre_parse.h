@@ -51,23 +51,18 @@ typedef enum {
 	/*      ! */ __NOT__,
 	/*        */ __START__,
 	/*        */ __END__,
-}	t_xre_expr_kind;
+}	xre_expr_kind_t;
 
 typedef enum {
 	EXPR_OP_TYPE_BINOP  = 1 << 1,
 	EXPR_OP_TYPE_UNIOP  = 1 << 2,
-	EXPR_TYPE_OPERAND   = 1 << 3,
-	EXPR_TYPE_CONDITION = 1 << 4,
-	EXPR_TYPE_LOOP      = 1 << 5,
-	EXPR_TYPE_SEQUENCE  = 1 << 6,
-	EXPR_TYPE_INJECT    = 1 << 7,
-	EXPR_TYPE_SEPARATOR = 1 << 8,
-	EXPR_TYPE_OTHER     = 1 << 9,
-}	t_xre_expr_type;
+	EXPR_TYPE_VALUE     = 1 << 3,
+	EXPR_TYPE_OTHER     = 1 << 4,
+}	xre_expr_type_t;
 
 typedef struct s_xre_expr_token {
-  t_xre_expr_type   _type;
-	t_xre_expr_kind _kind;
+  xre_expr_type_t   _type;
+	xre_expr_kind_t _kind;
 	int64_t         _value;
 	size_t          _line;
 	size_t          _cols;
@@ -75,34 +70,34 @@ typedef struct s_xre_expr_token {
 	size_t          _len;
 	const char *    _line_ptr;
 	size_t          _line_len;
-}	t_xre_token;
+}	xre_token_t;
 
-typedef struct s_ast t_xre_ast;
+typedef struct s_ast xre_ast_t;
 
 struct s_ast {
-	t_xre_expr_type	type;
-	t_xre_expr_kind	kind;
-	const t_xre_token  token;
-
+	xre_expr_type_t	   type;
+	xre_expr_kind_t	   kind;
+	const xre_token_t  token;
 	union {
-		int64_t value;
+		int64_t    value;
 		const char *string;
+		xre_ast_t  *uniop;
 		struct {
-			t_xre_ast *left;	
-			t_xre_ast *right;
-		}	binop;
-		t_xre_ast *uniop;
+			xre_ast_t *left;	
+			xre_ast_t *right;
+		}	_binop;
 	};
 };
 
-t_xre_ast  *xre_ast_compose(const char *expr);
+xre_ast_t  *xre_ast_compose(const char *expr);
 bool        xre_expr_lex (const char *expr, array_t *tokens);
 bool        xre_expr_syntax (array_t *tokens);
-t_xre_ast  *xre_expr_parse (array_t *tokens);
+xre_ast_t  *xre_expr_parse (array_t *tokens);
 
 /*---      UTILS      ---*/
-t_xre_expr_type  expr_type_by_kind(t_xre_expr_kind kind);
-const char      *expr_kind_to_string(t_xre_expr_kind kind);
-void             ast_show (t_xre_ast *ast);
-void             ast_free(t_xre_ast *ast);
+xre_expr_type_t  expr_type_by_kind(xre_expr_kind_t kind);
+const char      *expr_kind_to_string(xre_expr_kind_t kind);
+void             ast_show (xre_ast_t *ast);
+void             ast_free(xre_ast_t *ast);
+
 #endif /* __XRE_PARSE_H__ */

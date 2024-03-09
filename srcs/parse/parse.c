@@ -12,17 +12,17 @@ static const void	*__stack_b[MICROSTACK_SIZE];
 static size_t	__top_a;
 static size_t	__top_b;
 
-# define TOP_A_KIND ((t_xre_ast *)__stack_a[__top_a])->kind
-# define TOP_B_KIND ((t_xre_ast *)__stack_b[__top_b])->kind
+# define TOP_A_KIND ((xre_ast_t *)__stack_a[__top_a])->kind
+# define TOP_B_KIND ((xre_ast_t *)__stack_b[__top_b])->kind
 
 static void
-__push_a (t_xre_ast *node) {
+__push_a (xre_ast_t *node) {
   //printf("push A %s\n", expr_kind_to_string(node->kind));
 	if (__top_a < MICROSTACK_SIZE - 1)
 		__stack_a[++__top_a] = node;
 }
 static void
-__push_b (t_xre_ast *node) {
+__push_b (xre_ast_t *node) {
   //printf("push B %s\n", expr_kind_to_string(node->kind));
 	if (__top_b < MICROSTACK_SIZE - 1)
 		__stack_b[++__top_b] = node;
@@ -42,14 +42,15 @@ __pop_b (void) {
 	return ((void *)0);
 }
 
-t_xre_ast *
-__ast_new_node (t_xre_token *token) {
-  t_xre_ast *node = malloc(sizeof(t_xre_ast));
-  bzero(node, sizeof(t_xre_ast));
+xre_ast_t *
+__ast_new_node (xre_token_t *token) {
+  xre_ast_t *node = malloc(sizeof(xre_ast_t));
+  
+  bzero(node, sizeof(xre_ast_t));
   node->kind = token->_kind;
   node->type = token->_type;
   
-  (void)memcpy((void *)&node->token, token, sizeof(t_xre_token));
+  (void)memcpy((void *)&node->token, token, sizeof(xre_token_t));
 
   if (node->kind == __VAL__)
     node->value = token->_value;
@@ -66,7 +67,7 @@ __ast_new_node (t_xre_token *token) {
 }
 
 static int
-get_expr_precedence (t_xre_expr_kind kind) {
+get_expr_precedence (xre_expr_kind_t kind) {
 
 	switch (kind) {
     case __SCOPE_RESOLUTION__:
@@ -166,7 +167,7 @@ static void
 __make_value_to_b (void) {
   //printf("merging\n");
 
-	t_xre_ast *node = __pop_a();
+	xre_ast_t *node = __pop_a();
   assert(node);
 
   if (node->type & EXPR_OP_TYPE_UNIOP) {
@@ -174,18 +175,18 @@ __make_value_to_b (void) {
 
   }
   else { 
-    node->binop.right = __pop_b();
-    node->binop.left = __pop_b();
+    node->_binop.right = __pop_b();
+    node->_binop.left = __pop_b();
   }
 	
   __push_b(node);
 }
 
-t_xre_ast *
+xre_ast_t *
 xre_expr_parse (array_t *tokens) {
   __return_val_if_fail__(tokens, NULL);
 
-  t_xre_token *token = NULL;
+  xre_token_t *token = NULL;
   size_t idx = 0;
 
 	__top_a = 0;
@@ -195,7 +196,7 @@ xre_expr_parse (array_t *tokens) {
 	memset(__stack_b, 0, MICROSTACK_SIZE * sizeof(void *));
 
 	while (true) {
-    token = (t_xre_token *)array_unsafe_at(tokens, ++idx);
+    token = (xre_token_t *)array_unsafe_at(tokens, ++idx);
     if (!token)
       break;
   
@@ -252,5 +253,5 @@ xre_expr_parse (array_t *tokens) {
 	while (__top_b > 1)
 		__make_value_to_b();
 	
-	return ((t_xre_ast *)__stack_b[__top_b]);
+	return ((xre_ast_t *)__stack_b[__top_b]);
 }

@@ -73,11 +73,11 @@ typedef struct {
     t_xre_error_type type;
     t_xre_error_subtype subtype;
   } error;
-  const t_xre_token *src;
+  const xre_token_t *src;
 } t_xre_error;
 
 const char *err_type_to_string(t_xre_error_type type);
 const char *err_subtype_to_string(t_xre_error_subtype type);
-void xre_error(t_xre_error *report,const t_xre_token *token);
+void xre_error(t_xre_error *report,const xre_token_t *token);
 
 #endif /* __XRE_REPL_ERROR_H__ */

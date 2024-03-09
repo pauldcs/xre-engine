@@ -20,7 +20,7 @@ t_xre_state  __xre_state__ = {
 	.version = "0.5",
 };
 
-// void free_ast(t_xre_ast *ast) {
+// void free_ast(xre_ast_t *ast) {
 // 	if (ast->kind)
 // 	free_ast()
 // }
@@ -96,14 +96,17 @@ club:
 		return (false);
 	}
 
-	t_xre_ast *ast = xre_ast_compose(buffer);
-	if (!xre_runtime(ast)) {
+	xre_ast_t *ast = xre_ast_compose(buffer);
+	if (!ast) {
 		free(buffer);
-		ast_free(ast);
 		return (false);
 	}
 
-	ast_free(ast);
+	if (!xre_runtime(ast)) {
+		free(buffer);
+		return (false);
+	}
+
 	free(buffer);
  	return (true);
 }
@@ -136,7 +139,7 @@ main(int ac, char *av[]) {
 			}
 		} else {
 			if (args->code) {
-					t_xre_ast *ast = xre_ast_compose(args->code);
+					xre_ast_t *ast = xre_ast_compose(args->code);
 					if (!ast) {
 						return (free(args), false);
 					}
