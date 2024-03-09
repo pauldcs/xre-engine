@@ -1,4 +1,4 @@
-NAME          := libcont.a
+NAME          := libarray.a
 CC            := gcc
 SRCS_DIR      := srcs
 OBJS_DIR      := .objs

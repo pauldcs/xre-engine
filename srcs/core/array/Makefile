@@ -1,4 +1,4 @@
-include libcont.mk
+include libarray.mk
 include specs.mk
 
 SRCS_OBJS := $(patsubst %.c,$(OBJS_DIR)/%.o,$(SRCS))

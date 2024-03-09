@@ -17,29 +17,29 @@ all: $(NAME)
 -include  $(SRCS_OBJS:.o=.d)
 
 $(NAME): $(SRCS_OBJS)
-	$(MAKE) -C $(LIBCONT_DIR)
+	$(MAKE) -C $(LIBARRAY_DIR)
 	$(CC) \
 		$^ \
 		$(CFLAGS) \
 		$(MAIN) \
 		-o $(NAME) \
 		-I $(INCS_DIR) \
-		-L $(LIBCONT_DIR) \
-		-lcont \
+		-L $(LIBARRAY_DIR) \
+		-larray \
 		-ltermcap 
 
 g: CFLAGS += $(CFLAGS_DBG)
 g: all
 
 clean:
-	$(MAKE) clean -C $(LIBCONT_DIR)
+	$(MAKE) clean -C $(LIBARRAY_DIR)
 	rm -rf *.dSYM
 	rm -rf .cache
 	rm -rf .vscode
 	rm -rf $(OBJS_DIR)
 
 fclean: clean
-	$(MAKE) fclean -C $(LIBCONT_DIR)
+	$(MAKE) fclean -C $(LIBARRAY_DIR)
 	rm -rf $(NAME)
 
 re: fclean all

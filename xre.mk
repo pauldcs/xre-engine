@@ -6,8 +6,8 @@ OBJS_DIR      := .objs
 BUILD_DIR     := build
 INCS_DIR      := incs
 TEST_MAIN     := srcs/tests/__main__.c
-LIBCONT_DIR   := srcs/core/array
-LIBCONT_NAME  := libcont.dylib
+LIBARRAY_DIR   := srcs/core/array
+LIBARRAY_NAME  := libarray.a
 MAIN          := srcs/__main__.c
 
 CFLAGS   := \
