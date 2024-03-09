@@ -1,7 +1,7 @@
 #include "xre_assert.h"
 #include "xre_log.h"
-#include "xre_runtime.h"
 #include "xre_parse.h"
+#include "xre_runtime.h"
 #include <stdbool.h>
 
 // VALUE CMP
@@ -25,14 +25,13 @@ static int array_cmp(const array_t *a, const array_t *b) {
 }
 
 // RELATIONAL OPERAITON
-bool relational_op(xre_runtime_t *frame) {
+bool relational_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
 
-  xre_runtime_t *left = frame->left;
-  xre_runtime_t *right = frame->right;
+  xre_frame_t *left = frame->left;
+  xre_frame_t *right = frame->right;
 
-  if (!evaluate(left)
-    || !evaluate(right)) {
+  if (!evaluate(left) || !evaluate(right)) {
     return (false);
   }
 

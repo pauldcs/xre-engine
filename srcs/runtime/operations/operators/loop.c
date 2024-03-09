@@ -1,12 +1,12 @@
 #include "xre_assert.h"
-#include "xre_runtime.h"
 #include "xre_parse.h"
+#include "xre_runtime.h"
 
-bool loop_op(xre_runtime_t *frame) {
+bool loop_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
 
-  xre_runtime_t *left = frame->left;
-  xre_runtime_t *right = frame->right;
+  xre_frame_t *left = frame->left;
+  xre_frame_t *right = frame->right;
 
   size_t max_iterations = DEFAULT_MAX_ITERATIONS;
 
@@ -19,15 +19,15 @@ bool loop_op(xre_runtime_t *frame) {
       return (false);
     }
 
-    if (!is_truthy_state(left)) {
+    if (!is_true_state(left)) {
       break;
     }
-    //printf("bite1\n");
+    // printf("bite1\n");
 
     if (!evaluate(right)) {
       return (false);
     }
-  
+
     (void)change_state_copy(frame, right);
   }
 

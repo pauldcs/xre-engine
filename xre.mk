@@ -13,8 +13,8 @@ MAIN          := srcs/__main__.c
 CFLAGS   := \
 	-Wall     \
 	-Wextra   \
+	-Werror   \
 	-pedantic \
-	-O3 \
 	-g3
 
 # export ASAN_OPTIONS="log_path=sanitizer.log"
@@ -68,16 +68,16 @@ SRCS := \
 	readline/rl_buffer.c \
 \
 	runtime/xre_runtime.c \
-	runtime/state/runtime_stack.c \
-	runtime/state/state.c \
-	runtime/operations/arithmetic.c \
-	runtime/operations/assignment.c \
-	runtime/operations/logical.c \
-	runtime/operations/bitwise.c \
-	runtime/operations/loop.c \
-	runtime/operations/not.c \
-	runtime/operations/relational.c \
-	runtime/operations/sequence.c \
-	runtime/operations/inject.c \
+	runtime/frame/runtime_variables.c \
+	runtime/frame/xre_frame.c \
+	runtime/operations/operators/arithmetic.c \
+	runtime/operations/operators/assignment.c \
+	runtime/operations/operators/logical.c \
+	runtime/operations/operators/bitwise.c \
+	runtime/operations/operators/loop.c \
+	runtime/operations/operators/not.c \
+	runtime/operations/operators/relational.c \
+	runtime/operations/operators/sequence.c \
+	runtime/operations/operators/inject.c \
 \
-	runtime/operands/operands.c 
+	runtime/operations/operands/operands.c 

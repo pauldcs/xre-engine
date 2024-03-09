@@ -1,44 +1,45 @@
 #include "xre_assert.h"
-#include "xre_parse.h"
+#include "xre_frame.h"
 #include "xre_log.h"
+#include "xre_parse.h"
 #include "xre_runtime.h"
 
 // ADD OPERATION
-bool add_op(xre_runtime_t *frame) {
+bool add_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
 
-  xre_runtime_t *left = frame->left;
-  xre_runtime_t *right = frame->right;
+  xre_frame_t *left = frame->left;
+  xre_frame_t *right = frame->right;
 
   return (change_state_value(frame, left->state.value + right->state.value));
 }
 
 // SUB OPERATION
-bool sub_op(xre_runtime_t *frame) {
+bool sub_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
 
-  xre_runtime_t *left = frame->left;
-  xre_runtime_t *right = frame->right;
+  xre_frame_t *left = frame->left;
+  xre_frame_t *right = frame->right;
 
   return (change_state_value(frame, left->state.value - right->state.value));
 }
 
 // MUL OPERATION
-bool mul_op(xre_runtime_t *frame) {
+bool mul_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
 
-  xre_runtime_t *left = frame->left;
-  xre_runtime_t *right = frame->right;
+  xre_frame_t *left = frame->left;
+  xre_frame_t *right = frame->right;
 
   return (change_state_value(frame, left->state.value * right->state.value));
 }
 
 // DIV OPERATION
-bool div_op(xre_runtime_t *frame) {
+bool div_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
 
-  xre_runtime_t *left = frame->left;
-  xre_runtime_t *right = frame->right;
+  xre_frame_t *left = frame->left;
+  xre_frame_t *right = frame->right;
 
   if (right->state.value == 0) {
     return set_error(right, XRE_ARITHMETIC_ERROR, XRE_ZERO_DIVISION_ERROR);
@@ -48,11 +49,11 @@ bool div_op(xre_runtime_t *frame) {
 }
 
 // MOD OPERATION
-bool mod_op(xre_runtime_t *frame) {
+bool mod_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
 
-  xre_runtime_t *left = frame->left;
-  xre_runtime_t *right = frame->right;
+  xre_frame_t *left = frame->left;
+  xre_frame_t *right = frame->right;
 
   if (right->state.value == 0) {
     return set_error(right, XRE_ARITHMETIC_ERROR, XRE_ZERO_DIVISION_ERROR);
@@ -62,11 +63,11 @@ bool mod_op(xre_runtime_t *frame) {
 }
 
 // ARITHMETIC OPERAITON
-bool arithmetic_op(xre_runtime_t *frame) {
+bool arithmetic_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
-  xre_runtime_t *left = frame->left;
-  xre_runtime_t *right = frame->right;
+  xre_frame_t *left = frame->left;
+  xre_frame_t *right = frame->right;
 
   if (!evaluate(left)) {
     return (false);

@@ -1,20 +1,16 @@
 #include "xre_runtime.h"
-#include "array.h"
 #include "xre_args.h"
 #include "xre_assert.h"
-#include "xre_errors.h"
+#include "xre_frame.h"
 #include "xre_log.h"
-#include "xre_parse.h"
-#include "xre_stringf.h"
-#include "xre_utils.h"
-#include <iso646.h>
+#include "xre_operations.h"
 #include <stdbool.h>
-#include <sys/types.h>
 
-bool        _has_error = false;
+bool _has_error = false;
 t_xre_error _error;
 
-bool set_error(xre_runtime_t *frame, t_xre_error_type type, t_xre_error_subtype subtype) {
+bool set_error(xre_frame_t *frame, t_xre_error_type type,
+               t_xre_error_subtype subtype) {
   _error.error.type = type;
   _error.error.subtype = subtype;
   _error.src = frame->token;
@@ -22,34 +18,9 @@ bool set_error(xre_runtime_t *frame, t_xre_error_type type, t_xre_error_subtype 
   return (false);
 }
 
-bool error_occurred(void) {
-  return (_has_error);
-}
+bool error_occurred(void) { return (_has_error); }
 
-bool change_state_value(xre_runtime_t *frame, int64_t value) {
-  frame->state.type = STATE_NUMBER;
-  frame->state.value = value;
-  return (true);
-}
-
-bool change_state_array(xre_runtime_t *frame, array_t *array) {
-  frame->state.type = STATE_ARRAY;
-  frame->state.array = array;
-  return (true);
-}
-
-bool change_state_string(xre_runtime_t *frame, char *string) {
-  frame->state.type = STATE_STRING;
-  frame->state.string = string;
-  return (true);
-}
-
-bool change_state_copy(xre_runtime_t *this, xre_runtime_t *that) {
-  (void)memcpy(&this->state, &that->state, sizeof(state_t));
-  return (true);
-}
-
-bool binop_exec(xre_runtime_t *frame) {
+bool binop_exec(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
   switch (frame->kind) {
@@ -88,25 +59,25 @@ bool binop_exec(xre_runtime_t *frame) {
   case __LSHIFT__:
   case __RSHIFT__:
     return (bitwise_op(frame));
-  
+
   case __LOOP__:
     return (loop_op(frame));
 
   case __SEQUENCE_POINT__:
     return (sequence_op(frame));
-  
+
   case __SEPARATOR__:
     return (separator_op(frame));
-  
+
   case __INJECT__:
     return (inject_op(frame));
-  
+
   case __DO__:
   case __ELSE__:
   case __AND__:
   case __OR__:
     return (logical_op(frame));
-  
+
   default:
     break;
   }
@@ -114,26 +85,25 @@ bool binop_exec(xre_runtime_t *frame) {
   return (set_error(frame, XRE_INTERNAL_ERROR, XRE_NOT_IMPLEMENTED_ERROR));
 }
 
-bool uniop_exec(xre_runtime_t *frame) {
+bool uniop_exec(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
   switch (frame->kind) {
   case __NOT__:
     return (not_op(frame));
-    
+
   default:
     return (set_error(frame, XRE_INTERNAL_ERROR, XRE_NOT_IMPLEMENTED_ERROR));
   }
 }
 
-bool operand_exec(xre_runtime_t *frame) {
+bool operand_exec(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
   return (operand(frame));
 }
 
-
-bool evaluate(xre_runtime_t *frame) {
+bool evaluate(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
   switch (frame->type) {
@@ -156,27 +126,27 @@ bool evaluate(xre_runtime_t *frame) {
 bool xre_runtime(xre_ast_t *ast) {
   __return_val_if_fail__(ast, false);
 
-  xre_runtime_t *frame = init_state(ast);
+  xre_frame_t *frame = state_init(ast);
 
-  if (!runtime_stack_init()) {
+  if (!runtime_variables_init()) {
     return (false);
   }
-  
+
   if (!evaluate(frame)) {
-    if (error_occurred()) { 
+    if (error_occurred()) {
       xre_error(&_error, _error.src);
-      return (deinit_state(frame), false);
+      return (state_deinit(frame), false);
     }
     XRE_LOGGER(error, "Failed without error message");
-    return (deinit_state(frame), false);
+    return (state_deinit(frame), false);
   }
-  
+
   if (__xre_args__.flags & SHOW_EXPR_RESULT) {
     state_print(frame);
   }
-  
-  runtime_stack_deinit();
-  deinit_state(frame);
+
+  runtime_variables_deinit();
+  state_deinit(frame);
 
   return (true);
 }
