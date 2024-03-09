@@ -59,26 +59,25 @@ ast_show (xre_ast_t *ast) {
 void
 ast_free(xre_ast_t *ast) {
 
-    // switch(ast->kind) {
-    //     case __STRING_LITERAL__:
-    //     case __IDENTIFIER__:
-    //         free((void *)ast->string);
-    //         break;
+    switch(ast->kind) {
+        case __STRING_LITERAL__:
+        case __IDENTIFIER__:
+            free((void *)ast->string);
+            break;
 
-    //     case __NOT__:
-    //         ast_free(ast->uniop);
-    //         break;
+        case __NOT__:
+            ast_free(ast->uniop);
+            break;
         
-    //     default:
-    //         ast_free(ast->_binop.left);
-    //         ast_free(ast->_binop.right);          
-    // }
-
+        default:
+            ast_free(ast->_binop.left);
+            ast_free(ast->_binop.right);          
+    }
     free(ast);
 }
 
 const char *
-expr_kind_to_string(t_xre_expr_kind kind) {
+expr_kind_to_string(xre_expr_kind_t kind) {
     switch (kind) {
     case __START__:            return "start";
     case __END__:              return "end";
@@ -130,8 +129,8 @@ expr_kind_to_string(t_xre_expr_kind kind) {
     return "????????";
 }
 
-t_xre_expr_type
-expr_type_by_kind(t_xre_expr_kind kind) {
+xre_expr_type_t
+expr_type_by_kind(xre_expr_kind_t kind) {
     switch (kind) {
         case __VAL__:              
         case __STRING_LITERAL__:   

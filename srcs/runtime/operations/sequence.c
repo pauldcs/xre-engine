@@ -2,11 +2,11 @@
 #include "xre_parse.h"
 #include "xre_assert.h"
 
-bool sequence_op(xre_ast_t *node) {
-  __return_val_if_fail__(node, NULL);
+bool sequence_op(xre_runtime_t *frame) {
+  __return_val_if_fail__(frame, NULL);
 
-  xre_ast_t *left = node->_binop.left;
-  xre_ast_t *right = node->_binop.right;
+  xre_runtime_t *left = frame->left;
+  xre_runtime_t *right = frame->right;
 
   array_t *array = NULL;
 
@@ -15,28 +15,28 @@ bool sequence_op(xre_ast_t *node) {
     return (false);
   }
 
-  if (left->event.type & STATE_ARRAY) {
-    array = left->event.array;
+  if (left->state.type == STATE_ARRAY) {
+    array = left->state.array;
   
   } else {
     array = array_create(sizeof(state_t), 10, NULL);
-    array_push(array, &left->event);
+    array_push(array, &left->state);
   }
   
-  array_push(array, &right->event);
+  array_push(array, &right->state);
 
-  return (change_state_array(node, array));
+  return (change_state_array(frame, array));
 }
 
-bool separator_op(xre_ast_t *node) {
-  __return_val_if_fail__(node, NULL);
+bool separator_op(xre_runtime_t *frame) {
+  __return_val_if_fail__(frame, NULL);
 
-  xre_ast_t *left = node->_binop.left;
-  xre_ast_t *right = node->_binop.right;
+  xre_runtime_t *left = frame->left;
+  xre_runtime_t *right = frame->right;
 
   if (!evaluate(left) || !evaluate(right)) {
       return (false);
     }
 
-  return (change_state_copy(node, right));
+  return (change_state_copy(frame, right));
 }

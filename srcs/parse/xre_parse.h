@@ -51,18 +51,18 @@ typedef enum {
 	/*      ! */ __NOT__,
 	/*        */ __START__,
 	/*        */ __END__,
-}	t_xre_expr_kind;
+}	xre_expr_kind_t;
 
 typedef enum {
 	EXPR_OP_TYPE_BINOP  = 1 << 1,
 	EXPR_OP_TYPE_UNIOP  = 1 << 2,
 	EXPR_TYPE_VALUE     = 1 << 3,
 	EXPR_TYPE_OTHER     = 1 << 4,
-}	t_xre_expr_type;
+}	xre_expr_type_t;
 
 typedef struct s_xre_expr_token {
-  t_xre_expr_type   _type;
-	t_xre_expr_kind _kind;
+  xre_expr_type_t   _type;
+	xre_expr_kind_t _kind;
 	int64_t         _value;
 	size_t          _line;
 	size_t          _cols;
@@ -74,26 +74,10 @@ typedef struct s_xre_expr_token {
 
 typedef struct s_ast xre_ast_t;
 
-typedef enum {
-	STATE_ARRAY,
-	STATE_NUMBER,
-	STATE_STRING,
-}	exp_event_e;
-
-typedef struct {
-  exp_event_e  type;
-  union {
-    int64_t    value;
-    array_t    *array;
-    const char *string;
-};
-} state_t;
-
 struct s_ast {
-	t_xre_expr_type	   type;
-	t_xre_expr_kind	   kind;
+	xre_expr_type_t	   type;
+	xre_expr_kind_t	   kind;
 	const xre_token_t  token;
-	state_t            event;
 	union {
 		int64_t    value;
 		const char *string;
@@ -111,30 +95,9 @@ bool        xre_expr_syntax (array_t *tokens);
 xre_ast_t  *xre_expr_parse (array_t *tokens);
 
 /*---      UTILS      ---*/
-t_xre_expr_type  expr_type_by_kind(t_xre_expr_kind kind);
-const char      *expr_kind_to_string(t_xre_expr_kind kind);
+xre_expr_type_t  expr_type_by_kind(xre_expr_kind_t kind);
+const char      *expr_kind_to_string(xre_expr_kind_t kind);
 void             ast_show (xre_ast_t *ast);
 void             ast_free(xre_ast_t *ast);
-
-typedef struct {
-  const char  *key;
-  state_t     state;
-} stack_item_t;
-
-extern array_t *runtime_stack;
-
-// FRAME
-bool    runtime_stack_init(void);
-void    runtime_stack_deinit(void);
-
-state_t *runtime_stack_get(const char *key);
-
-bool runtime_stack_add(const char *key, state_t state);
-bool runtime_stack_set(const char *key, state_t state);
-
-bool is_truthy_state(xre_ast_t *node);
-
-// COMMON
-void state_print(xre_ast_t *node);
 
 #endif /* __XRE_PARSE_H__ */

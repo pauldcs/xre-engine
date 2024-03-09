@@ -67,7 +67,7 @@ __ast_new_node (xre_token_t *token) {
 }
 
 static int
-get_expr_precedence (t_xre_expr_kind kind) {
+get_expr_precedence (xre_expr_kind_t kind) {
 
 	switch (kind) {
     case __SCOPE_RESOLUTION__:

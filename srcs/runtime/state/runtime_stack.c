@@ -16,6 +16,12 @@ bool runtime_stack_init(void) {
 }
 
 void runtime_stack_deinit(void) {
+  size_t size = array_size(runtime_stack);
+  size_t i = 0;
+  while (i < size) {
+    stack_item_t *item = (stack_item_t *)array_at(runtime_stack, i++);
+    free_state(&item->state);
+  }
   array_kill(runtime_stack);
   runtime_stack = NULL;
 }

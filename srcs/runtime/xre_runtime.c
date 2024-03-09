@@ -14,10 +14,10 @@
 bool        _has_error = false;
 t_xre_error _error;
 
-bool set_error(xre_ast_t*node, t_xre_error_type type, t_xre_error_subtype subtype) {
+bool set_error(xre_runtime_t *frame, t_xre_error_type type, t_xre_error_subtype subtype) {
   _error.error.type = type;
   _error.error.subtype = subtype;
-  _error.src = &node->token;
+  _error.src = frame->token;
   _has_error = true;
   return (false);
 }
@@ -26,33 +26,33 @@ bool error_occurred(void) {
   return (_has_error);
 }
 
-bool change_state_value(xre_ast_t *node, int64_t value) {
-  node->event.type = STATE_NUMBER;
-  node->event.value = value;
+bool change_state_value(xre_runtime_t *frame, int64_t value) {
+  frame->state.type = STATE_NUMBER;
+  frame->state.value = value;
   return (true);
 }
 
-bool change_state_array(xre_ast_t *node, array_t *array) {
-  node->event.type = STATE_ARRAY;
-  node->event.array = array;
+bool change_state_array(xre_runtime_t *frame, array_t *array) {
+  frame->state.type = STATE_ARRAY;
+  frame->state.array = array;
   return (true);
 }
 
-bool change_state_string(xre_ast_t *node, const char *string) {
-  node->event.type = STATE_STRING;
-  node->event.string = string;
+bool change_state_string(xre_runtime_t *frame, char *string) {
+  frame->state.type = STATE_STRING;
+  frame->state.string = string;
   return (true);
 }
 
-bool change_state_copy(xre_ast_t *this, xre_ast_t *that) {
-  (void)memcpy(&this->event, &that->event, sizeof(state_t));
+bool change_state_copy(xre_runtime_t *this, xre_runtime_t *that) {
+  (void)memcpy(&this->state, &that->state, sizeof(state_t));
   return (true);
 }
 
-bool binop_exec(xre_ast_t *node) {
-  __return_val_if_fail__(node, NULL);
+bool binop_exec(xre_runtime_t *frame) {
+  __return_val_if_fail__(frame, NULL);
 
-  switch (node->kind) {
+  switch (frame->kind) {
   case __ASSIGN__:
   case __ADD_ASSIGN__:
   case __SUB_ASSIGN__:
@@ -64,7 +64,7 @@ bool binop_exec(xre_ast_t *node) {
   case __RSHIFT_ASSIGN__:
   case __OR_ASSIGN__:
   case __AND_ASSIGN__:
-    return (assignment_op(node));
+    return (assignment_op(frame));
 
   case __ADD__:
   case __SUB__:
@@ -72,7 +72,7 @@ bool binop_exec(xre_ast_t *node) {
   case __DIV__:
   case __MOD__:
   case __POW__:
-    return (arithmetic_op(node));
+    return (arithmetic_op(frame));
 
   case __EQ__:
   case __NE__:
@@ -80,100 +80,103 @@ bool binop_exec(xre_ast_t *node) {
   case __GT__:
   case __LE__:
   case __GE__:
-    return (relational_op(node));
+    return (relational_op(frame));
 
   case __BAND__:
   case __BOR__:
   case __BXOR__:
   case __LSHIFT__:
   case __RSHIFT__:
-    return (bitwise_op(node));
+    return (bitwise_op(frame));
   
   case __LOOP__:
-    return (loop_op(node));
+    return (loop_op(frame));
 
   case __SEQUENCE_POINT__:
-    return (sequence_op(node));
+    return (sequence_op(frame));
   
   case __SEPARATOR__:
-    return (separator_op(node));
+    return (separator_op(frame));
   
   case __INJECT__:
-    return (inject_op(node));
+    return (inject_op(frame));
   
   case __DO__:
   case __ELSE__:
   case __AND__:
   case __OR__:
-    return (logical_op(node));
+    return (logical_op(frame));
   
   default:
     break;
   }
 
-  return (set_error(node, XRE_INTERNAL_ERROR, XRE_NOT_IMPLEMENTED_ERROR));
+  return (set_error(frame, XRE_INTERNAL_ERROR, XRE_NOT_IMPLEMENTED_ERROR));
 }
 
-bool uniop_exec(xre_ast_t *node) {
-  __return_val_if_fail__(node, NULL);
+bool uniop_exec(xre_runtime_t *frame) {
+  __return_val_if_fail__(frame, NULL);
 
-  switch (node->kind) {
+  switch (frame->kind) {
   case __NOT__:
-    return (not_op(node));
+    return (not_op(frame));
     
   default:
-    return (set_error(node, XRE_INTERNAL_ERROR, XRE_NOT_IMPLEMENTED_ERROR));
+    return (set_error(frame, XRE_INTERNAL_ERROR, XRE_NOT_IMPLEMENTED_ERROR));
   }
 }
 
-bool operand_exec(xre_ast_t *node) {
-  __return_val_if_fail__(node, NULL);
+bool operand_exec(xre_runtime_t *frame) {
+  __return_val_if_fail__(frame, NULL);
 
-  return (operand(node));
+  return (operand(frame));
 }
 
 
-bool evaluate(xre_ast_t *ast) {
-  __return_val_if_fail__(ast, NULL);
+bool evaluate(xre_runtime_t *frame) {
+  __return_val_if_fail__(frame, NULL);
 
-  switch (ast->type) {
+  switch (frame->type) {
   case EXPR_TYPE_VALUE:
-    return operand_exec(ast);
+    return operand_exec(frame);
 
   case EXPR_OP_TYPE_BINOP:
-    return binop_exec(ast);
+    return binop_exec(frame);
 
   case EXPR_OP_TYPE_UNIOP:
-    return uniop_exec(ast);
+    return uniop_exec(frame);
 
   case EXPR_TYPE_OTHER:
   default:
     XRE_LOGGER(warning, "Confusing condition");
-    return (set_error(ast, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
+    return (set_error(frame, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
   }
 }
 
 bool xre_runtime(xre_ast_t *ast) {
   __return_val_if_fail__(ast, false);
 
+  xre_runtime_t *frame = init_state(ast);
+
   if (!runtime_stack_init()) {
     return (false);
   }
   
-  if (!evaluate(ast)) {
+  if (!evaluate(frame)) {
     if (error_occurred()) { 
       xre_error(&_error, _error.src);
-      return (false);
+      return (deinit_state(frame), false);
     }
     XRE_LOGGER(error, "Failed without error message");
-    return (false);
+    return (deinit_state(frame), false);
   }
   
   if (__xre_args__.flags & SHOW_EXPR_RESULT) {
-    state_print(ast);
+    state_print(frame);
   }
   
   runtime_stack_deinit();
+  deinit_state(frame);
 
   return (true);
 }

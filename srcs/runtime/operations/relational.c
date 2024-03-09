@@ -25,45 +25,45 @@ static int array_cmp(const array_t *a, const array_t *b) {
 }
 
 // RELATIONAL OPERAITON
-bool relational_op(xre_ast_t *node) {
-  __return_val_if_fail__(node, false);
+bool relational_op(xre_runtime_t *frame) {
+  __return_val_if_fail__(frame, false);
 
-  xre_ast_t *left = node->_binop.left;
-  xre_ast_t *right = node->_binop.right;
+  xre_runtime_t *left = frame->left;
+  xre_runtime_t *right = frame->right;
 
   if (!evaluate(left)
     || !evaluate(right)) {
     return (false);
   }
 
-  bool matching_types = left->event.type == right->event.type;
+  bool matching_types = left->state.type == right->state.type;
 
   int equality = 0;
 
   if (matching_types) {
-    if (left->event.type == STATE_NUMBER)
-      equality = value_cmp(left->event.value, right->event.value);
+    if (left->state.type == STATE_NUMBER)
+      equality = value_cmp(left->state.value, right->state.value);
     else
-      equality = array_cmp(left->event.array, right->event.array);
+      equality = array_cmp(left->state.array, right->state.array);
   }
 
-  if (node->kind == __EQ__) {
-    return (change_state_value(node, matching_types && equality == 0));
+  if (frame->kind == __EQ__) {
+    return (change_state_value(frame, matching_types && equality == 0));
 
-  } else if (node->kind == __NE__) {
-    return (change_state_value(node, !matching_types || equality != 0));
+  } else if (frame->kind == __NE__) {
+    return (change_state_value(frame, !matching_types || equality != 0));
 
   } else {
     if (matching_types) {
-      switch (node->kind) {
+      switch (frame->kind) {
       case __LT__:
-        return (change_state_value(node, equality < 0));
+        return (change_state_value(frame, equality < 0));
       case __GT__:
-        return (change_state_value(node, equality > 0));
+        return (change_state_value(frame, equality > 0));
       case __LE__:
-        return (change_state_value(node, equality <= 0));
+        return (change_state_value(frame, equality <= 0));
       case __GE__:
-        return (change_state_value(node, equality >= 0));
+        return (change_state_value(frame, equality >= 0));
       default:
         break;
       }

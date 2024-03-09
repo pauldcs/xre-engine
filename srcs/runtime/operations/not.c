@@ -2,14 +2,14 @@
 #include "xre_assert.h"
 #include "xre_parse.h"
 
-bool not_op(xre_ast_t *node) {
-  __return_val_if_fail__(node, NULL);
+bool not_op(xre_runtime_t *frame) {
+  __return_val_if_fail__(frame, NULL);
 
-  xre_ast_t *uni = node->uniop;
+  xre_runtime_t *uni = frame->left;
 
   if (!evaluate(uni)) {
     return (false);
   }
 
-  return (change_state_value(node, !is_truthy_state(uni)));
+  return (change_state_value(frame, !is_truthy_state(uni)));
 }

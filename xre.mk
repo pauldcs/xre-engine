@@ -13,8 +13,8 @@ MAIN          := srcs/__main__.c
 CFLAGS   := \
 	-Wall     \
 	-Wextra   \
-	-Werror   \
 	-pedantic \
+	-O3 \
 	-g3
 
 # export ASAN_OPTIONS="log_path=sanitizer.log"
@@ -68,8 +68,8 @@ SRCS := \
 	readline/rl_buffer.c \
 \
 	runtime/xre_runtime.c \
-	runtime/frame/block.c \
-	runtime/frame/frame.c \
+	runtime/state/runtime_stack.c \
+	runtime/state/state.c \
 	runtime/operations/arithmetic.c \
 	runtime/operations/assignment.c \
 	runtime/operations/logical.c \

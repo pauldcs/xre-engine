@@ -4,50 +4,50 @@
 #include "xre_assert.h"
 #include "xre_log.h"
 
-bool simple_assignment(xre_ast_t *node) {
-  __return_val_if_fail__(node, false);
+bool simple_assignment(xre_runtime_t *frame) {
+  __return_val_if_fail__(frame, false);
 
-  xre_ast_t *left = node->_binop.left;
-  xre_ast_t *right = node->_binop.right;
+  xre_runtime_t *left = frame->left;
+  xre_runtime_t *right = frame->right;
 
-  if (!runtime_stack_set(left->string, right->event)
-    && !runtime_stack_add(left->string, right->event)) 
+  if (!runtime_stack_set(left->initial.string, right->state)
+    && !runtime_stack_add(left->initial.string, right->state)) 
     return (false);
 
-  return (change_state_copy(node, right));
+  return (change_state_copy(frame, right));
 }
 
-bool reassignement(xre_ast_t *node) {
-  __return_val_if_fail__(node, false);
+bool reassignement(xre_runtime_t *frame) {
+  __return_val_if_fail__(frame, false);
 
-  xre_ast_t *left = node->_binop.left;
+  xre_runtime_t *left = frame->left;
 
-  if (runtime_stack_set(left->string, node->event))
-    return (node);
+  if (runtime_stack_set(left->initial.string, frame->state))
+    return (frame);
   
   return (set_error(left, XRE_RUNTIME_ERROR, XRE_UNBOUND_LOCAL_ERROR));
 }
 
-bool assignment_op(xre_ast_t *node) {
-  __return_val_if_fail__(node, NULL);
+bool assignment_op(xre_runtime_t *frame) {
+  __return_val_if_fail__(frame, NULL);
 
-  xre_ast_t *left = node->_binop.left;
-  xre_ast_t *right = node->_binop.right;
+  xre_runtime_t *left = frame->left;
+  xre_runtime_t *right = frame->right;
 
   
   if (left->kind != __IDENTIFIER__) {
-    return set_error(node, XRE_TYPE_ERROR, XRE_INVALID_ASSIGMENT_ERROR);
+    return set_error(frame, XRE_TYPE_ERROR, XRE_INVALID_ASSIGMENT_ERROR);
   }
 
   if (!evaluate(right)) {
     return (false);
   }
 
-  if (node->kind == __ASSIGN__) {
-    return (simple_assignment(node));
+  if (frame->kind == __ASSIGN__) {
+    return (simple_assignment(frame));
   }
 
-  state_t *state = runtime_stack_get(left->string);
+  state_t *state = runtime_stack_get(left->initial.string);
 
   if (!state) {
     return set_error(right, XRE_RUNTIME_ERROR, XRE_UNBOUND_LOCAL_ERROR);
@@ -59,37 +59,37 @@ bool assignment_op(xre_ast_t *node) {
 
   change_state_value(left, state->value);
 
-  switch (node->kind) {
+  switch (frame->kind) {
   case __ADD_ASSIGN__:
-    if (!add_op(node))
+    if (!add_op(frame))
       return (false);
     break;
   
   case __SUB_ASSIGN__:
-    if (!sub_op(node))
+    if (!sub_op(frame))
       return (false);
     break;
   
   case __MUL_ASSIGN__:
-    if (!mul_op(node))
+    if (!mul_op(frame))
       return (false);
     break;
   
   case __DIV_ASSIGN__:
-    if (!div_op(node))
+    if (!div_op(frame))
       return (false);
     break;
   
   case __MOD_ASSIGN__:
-    if (!mod_op(node))
+    if (!mod_op(frame))
       return (false);
     break;
   
   case __POW_ASSIGN__:
   default:
     XRE_LOGGER(warning, "Confusing condition");
-    return (set_error(node, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
+    return (set_error(frame, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
   }
 
-  return (reassignement(node));
+  return (reassignement(frame));
 }
