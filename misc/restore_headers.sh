@@ -1,2 +1,0 @@
-rm xre_stringf.h xre_xdp.h dynstr.h array.h xre_utils.h xre_log.h xre_args.h xre_fs.h xre_parse.h xre_readline.h xre_runtime.h xre_repl.h xre_errors.h
-ln -s ../srcs/core/stringf/xre_stringf.h ../srcs/core/hex/xre_xdp.h ../srcs/core/array/srcs/array.h ../srcs/core/utils/xre_utils.h ../srcs/core/log/xre_log.h ../srcs/core/args/xre_args.h ../srcs/core/fs/xre_fs.h ../srcs/parse/xre_parse.h ../srcs/readline/xre_readline.h ../srcs/runtime/xre_runtime.h ../srcs/repl/xre_repl.h ../srcs/error/xre_errors.h .
