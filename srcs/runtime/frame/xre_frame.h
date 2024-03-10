@@ -1,68 +1,87 @@
 #ifndef __XRE_FRAME_H__
-# define __XRE_FRAME_H__
+#define __XRE_FRAME_H__
 
-# include "xre_parse.h"
-# include "xre_errors.h"
-# include <sys/types.h>
+#include "xre_errors.h"
 
-extern size_t n_allocs;
-extern size_t n_arrays_allocd;
-extern size_t n_arrays_freed;
-extern size_t n_frees;
+typedef enum {
+  STATE_ARRAY,
+  STATE_NUMBER,
+  STATE_STRING,
+  STATE_UNDEFINED,
+} exp_event_e;
+
+typedef enum {
+  NONE,
+  RDONLY,
+  TRACED,
+  STRICT,
+} varmode_e;
+
+struct varmode_s {
+  varmode_e   mode;
+  const char *key;
+};
+
+typedef struct varmode_s varmode_t;
 
 typedef struct {
-  int64_t          _type;
-  t_xre_error     *_error;
-  const t_xre_ast *_src;
+  exp_event_e type;
+
   union {
-    int64_t     value;
-    array_t    *array;
+    int64_t value;
+    array_t *array;
+    char *string;
+  };
+} state_t;
+
+typedef struct xre_frame_s xre_frame_t;
+
+typedef struct xre_frame_s {
+  xre_expr_kind_t kind;
+  xre_expr_type_t type;
+  xre_token_t *token;
+  xre_frame_t *left;
+  xre_frame_t *right;
+  union {
     const char *string;
-  } _data;
-} frame_block_t;
+    int64_t value;
+  } initial;
 
+  state_t state;
+  varmode_e mode;
+} xre_frame_t;
 
-typedef struct stack_item {
-  const char   *key;
-  frame_block_t block;
+typedef struct {
+  const char *key;
+  varmode_e  mode;
+  state_t state;
 } stack_item_t;
 
-extern array_t *runtime_stack;
+xre_frame_t *state_init(xre_ast_t *ast);
+void state_deinit(xre_frame_t *frame);
+void state_free(state_t *state);
+void state_print(xre_frame_t *frame);
+bool is_true_state(xre_frame_t *frame);
+const char *state_to_str(state_t *state);
+
+extern array_t *runtime_variables;
 
 // FRAME
-bool           runtime_stack_init(void);
-void           runtime_stack_deinit(void);
-frame_block_t *runtime_stack_get(const char *key);
-frame_block_t *runtime_stack_add(const char *key, frame_block_t *block);
-frame_block_t *runtime_stack_set(const char *key, frame_block_t *block);
+bool runtime_variables_init(void);
+void runtime_variables_deinit(void);
 
-// BLOCK
-frame_block_t *error_block_alloc(t_xre_error_type type, t_xre_error_subtype subtype);
-frame_block_t *value_block_alloc(int64_t value);
-frame_block_t *true_block_alloc(void);
-frame_block_t *false_block_alloc(void);
-frame_block_t *sequence_block_alloc(array_t *array);
-frame_block_t *array_block_alloc(array_t *array);
-frame_block_t *copy_block_alloc(frame_block_t *src);
-frame_block_t *array_block_from_string_alloc(const char *string);
-frame_block_t *string_block_alloc(const char *string);
+stack_item_t *runtime_variables_get(const char *key);
+bool          runtime_variables_set(xre_frame_t *frame, const char *key, state_t state, varmode_e mode);
 
-frame_block_t *string_block_with(frame_block_t *buffer, const char *string);
-frame_block_t *error_block_with(frame_block_t *buffer, t_xre_error_type type, t_xre_error_subtype subtype);
-frame_block_t *value_block_with(frame_block_t *buffer, int64_t value);
-frame_block_t *true_block_with(frame_block_t *buffer);
-frame_block_t *false_block_with(frame_block_t *buffer);
-frame_block_t *sequence_block_with(frame_block_t *buffer, array_t *array);
-frame_block_t *array_block_with(frame_block_t *buffer, array_t *array);
-frame_block_t *string_block_with(frame_block_t *buffer, const char *string);
-bool           is_truthy_block(const frame_block_t *block);
+extern bool _has_error;
+extern t_xre_error _error;
+bool set_error(xre_frame_t *node, t_xre_error_type type,
+               t_xre_error_subtype subtype);
+bool error_occurred(void);
 
-frame_block_t* operand_with(frame_block_t *buffer, t_xre_ast *ast);
-
-// COMMON
-void frame_block_print(const frame_block_t *block);
-void frame_block_free(frame_block_t **block);
-
-void print_statistics(void);
+bool change_state_value(xre_frame_t *frame, int64_t value);
+bool change_state_array(xre_frame_t *frame, array_t *array);
+bool change_state_string(xre_frame_t *frame, char *string);
+bool change_state_copy(xre_frame_t *this, xre_frame_t *that);
 
 #endif /* __XRE_FRAME_H__ */

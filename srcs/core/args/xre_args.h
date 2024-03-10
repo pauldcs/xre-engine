@@ -21,15 +21,14 @@ typedef struct {
 
 typedef enum {
     FLAGS_DEBUG      = 1 << 1,
-    MINIMAL_ERRORS   = 1 << 2,
+    SHOW_ERRORS      = 1 << 2,
 		SHOW_EXPR_RESULT = 1 << 3,
-		SHOW_STATISTICS  = 1 << 4,
 }   t_flags;
 
 typedef struct {
 	t_flags   flags;
 	uint32_t  argument_a;
-	char 	   *argument_b;
+	char 	   *code;
 }	t_xre_args;
 
 extern t_xre_args   __xre_args__;

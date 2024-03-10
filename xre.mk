@@ -6,8 +6,8 @@ OBJS_DIR      := .objs
 BUILD_DIR     := build
 INCS_DIR      := incs
 TEST_MAIN     := srcs/tests/__main__.c
-LIBCONT_DIR   := srcs/core/array
-LIBCONT_NAME  := libcont.dylib
+LIBARRAY_DIR   := srcs/core/array
+LIBARRAY_NAME  := libarray.a
 MAIN          := srcs/__main__.c
 
 CFLAGS   := \
@@ -68,16 +68,20 @@ SRCS := \
 	readline/rl_buffer.c \
 \
 	runtime/xre_runtime.c \
-	runtime/frame/block.c \
-	runtime/frame/frame.c \
-	runtime/operations/arithmetic.c \
-	runtime/operations/assignment.c \
-	runtime/operations/logical.c \
-	runtime/operations/bitwise.c \
-	runtime/operations/loop.c \
-	runtime/operations/not.c \
-	runtime/operations/relational.c \
-	runtime/operations/sequence.c \
-	runtime/operations/inject.c \
+	runtime/frame/variables.c \
+	runtime/frame/xre_frame.c \
+	runtime/operations/operators/arithmetic.c \
+	runtime/operations/operators/assignment.c \
+	runtime/operations/operators/logical.c \
+	runtime/operations/operators/bitwise.c \
+	runtime/operations/operators/loop.c \
+	runtime/operations/operators/not.c \
+	runtime/operations/operators/relational.c \
+	runtime/operations/operators/sequence.c \
+	runtime/operations/operators/inject/xre_inject.c \
+	runtime/operations/operators/inject/write.c \
+	runtime/operations/operators/annotate.c \
 \
-	runtime/operands/operands.c 
+	runtime/operations/operands/arrays.c \
+	runtime/operations/operands/basic.c \
+	runtime/operations/operands/identifier.c 

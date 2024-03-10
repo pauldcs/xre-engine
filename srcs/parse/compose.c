@@ -2,15 +2,15 @@
 #include "xre_args.h"
 #include "xre_assert.h"
 
-t_xre_ast
+xre_ast_t
 *xre_ast_compose(const char *expr) {
   __return_val_if_fail__(expr, NULL);
 
   array_t *tokens = NULL;
-  t_xre_ast *ast = NULL;
+  xre_ast_t *ast = NULL;
 
   tokens = array_create(
-    sizeof(t_xre_token),
+    sizeof(xre_token_t),
     16,
     NULL
   );

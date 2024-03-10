@@ -2,23 +2,23 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-static void	inner(t_xre_ast *ast, size_t depth);
+static void	inner(xre_ast_t *ast, size_t depth);
 
 static void
-put_binop (t_xre_ast *ast, size_t depth) {
+put_binop (xre_ast_t *ast, size_t depth) {
 
-	inner(ast->binop.left, depth + 1);
-	inner(ast->binop.right, depth + 1);
+	inner(ast->_binop.left, depth + 1);
+	inner(ast->_binop.right, depth + 1);
 }
 
 static void
-put_uniop (t_xre_ast *ast, size_t depth) {
+put_uniop (xre_ast_t *ast, size_t depth) {
 
 	inner(ast->uniop, depth + 1);
 }
 
 static void
-inner (t_xre_ast *ast, size_t depth) {
+inner (xre_ast_t *ast, size_t depth) {
 	size_t	i;
 
 	i = 0;
@@ -45,39 +45,42 @@ inner (t_xre_ast *ast, size_t depth) {
 	  printf("[%s]\n", expr_kind_to_string(ast->kind));
   }
 
-	if (ast->token._type & (EXPR_OP_TYPE_BINOP | EXPR_TYPE_CONDITION | EXPR_TYPE_LOOP |EXPR_TYPE_SEQUENCE))
+	if (ast->token._type & (EXPR_OP_TYPE_BINOP))
 		put_binop(ast, depth);
 	else if (ast->token._type & EXPR_OP_TYPE_UNIOP)
 		put_uniop(ast, depth);
 }
 
 void
-ast_show (t_xre_ast *ast) {
+ast_show (xre_ast_t *ast) {
 	inner(ast, 0);
 }
 
 void
-ast_free(t_xre_ast *ast) {
-    if (ast->token._type
-        & (EXPR_OP_TYPE_BINOP
-            | EXPR_TYPE_CONDITION
-            | EXPR_TYPE_LOOP
-            | EXPR_TYPE_SEQUENCE
-        )) {
-		ast_free(ast->binop.left);
-        ast_free(ast->binop.right);
-    } else if (ast->token._type & EXPR_OP_TYPE_UNIOP) {
-		ast_free(ast->binop.left);
-    } else if (ast->token._kind == __IDENTIFIER__
-            || ast->token._kind == __STRING_LITERAL__
-            || ast->token._kind == __SEPARATOR__) {
-        free((void *)ast->string);
-    }
-    free(ast);
+ast_free(xre_ast_t *ast) {
+
+    // if (!ast)
+    //     return ;
+    // switch(ast->kind) {
+    //     case __STRING_LITERAL__:
+    //     case __IDENTIFIER__:
+    //         free((void *)ast->string);
+    //         break;
+
+    //     case __NOT__:
+    //         ast_free(ast->uniop);
+    //         break;
+        
+    //     default:
+    //         ast_free(ast->_binop.left);
+    //         ast_free(ast->_binop.right);          
+    // }
+    // free(ast);
+    (void)ast;
 }
 
 const char *
-expr_kind_to_string(t_xre_expr_kind kind) {
+expr_kind_to_string(xre_expr_kind_t kind) {
     switch (kind) {
     case __START__:            return "start";
     case __END__:              return "end";
@@ -99,10 +102,6 @@ expr_kind_to_string(t_xre_expr_kind kind) {
     case __MUL_ASSIGN__:       return "assign mul";
     case __MOD_ASSIGN__:       return "assign mod";
     case __POW_ASSIGN__:       return "assign pow";
-    case __OR_ASSIGN__:        return "assign or";
-    case __AND_ASSIGN__:       return "assign and";
-    case __LSHIFT_ASSIGN__:    return "lshift assign";
-    case __RSHIFT_ASSIGN__:    return "rshift assign";
     case __LT__:               return "less than";
     case __GT__:               return "greater than";
     case __LE__:               return "less or eaqual";
@@ -129,13 +128,13 @@ expr_kind_to_string(t_xre_expr_kind kind) {
     return "????????";
 }
 
-t_xre_expr_type
-expr_type_by_kind(t_xre_expr_kind kind) {
+xre_expr_type_t
+expr_type_by_kind(xre_expr_kind_t kind) {
     switch (kind) {
         case __VAL__:              
         case __STRING_LITERAL__:   
         case __IDENTIFIER__:       
-            return (EXPR_TYPE_OPERAND);
+            return (EXPR_TYPE_VALUE);
 
         case __ADD__:              
         case __SUB__:              
@@ -150,11 +149,7 @@ expr_type_by_kind(t_xre_expr_kind kind) {
         case __DIV_ASSIGN__:       
         case __MUL_ASSIGN__:       
         case __MOD_ASSIGN__:       
-        case __POW_ASSIGN__:       
-        case __OR_ASSIGN__:        
-        case __AND_ASSIGN__:       
-        case __LSHIFT_ASSIGN__:    
-        case __RSHIFT_ASSIGN__:         
+        case __POW_ASSIGN__:              
         case __LT__:               
         case __GT__:               
         case __LE__:               
@@ -167,25 +162,16 @@ expr_type_by_kind(t_xre_expr_kind kind) {
         case __NE__:                         
         case __ANNOTATE__:         
         case __SCOPE_RESOLUTION__:
-            return (EXPR_OP_TYPE_BINOP);
-        
         case __SEPARATOR__:
-            return (EXPR_TYPE_SEPARATOR);
-        
         case __SEQUENCE_POINT__:
-            return (EXPR_TYPE_SEQUENCE); 
-
         case __INJECT__:
-            return (EXPR_TYPE_INJECT); 
-
         case __LOOP__:             
-            return (EXPR_TYPE_LOOP);
-        
         case __DO__:             
         case __ELSE__:             
         case __AND__:              
         case __OR__:               
-            return (EXPR_TYPE_CONDITION);
+        
+            return (EXPR_OP_TYPE_BINOP);
         
         case __NOT__:
             return (EXPR_OP_TYPE_UNIOP);

@@ -8,7 +8,7 @@
 
 t_xre_error __lexer_err_report__;
 
-t_xre_token _token;
+xre_token_t _token;
 size_t _line;
 size_t _cols;
 char *_token_ptr;
@@ -174,9 +174,12 @@ not_a_constant_value:
         case ';': _token._kind = __SEPARATOR__; tf = 1;
         
         break;
+        case '$': _token._kind = __INJECT__; tf = 1;
+        
+        break;
         case ':':
           if   (*(ptr + 1) == ':')
-            { _token._kind = __SCOPE_RESOLUTION__; tf = 2; }
+            { _token._kind = __INJECT__; tf = 2; }
           else 
             { _token._kind = __ANNOTATE__; tf = 1; }
         
@@ -233,8 +236,6 @@ not_a_constant_value:
         case '<':
           if      (*(ptr + 1) == '<') 
             { _token._kind = __LSHIFT__; tf = 2; }
-          else if (*(ptr + 1) == '-')
-            { _token._kind = __INJECT__; tf = 2; }
           else if (*(ptr + 1) == '=')
             { _token._kind = __LE__; tf = 2; }
           else 

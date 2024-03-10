@@ -1,6 +1,5 @@
 #include "xre_args.h"
 #include "xre_repl.h"
-#include "xre_log.h"
 #include "xre_core.h"
 #include "xre_alloc.h"
 #include "xre_fs.h"
@@ -9,21 +8,13 @@
 #include "xre_readline.h"
 #include "xre_log.h"
 #include "xre_parse.h"
-#include <assert.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <sys/mman.h>
-#include <errno.h>
 
 t_xre_state  __xre_state__ = {
 	.title = "xre",
 	.version = "0.5",
 };
-
-// void free_ast(t_xre_ast *ast) {
-// 	if (ast->kind)
-// 	free_ast()
-// }
 
 static bool
 init_source_file(t_xre_args *args, const char *path) {	
@@ -94,15 +85,20 @@ club:
 		return (false);
 	}
 
-	t_xre_ast *ast = xre_ast_compose(buffer);
-	if (!xre_runtime(ast)) {
+	xre_ast_t *ast = xre_ast_compose(buffer);
+	if (!ast) {
 		free(buffer);
-		ast_free(ast);
 		return (false);
 	}
 
-	ast_free(ast);
+	if (!xre_runtime(ast)) {
+		ast_free(ast);
+		free(buffer);
+		return (false);
+	}
+
 	free(buffer);
+	ast_free(ast);
  	return (true);
 }
 
@@ -133,9 +129,20 @@ main(int ac, char *av[]) {
 				return (free(args), false);
 			}
 		} else {
-	
-			if (!xre_repl_entrypoint()) {
-				return (free(args), false);
+			if (args->code) {
+					xre_ast_t *ast = xre_ast_compose(args->code);
+					if (!ast) {
+						return (free(args), false);
+					}
+					if (!xre_runtime(ast)) {
+						ast_free(ast);
+						return (free(args), false);
+					}
+					return (true);
+			} else {
+				if (!xre_repl_entrypoint()) {
+					return (free(args), false);
+				}
 			}
 		}
 

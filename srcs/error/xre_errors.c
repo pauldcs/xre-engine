@@ -8,6 +8,7 @@ const char *err_type_to_string(t_xre_error_type type) {
         case XRE_LOOKUP_ERROR:      return "Lookup Error";
         case XRE_INTERNAL_ERROR:    return "Internal Error";
         case XRE_INDENTIFIER_ERROR: return "Unknown Identifier Error";
+        case XRE_ACCESS_VIOLATION:  return "Access Error";
         case XRE_EXIT_ERROR:        return "Exit Error";
         case XRE_OS_ERROR:          return "OS Error";
         case XRE_RUNTIME_ERROR:     return "Runtime error";
@@ -21,11 +22,18 @@ const char *err_type_to_string(t_xre_error_type type) {
 const char *err_subtype_to_string(t_xre_error_subtype type) {
     switch (type) {
         case XRE_MODULE_NOT_FOUND_ERROR:  return "The required module was not found";
+        case XRE_ALREADY_ANNOTATED_ERROR: return "Already annotated";
         case XRE_INVALID_MODULE_ERROR:    return "The required module is invalid";
         case XRE_CONFUSING_CONDITION:     return "A confusing internal condition happended";
         case XRE_ASSERTION_ERROR:         return "Failed an assertion check in the code";
+        case XRE_MODE_WRITE_ON_STRICT: return "Attempt to write on a protected variable";
+        case XRE_WRITE_ON_READONLY:    return "Attempt to write on a readonly variable";
+        case XRE_INVALID_ANNOTATION_ERROR: return "Attempt to annotate a variable with an invalid type";
+        case XRE_UNKNOWN_ANNOTATION_ERROR: return "Unknown annotation";
         case XRE_TYPE_MISSMATCH_ERROR:    return "Missmatching type";
         case XRE_EXIT_CALLED_ERROR:       return "Exit called";
+        case XRE_INVALID_SCOPE_RESOLUTION: return "Invalid scope resolution";
+        case XRE_UNKNOWN_COMMAND_ERROR:    return "Unknown command";
         case XRE_NEGATIVE_SHIFT_ERROR:    return "Shift value cannot be negative";
         case XRE_EXCEEDS_SHIFT_LIMIT_ERROR: return "Exceeds the maximum shift count";
         case XRE_INVALID_TYPE_FOR_OPERAND: return "Operator unsupported for this type";

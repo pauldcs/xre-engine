@@ -13,13 +13,13 @@ t_xre_args __xre_args__;
 void __attribute__((noreturn)) usage(void) {
 	(void)fprintf(stderr,
 		"XRE Interpreter v%s\n"
-		"usage: %s [-hdrsm] [INFILES] ...\n\n"
+		"usage: %s [-resdh] [-x [CODE]] [INFILES] ...\n\n"
 		"options:\n"
-		"    -h  show this help message\n"
-		"    -r  print command results\n"
-		"    -s  print command statistics\n"
-		"    -m  minimal error messages\n"
-		"    -d  enable ast debug mode\n\n",
+		"    -x   [CODE]   Execute code from command line\n"
+		"    -r            Print command results\n"
+		"    -e            Show good error messages\n"
+		"    -d            Enable ast debug mode\n"
+		"    -h            Show this help message\n\n",
 
 	__xre_state__.version,
 	__xre_state__.title
@@ -105,7 +105,7 @@ static int xre_getopts_next(t_xre_getopts *opts) {
                 "illegal option -- %c\n", *(ptr + 1)
             );
             ++opts->av;
-			--opts->ac;
+						--opts->ac;
             return ((int)'?');
         }
 
@@ -117,7 +117,7 @@ static int xre_getopts_next(t_xre_getopts *opts) {
                     stderr,
                     "option requires an argument -- %c\n", ret
                 );
-				opts->fail = true;
+								opts->fail = true;
                 return (-1);
             }
         }
@@ -151,18 +151,6 @@ static bool string_parse(const char *expr, char **dest) {
     return (true);
 }
 
-// void xmo_arguments_print(t_xre_args *args) {
-// 	fprintf(stdout, "t_cl_arguments: {\n");
-// 	fprintf(stdout, "t_cl_arguments:    .argument_a=%u\n", args->argument_a);
-// 	fprintf(stdout, "t_cl_arguments:    .argument_b=%s\n", args->argument_b);
-// 	switch(args->flags)
-// 	{
-// 		case OPTION_A:   fprintf(stdout, "t_cl_arguments:         .flags=OPTION_A\n"); break;
-// 		case OPTION_B:   fprintf(stdout, "t_cl_arguments:         .flags=OPTION_B\n"); break;
-// 	}
-// 	fprintf(stdout, "t_cl_arguments: }\n");
-// }
-
 t_xre_args *xre_args_parse(int ac, char *av[]) {
 	t_xre_args     *args = xmalloc(sizeof(t_xre_args));
 	t_xre_getopts  xopts;
@@ -172,15 +160,14 @@ t_xre_args *xre_args_parse(int ac, char *av[]) {
 		return (NULL);
 		
 	bzero(args, sizeof(t_xre_args));
-	xre_getopts_init(&xopts, ac, (const char **)av, "drsmh");
+	xre_getopts_init(&xopts, ac, (const char **)av, "drhex:");
 
 	while ((c = xre_getopts_next(&xopts)) != (char)-1)
 	{
 		switch (c) {
 			case 'd': args->flags |= FLAGS_DEBUG; break;	
-			case 'm': args->flags |= MINIMAL_ERRORS; break;
+			case 'e': args->flags |= SHOW_ERRORS; break;
 			case 'r': args->flags |= SHOW_EXPR_RESULT; break;
-			case 's': args->flags |= SHOW_STATISTICS; break;
 			case 'v':
 				if (!uint32_parse(xopts.arg, &args->argument_a))
 					return (
@@ -188,8 +175,8 @@ t_xre_args *xre_args_parse(int ac, char *av[]) {
 						NULL);
 			
 			break;
-			case 'B':
-				if (!string_parse(xopts.arg, &args->argument_b))
+			case 'x':
+				if (!string_parse(xopts.arg, &args->code))
 					return (
 						free(args),
 						NULL);
@@ -217,7 +204,6 @@ t_xre_args *xre_args_parse(int ac, char *av[]) {
 			}
 		}
 	if (xopts.fail) {
-		fprintf(stderr, "Invalid arguments");
 		return (
 			free(args),
 			NULL);
