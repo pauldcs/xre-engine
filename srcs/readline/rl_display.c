@@ -1,4 +1,5 @@
 #include "xre_readline.h"
+#include "xre_core.h"
 #include "array.h"
 #include "xre_stringf.h"
 #include <stdbool.h>
@@ -16,7 +17,7 @@ rl_display_status(const char *mode) {
 
   (void)mode;
   slcpyf(screen, config.screencols - 1,
-    " xre-engine - v0.5 ..."
+    " xre-engine ~ v%s ... ", __xre_state__.version
   );              
   fputstr(1, "%s%s%s", "\033[0;93m", screen, "\033[0m");
   rl_move_cursor_to(__state__._pt.x, __state__._pt.y);

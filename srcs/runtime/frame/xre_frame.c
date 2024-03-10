@@ -47,7 +47,7 @@ void state_free(state_t *state) {
     break;
 
   case STATE_ARRAY:
-    array_kill(state->array);
+    //array_kill(state->array);
     break;
 
   default:
@@ -128,6 +128,23 @@ bool is_true_state(xre_frame_t *frame) {
 
   XRE_LOGGER(error, "Unrecognized block type");
   return (set_error(frame, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
+}
+
+const char *state_to_str(state_t *state) {
+
+  if (state->type == STATE_NUMBER) {
+    return ("number");
+  }
+
+  if (state->type == STATE_ARRAY) {
+    return ("array");
+  }
+
+  if (state->type == STATE_STRING) {
+    return ("array");
+  }
+
+  return ("unknown");
 }
 
 static void state_print_one(state_t state) {

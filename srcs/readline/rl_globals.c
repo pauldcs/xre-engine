@@ -1,16 +1,6 @@
 #include "xre_readline.h"
 #include "array.h"
 
-// t_xre_rl_allocator __rl_array__ = {
-//     .init   = (void *(*)(size_t, size_t, void (*)(void *)))    array_create,
-//     .access = (void *(*)(void *, size_t))                      array_access,
-//     .size   = (size_t (*)(void *))                             array_size,
-//     .wipe   = (void  (*)(void *, size_t, size_t))              array_wipe,
-//     .append = (bool  (*)(void *, const void *, size_t))        array_append,
-//     .inject = (bool  (*)(void *, off_t, const void *, size_t)) array_inject,
-//     .kill   = (void  (*)(void *))                              array_kill
-// };
-
 void *__screen__ = NULL;
 
 bool __terminal_in_raw_mode__ = false;

@@ -31,62 +31,46 @@
 #define RDONLY_PTR_TYPE(__p) const PTR_TYPE(__p)
 #define NONE_TYPE(__x) void __x
 
-#define cut8_t const uint8_t
-#define ct8_t const char
-#define ut64_t uint64_t
-#define st64_t int64_t
-#define ut32_t uint32_t
-#define st32_t int32_t
-#define ut16_t uint16_t
-#define st16_t int16_t
-#define ut8_t uint8_t
-#define st8_t int8_t
-#define ptr_t void *
-#define diff_t size_t
-#define cstr_t const char *
-#define custr_t const unsigned char *
-#define str_t char *
-
 typedef struct {
-  st8_t _v;
+  int8_t _v;
 } x_st8_t;
 
 typedef struct {
-  st16_t _v;
+  int8_t _v;
 } x_st16_t;
 
 typedef struct {
-  st32_t _v;
+  int8_t _v;
 } x_st32_t;
 
 typedef struct {
-  st64_t _v;
+  int64_t _v;
 } x_st64_t;
 
 typedef struct {
-  ut8_t _v;
+  uint8_t _v;
 } x_ut8_t;
 
 typedef struct {
-  ut16_t _v;
+  uint16_t _v;
 } x_ut16_t;
 
 typedef struct {
-  ut32_t _v;
+  uint32_t _v;
 } x_ut32_t;
 
 typedef struct {
-  ut64_t _v;
+  uint64_t _v;
 } x_ut64_t;
 
 typedef struct {
-  cstr_t _ptr;
+  const char *_ptr;
   size_t _size;
 } x_str_t;
 
 typedef struct {
-  st32_t _val;
-  st32_t _point;
+  int32_t _val;
+  int32_t _point;
 } x_fixed_t;
 
 #define __PTRIZE_ST8__(x)                                                      \

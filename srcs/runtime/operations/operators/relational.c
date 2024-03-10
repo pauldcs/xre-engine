@@ -32,6 +32,8 @@ bool relational_op(xre_frame_t *frame) {
   xre_frame_t *right = frame->right;
 
   if (!evaluate(left) || !evaluate(right)) {
+
+    log_error_return;
     return (false);
   }
 
@@ -67,9 +69,11 @@ bool relational_op(xre_frame_t *frame) {
         break;
       }
     }
+  
+    log_error_condition_reached;
     return (set_error(right, XRE_TYPE_ERROR, XRE_TYPE_MISSMATCH_ERROR));
   }
 
-  XRE_LOGGER(error, "Unrecognized comparison");
+  log_error_condition_reached;
   return (set_error(right, XRE_INTERNAL_ERROR, XRE_NOT_IMPLEMENTED_ERROR));
 }

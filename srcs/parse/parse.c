@@ -130,10 +130,6 @@ get_expr_precedence (xre_expr_kind_t kind) {
 	  case __MOD_ASSIGN__:
 	  case __POW_ASSIGN__:
 	  case __MUL_ASSIGN__:
-    case __LSHIFT_ASSIGN__:
-    case __RSHIFT_ASSIGN__:
-    case __OR_ASSIGN__:
-    case __AND_ASSIGN__:
       return (-14);
     
     case __LOOP__:

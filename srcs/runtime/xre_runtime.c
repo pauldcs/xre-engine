@@ -31,10 +31,6 @@ bool binop_exec(xre_frame_t *frame) {
   case __MOD_ASSIGN__:
   case __POW_ASSIGN__:
   case __MUL_ASSIGN__:
-  case __LSHIFT_ASSIGN__:
-  case __RSHIFT_ASSIGN__:
-  case __OR_ASSIGN__:
-  case __AND_ASSIGN__:
     return (assignment_op(frame));
 
   case __ADD__:
@@ -59,7 +55,10 @@ bool binop_exec(xre_frame_t *frame) {
   case __LSHIFT__:
   case __RSHIFT__:
     return (bitwise_op(frame));
-
+  
+  case __ANNOTATE__:
+    return (annotation_op(frame));
+    
   case __LOOP__:
     return (loop_op(frame));
 
@@ -82,6 +81,7 @@ bool binop_exec(xre_frame_t *frame) {
     break;
   }
 
+  log_error_condition_reached;
   return (set_error(frame, XRE_INTERNAL_ERROR, XRE_NOT_IMPLEMENTED_ERROR));
 }
 
@@ -93,6 +93,7 @@ bool uniop_exec(xre_frame_t *frame) {
     return (not_op(frame));
 
   default:
+    log_error_condition_reached;
     return (set_error(frame, XRE_INTERNAL_ERROR, XRE_NOT_IMPLEMENTED_ERROR));
   }
 }
@@ -100,7 +101,18 @@ bool uniop_exec(xre_frame_t *frame) {
 bool operand_exec(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
-  return (operand(frame));
+  switch (frame->kind) {
+    case __IDENTIFIER__:
+      return (identifier_operand(frame));
+    
+    case __VAL__: 
+    case __STRING_LITERAL__:
+      return (basic_operand(frame));
+  
+  default:
+    log_error_condition_reached;
+    return (set_error(frame, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
+  }
 }
 
 bool evaluate(xre_frame_t *frame) {
@@ -118,7 +130,7 @@ bool evaluate(xre_frame_t *frame) {
 
   case EXPR_TYPE_OTHER:
   default:
-    XRE_LOGGER(warning, "Confusing condition");
+    log_error_condition_reached;
     return (set_error(frame, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
   }
 }
@@ -129,14 +141,17 @@ bool xre_runtime(xre_ast_t *ast) {
   xre_frame_t *frame = state_init(ast);
 
   if (!runtime_variables_init()) {
-    return (false);
+    return (state_deinit(frame), false);
   }
 
   if (!evaluate(frame)) {
+    
+    log_error_return;
     if (error_occurred()) {
       xre_error(&_error, _error.src);
       return (state_deinit(frame), false);
     }
+  
     XRE_LOGGER(error, "Failed without error message");
     return (state_deinit(frame), false);
   }

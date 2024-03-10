@@ -10,8 +10,23 @@ typedef enum {
   STATE_UNDEFINED,
 } exp_event_e;
 
+typedef enum {
+  NONE,
+  RDONLY,
+  TRACED,
+  STRICT,
+} varmode_e;
+
+struct varmode_s {
+  varmode_e   mode;
+  const char *key;
+};
+
+typedef struct varmode_s varmode_t;
+
 typedef struct {
   exp_event_e type;
+
   union {
     int64_t value;
     array_t *array;
@@ -33,10 +48,12 @@ typedef struct xre_frame_s {
   } initial;
 
   state_t state;
+  varmode_e mode;
 } xre_frame_t;
 
 typedef struct {
   const char *key;
+  varmode_e  mode;
   state_t state;
 } stack_item_t;
 
@@ -45,6 +62,7 @@ void state_deinit(xre_frame_t *frame);
 void state_free(state_t *state);
 void state_print(xre_frame_t *frame);
 bool is_true_state(xre_frame_t *frame);
+const char *state_to_str(state_t *state);
 
 extern array_t *runtime_variables;
 
@@ -52,9 +70,8 @@ extern array_t *runtime_variables;
 bool runtime_variables_init(void);
 void runtime_variables_deinit(void);
 
-state_t *runtime_variables_get(const char *key);
-bool runtime_variables_add(const char *key, state_t state);
-bool runtime_variables_set(const char *key, state_t state);
+stack_item_t *runtime_variables_get(const char *key);
+bool          runtime_variables_set(xre_frame_t *frame, const char *key, state_t state, varmode_e mode);
 
 extern bool _has_error;
 extern t_xre_error _error;

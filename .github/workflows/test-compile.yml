@@ -49,10 +49,10 @@ jobs:
         run: make
 
       - name: Run tester.sh
-        working-directory: tester
+        working-directory: __tests__/tester
         run: >
           chmod +x run
-          && mv ../xre .
+          && mv ../../xre .
           && chmod +x xre
           && ./run
 
@@ -74,10 +74,10 @@ jobs:
         run: make g
 
       - name: Run tester.sh
-        working-directory: tester
+        working-directory: __tests__/tester
         run: >
           chmod +x run
-          && mv ../xre .
+          && mv ../../xre .
           && chmod +x xre
           && ./run
 
@@ -120,4 +120,4 @@ jobs:
             --show-leak-kinds=all \
             --track-fds=yes       \
             --error-exitcode=1    \
-            ./xre ./tester/infiles/programs/prime_numbers.in
+            ./xre ./__tests__/tester/infiles/programs/prime_numbers.in
