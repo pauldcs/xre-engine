@@ -14,6 +14,7 @@ bool sequence_op(xre_frame_t *frame);
 bool inject_op(xre_frame_t *frame);
 bool separator_op(xre_frame_t *frame);
 bool annotation_op(xre_frame_t *frame);
+bool scope_resolution_op(xre_frame_t *frame);
 
 bool add_op(xre_frame_t *frame);
 bool sub_op(xre_frame_t *frame);

@@ -78,7 +78,8 @@ SRCS := \
 	runtime/operations/operators/not.c \
 	runtime/operations/operators/relational.c \
 	runtime/operations/operators/sequence.c \
-	runtime/operations/operators/inject.c \
+	runtime/operations/operators/inject/xre_inject.c \
+	runtime/operations/operators/inject/write.c \
 	runtime/operations/operators/annotate.c \
 \
 	runtime/operations/operands/arrays.c \

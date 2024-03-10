@@ -47,7 +47,7 @@ void state_free(state_t *state) {
     break;
 
   case STATE_ARRAY:
-    array_kill(state->array);
+    //array_kill(state->array);
     break;
 
   default:

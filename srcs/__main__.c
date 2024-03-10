@@ -92,11 +92,13 @@ club:
 	}
 
 	if (!xre_runtime(ast)) {
+		ast_free(ast);
 		free(buffer);
 		return (false);
 	}
 
 	free(buffer);
+	ast_free(ast);
  	return (true);
 }
 

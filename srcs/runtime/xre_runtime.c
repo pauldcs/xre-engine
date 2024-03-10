@@ -58,7 +58,7 @@ bool binop_exec(xre_frame_t *frame) {
   
   case __ANNOTATE__:
     return (annotation_op(frame));
-
+    
   case __LOOP__:
     return (loop_op(frame));
 
@@ -141,7 +141,7 @@ bool xre_runtime(xre_ast_t *ast) {
   xre_frame_t *frame = state_init(ast);
 
   if (!runtime_variables_init()) {
-    return (false);
+    return (state_deinit(frame), false);
   }
 
   if (!evaluate(frame)) {

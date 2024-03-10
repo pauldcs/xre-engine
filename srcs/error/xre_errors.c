@@ -32,6 +32,8 @@ const char *err_subtype_to_string(t_xre_error_subtype type) {
         case XRE_UNKNOWN_ANNOTATION_ERROR: return "Unknown annotation";
         case XRE_TYPE_MISSMATCH_ERROR:    return "Missmatching type";
         case XRE_EXIT_CALLED_ERROR:       return "Exit called";
+        case XRE_INVALID_SCOPE_RESOLUTION: return "Invalid scope resolution";
+        case XRE_UNKNOWN_COMMAND_ERROR:    return "Unknown command";
         case XRE_NEGATIVE_SHIFT_ERROR:    return "Shift value cannot be negative";
         case XRE_EXCEEDS_SHIFT_LIMIT_ERROR: return "Exceeds the maximum shift count";
         case XRE_INVALID_TYPE_FOR_OPERAND: return "Operator unsupported for this type";
