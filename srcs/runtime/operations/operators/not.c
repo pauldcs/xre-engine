@@ -8,6 +8,8 @@ bool not_op(xre_frame_t *frame) {
   xre_frame_t *uni = frame->left;
 
   if (!evaluate(uni)) {
+
+    log_error_return;
     return (false);
   }
 

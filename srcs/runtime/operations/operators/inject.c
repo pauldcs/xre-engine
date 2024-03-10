@@ -9,10 +9,14 @@ bool inject_op(xre_frame_t *frame) {
   xre_frame_t *right = frame->right;
 
   if (left->kind != __IDENTIFIER__) {
+  
+    log_error_condition_reached;
     return set_error(frame, XRE_TYPE_ERROR, XRE_INVALID_ASSIGMENT_ERROR);
   }
 
   if (!evaluate(right)) {
+
+    log_error_return;
     return (false);
   }
 

@@ -1,1 +1,4 @@
+ 15:07:23 [[0;33mdebug[0m] (srcs/runtime/operations/operators/assignment.c: assignment_op: 60): error state reached
+ 15:07:23 [[0;33mdebug[0m] (srcs/runtime/operations/operators/sequence.c: separator_op: 40): error returned
+ 15:07:23 [[0;33mdebug[0m] (srcs/runtime/xre_runtime.c: xre_runtime: 149): error returned
 error: Type Error: 2 + a = 1: Invalid assignement

@@ -120,4 +120,4 @@ jobs:
             --show-leak-kinds=all \
             --track-fds=yes       \
             --error-exitcode=1    \
-            ./xre ./tester/infiles/programs/prime_numbers.in
+            ./xre ./__tests__/tester/infiles/programs/prime_numbers.in

@@ -68,7 +68,7 @@ SRCS := \
 	readline/rl_buffer.c \
 \
 	runtime/xre_runtime.c \
-	runtime/frame/runtime_variables.c \
+	runtime/frame/variables.c \
 	runtime/frame/xre_frame.c \
 	runtime/operations/operators/arithmetic.c \
 	runtime/operations/operators/assignment.c \
@@ -79,5 +79,8 @@ SRCS := \
 	runtime/operations/operators/relational.c \
 	runtime/operations/operators/sequence.c \
 	runtime/operations/operators/inject.c \
+	runtime/operations/operators/annotate.c \
 \
-	runtime/operations/operands/operands.c 
+	runtime/operations/operands/arrays.c \
+	runtime/operations/operands/basic.c \
+	runtime/operations/operands/identifier.c 

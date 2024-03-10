@@ -11,6 +11,8 @@ bool sequence_op(xre_frame_t *frame) {
   array_t *array = NULL;
 
   if (!evaluate(left) || !evaluate(right)) {
+
+    log_error_return;
     return (false);
   }
 
@@ -34,6 +36,8 @@ bool separator_op(xre_frame_t *frame) {
   xre_frame_t *right = frame->right;
 
   if (!evaluate(left) || !evaluate(right)) {
+
+    log_error_return;
     return (false);
   }
 

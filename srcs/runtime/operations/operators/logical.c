@@ -11,11 +11,15 @@ bool do_op(xre_frame_t *frame) {
   xre_frame_t *right = frame->right;
 
   if (!evaluate(left)) {
+
+    log_error_return;
     return (false);
   }
 
   if (is_true_state(left)) {
     if (!evaluate(right)) {
+
+      log_error_return;
       return (false);
     }
     return (change_state_copy(frame, right));
@@ -31,11 +35,15 @@ bool else_op(xre_frame_t *frame) {
   xre_frame_t *right = frame->right;
 
   if (!evaluate(left)) {
+
+    log_error_return;
     return (false);
   }
 
   if (!is_true_state(left)) {
     if (!evaluate(right)) {
+
+      log_error_return;
       return (false);
     }
     return (change_state_copy(frame, right));
@@ -51,11 +59,15 @@ bool and_op(xre_frame_t *frame) {
   xre_frame_t *right = frame->right;
 
   if (!evaluate(left)) {
+
+    log_error_return;
     return (false);
   }
 
   if (is_true_state(left)) {
     if (!evaluate(right)) {
+
+      log_error_return;
       return (false);
     }
   }
@@ -69,14 +81,19 @@ bool or_op(xre_frame_t *frame) {
   xre_frame_t *left = frame->left;
   xre_frame_t *right = frame->right;
 
-  if (!evaluate(left))
+  if (!evaluate(left)) {
+
+    log_error_return;
     return (false);
+  }
 
   if (is_true_state(left)) {
     return (change_state_value(frame, true));
   }
 
   if (!evaluate(right)) {
+
+    log_error_return;
     return (false);
   }
 
@@ -103,6 +120,6 @@ bool logical_op(xre_frame_t *frame) {
     break;
   }
 
-  XRE_LOGGER(warning, "Confusing condition");
+  log_error_condition_reached;
   return (set_error(frame, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
 }

@@ -59,21 +59,24 @@ ast_show (xre_ast_t *ast) {
 void
 ast_free(xre_ast_t *ast) {
 
-    switch(ast->kind) {
-        case __STRING_LITERAL__:
-        case __IDENTIFIER__:
-            free((void *)ast->string);
-            break;
+    // if (!ast)
+    //     return ;
+    // switch(ast->kind) {
+    //     case __STRING_LITERAL__:
+    //     case __IDENTIFIER__:
+    //         free((void *)ast->string);
+    //         break;
 
-        case __NOT__:
-            ast_free(ast->uniop);
-            break;
+    //     case __NOT__:
+    //         ast_free(ast->uniop);
+    //         break;
         
-        default:
-            ast_free(ast->_binop.left);
-            ast_free(ast->_binop.right);          
-    }
-    free(ast);
+    //     default:
+    //         ast_free(ast->_binop.left);
+    //         ast_free(ast->_binop.right);          
+    // }
+    // free(ast);
+    (void)ast;
 }
 
 const char *
@@ -99,10 +102,6 @@ expr_kind_to_string(xre_expr_kind_t kind) {
     case __MUL_ASSIGN__:       return "assign mul";
     case __MOD_ASSIGN__:       return "assign mod";
     case __POW_ASSIGN__:       return "assign pow";
-    case __OR_ASSIGN__:        return "assign or";
-    case __AND_ASSIGN__:       return "assign and";
-    case __LSHIFT_ASSIGN__:    return "lshift assign";
-    case __RSHIFT_ASSIGN__:    return "rshift assign";
     case __LT__:               return "less than";
     case __GT__:               return "greater than";
     case __LE__:               return "less or eaqual";
@@ -150,11 +149,7 @@ expr_type_by_kind(xre_expr_kind_t kind) {
         case __DIV_ASSIGN__:       
         case __MUL_ASSIGN__:       
         case __MOD_ASSIGN__:       
-        case __POW_ASSIGN__:       
-        case __OR_ASSIGN__:        
-        case __AND_ASSIGN__:       
-        case __LSHIFT_ASSIGN__:    
-        case __RSHIFT_ASSIGN__:         
+        case __POW_ASSIGN__:              
         case __LT__:               
         case __GT__:               
         case __LE__:               

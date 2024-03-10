@@ -1,4 +1,5 @@
 #include "xre_stringf.h"
+#include "xre_utils.h"
 #include <string.h>
 #include <stdarg.h>
 #include <unistd.h>
@@ -264,7 +265,7 @@ fputstr(int fd, const char *format, ...) {
 	iob_format_str(&iob, format, &ap);
 	va_end(ap);
 
-	return (write(
+	return (xwrite(
 		fd,
 		iob.data,
 		iob.len

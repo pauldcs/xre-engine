@@ -12,19 +12,23 @@ bool loop_op(xre_frame_t *frame) {
 
   for (;;) {
     if (!max_iterations--) {
+      log_error_condition_reached;
       return (set_error(frame, XRE_RUNTIME_ERROR, XRE_NOT_TERMINATED_ERROR));
     }
 
     if (!evaluate(left)) {
+
+      log_error_return;
       return (false);
     }
 
     if (!is_true_state(left)) {
       break;
     }
-    // printf("bite1\n");
 
     if (!evaluate(right)) {
+
+      log_error_return;
       return (false);
     }
 

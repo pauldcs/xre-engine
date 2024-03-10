@@ -55,10 +55,6 @@ bool xre_expr_syntax(array_t *tokens) {
     case __DIV_ASSIGN__:
     case __MOD_ASSIGN__:
     case __POW_ASSIGN__:
-    case __OR_ASSIGN__:
-    case __AND_ASSIGN__:
-    case __LSHIFT_ASSIGN__:
-    case __RSHIFT_ASSIGN__:
 
       if (PREV_TOKEN_KIND == __IDENTIFIER__)
         continue;

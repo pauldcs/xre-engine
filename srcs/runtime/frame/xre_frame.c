@@ -130,6 +130,23 @@ bool is_true_state(xre_frame_t *frame) {
   return (set_error(frame, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
 }
 
+const char *state_to_str(state_t *state) {
+
+  if (state->type == STATE_NUMBER) {
+    return ("number");
+  }
+
+  if (state->type == STATE_ARRAY) {
+    return ("array");
+  }
+
+  if (state->type == STATE_STRING) {
+    return ("array");
+  }
+
+  return ("unknown");
+}
+
 static void state_print_one(state_t state) {
   if (state.type == STATE_NUMBER) {
 #if defined(__linux__)
