@@ -5,7 +5,7 @@
 #include "xre_runtime.h"
 
 injectee_t injectee_tab[] = {
-  { "pr", inject_write},
+  { "fmt", inject_write},
 };
 
 bool run_func_by_id(const char *identifier, xre_frame_t *frame) {

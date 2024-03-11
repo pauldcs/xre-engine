@@ -1,4 +1,5 @@
 #include "xre_runtime.h"
+#include "xre_parse.h"
 #include "xre_args.h"
 #include "xre_assert.h"
 #include "xre_frame.h"
@@ -135,25 +136,32 @@ bool evaluate(xre_frame_t *frame) {
   }
 }
 
-bool xre_runtime(xre_ast_t *ast) {
-  __return_val_if_fail__(ast, false);
-
+bool call_runtime(xre_ast_t *ast) {
   xre_frame_t *frame = state_init(ast);
+  if (frame) {
+    bool ret = xre_runtime(frame);
+    state_deinit(frame);
+    return (ret);
+  }
+  return (false);
+}
+
+bool xre_runtime(xre_frame_t *frame) {
+  __return_val_if_fail__(frame, false);
+
 
   if (!runtime_variables_init()) {
-    return (state_deinit(frame), false);
+    return (false);
   }
 
   if (!evaluate(frame)) {
-    
-    log_error_return;
     if (error_occurred()) {
       xre_error(&_error, _error.src);
-      return (state_deinit(frame), false);
+      goto prison;
     }
   
     XRE_LOGGER(error, "Failed without error message");
-    return (state_deinit(frame), false);
+    goto prison;
   }
 
   if (__xre_args__.flags & SHOW_EXPR_RESULT) {
@@ -161,7 +169,9 @@ bool xre_runtime(xre_ast_t *ast) {
   }
 
   runtime_variables_deinit();
-  state_deinit(frame);
-
   return (true);
+
+prison:
+  runtime_variables_deinit();
+  return (false);
 }

@@ -2,8 +2,8 @@
 #define __XRE_RUNTIME_H__
 
 #include "xre_frame.h"
-#include "xre_parse.h"
 #include "xre_log.h"
+#include "xre_parse.h"
 #include <stdbool.h>
 
 #define DEFAULT_MAX_ITERATIONS 5000
@@ -19,7 +19,8 @@
 #define log_error_details(string) 
 # endif
 
-bool xre_runtime(xre_ast_t *ast);
+bool call_runtime(xre_ast_t *ast);
+bool xre_runtime(xre_frame_t *frame);
 bool evaluate(xre_frame_t *frame);
 
 #endif /* __XRE_RUNTIME_H__ */

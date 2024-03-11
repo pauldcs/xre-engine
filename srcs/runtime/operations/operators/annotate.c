@@ -5,7 +5,6 @@
 
 varmode_t varmodes_tab[] = {
   { RDONLY, "const"},
-  { TRACED, "traced"},
   { STRICT, "strict"},
 };
 

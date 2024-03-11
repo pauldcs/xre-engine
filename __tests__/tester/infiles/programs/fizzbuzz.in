@@ -2,8 +2,8 @@ i = 0,
 
 (i += 1) < 100
 loop 
-	      ! i % 15 do pr :: "fizzbuzz"
-	else  ! i %  3 do pr :: "fizz"
-	else  ! i %  5 do pr :: "buzz"
-	else              pr :: i
+	      ! i % 15 do fmt :: "fizzbuzz"
+	else  ! i %  3 do fmt :: "fizz"
+	else  ! i %  5 do fmt :: "buzz"
+	else              fmt :: i
 	
