@@ -59,24 +59,27 @@ ast_show (xre_ast_t *ast) {
 void
 ast_free(xre_ast_t *ast) {
 
-    // if (!ast)
-    //     return ;
-    // switch(ast->kind) {
-    //     case __STRING_LITERAL__:
-    //     case __IDENTIFIER__:
-    //         free((void *)ast->string);
-    //         break;
+    if (!ast)
+        return ;
+    
+    switch(ast->kind) {
+        case __STRING_LITERAL__:
+        case __IDENTIFIER__:
+            free((void *)ast->string);
+            break;
 
-    //     case __NOT__:
-    //         ast_free(ast->uniop);
-    //         break;
-        
-    //     default:
-    //         ast_free(ast->_binop.left);
-    //         ast_free(ast->_binop.right);          
-    // }
-    // free(ast);
-    (void)ast;
+        case __NOT__:
+            ast_free(ast->uniop);
+            break;
+
+        case __VAL__:
+            break;
+
+        default:
+            ast_free(ast->_binop.left);
+            ast_free(ast->_binop.right);          
+    }
+    free(ast);
 }
 
 const char *

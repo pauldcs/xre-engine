@@ -81,31 +81,33 @@ club:
 	(void)memset(buffer, 0, sb.st_size + sizeof(char));
 
 	if (read(fd, buffer, sb.st_size + sizeof(char)) == -1) {
-		free(buffer);
-		return (false);
+		goto prison;
 	}
 
 	xre_ast_t *ast = xre_ast_compose(buffer);
 	if (!ast) {
-		free(buffer);
-		return (false);
+		goto prison;
 	}
 
-	if (!xre_runtime(ast)) {
+	if (!call_runtime(ast)) {
 		ast_free(ast);
-		free(buffer);
-		return (false);
+		goto prison;
 	}
 
 	free(buffer);
 	ast_free(ast);
  	return (true);
+
+prison:
+	free(buffer);
+	return (false);
 }
 
 int
 main(int ac, char *av[]) {
 
 	t_xre_args *args;
+	xre_ast_t *ast;
 	char *file;
 
 	if (!(args = xre_args_parse(ac, av)))
@@ -118,30 +120,34 @@ main(int ac, char *av[]) {
 		if (__top) {
 			file = filename_stack_pop();
 			if (file) {
-				if (!init_source_file(args, file))
-					return (free(args), false);
+				if (!init_source_file(args, file)) {
+					goto prison;
+				}
 			} else {
 				fprintf(stderr, "%s: Failed to import '%s'\n",
 					__xre_state__.title,
 					file
 				);
-				xfree(args);
-				return (free(args), false);
+				goto prison;
 			}
 		} else {
 			if (args->code) {
-					xre_ast_t *ast = xre_ast_compose(args->code);
+					ast = xre_ast_compose(args->code);
 					if (!ast) {
-						return (free(args), false);
+						goto prison;
 					}
-					if (!xre_runtime(ast)) {
+				
+					if (!call_runtime(ast)) {
 						ast_free(ast);
-						return (free(args), false);
+						goto prison;
 					}
+				
+					ast_free(ast);
 					return (true);
+		
 			} else {
 				if (!xre_repl_entrypoint()) {
-					return (free(args), false);
+					goto prison;
 				}
 			}
 		}
@@ -150,6 +156,7 @@ main(int ac, char *av[]) {
 			break;
 	}
 
+prison:
 	free(args);
-	return (0);
+	return (false);
 }

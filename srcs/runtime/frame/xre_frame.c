@@ -42,14 +42,16 @@ xre_frame_t *state_init(xre_ast_t *ast) {
 
 void state_free(state_t *state) {
   switch (state->type) {
+  case STATE_NUMBER:
+    break;
+
   case STATE_STRING:
-    free(state->string);
+    free((char *)state->string);
     break;
 
   case STATE_ARRAY:
-    //array_kill(state->array);
-    break;
-
+    array_kill(state->array);
+  
   default:
     break;
   }
@@ -57,22 +59,21 @@ void state_free(state_t *state) {
 
 void state_deinit(xre_frame_t *frame) {
   switch (frame->kind) {
-  case __VAL__:
-    break;
-
   case __STRING_LITERAL__:
   case __IDENTIFIER__:
-    free((char *)frame->initial.string);
+    free((void *)frame->initial.string);
     break;
+  
+  case __VAL__:
+      break;
 
   case __NOT__:
-    state_deinit(frame->left);
-    break;
+      state_deinit(frame->left);
+      break;
 
   default:
     state_deinit(frame->left);
-    state_deinit(frame->right);
-    break;
+    state_deinit(frame->right);         
   }
 
   state_free(&frame->state);
@@ -80,24 +81,43 @@ void state_deinit(xre_frame_t *frame) {
 }
 
 bool change_state_value(xre_frame_t *frame, int64_t value) {
+  __return_val_if_fail__(frame, false);
+  
+  state_free(&frame->state);
+
   frame->state.type = STATE_NUMBER;
   frame->state.value = value;
   return (true);
 }
 
 bool change_state_array(xre_frame_t *frame, array_t *array) {
+  __return_val_if_fail__(frame, false);
+  __return_val_if_fail__(array, false);
+
+  state_free(&frame->state);
+
   frame->state.type = STATE_ARRAY;
   frame->state.array = array;
   return (true);
 }
 
 bool change_state_string(xre_frame_t *frame, char *string) {
+  __return_val_if_fail__(frame, false);
+  __return_val_if_fail__(string, false);
+
+  state_free(&frame->state);
+
   frame->state.type = STATE_STRING;
   frame->state.string = string;
   return (true);
 }
 
 bool change_state_copy(xre_frame_t *this, xre_frame_t *that) {
+  __return_val_if_fail__(this, false);
+  __return_val_if_fail__(that, false);
+
+  state_free(&this->state);
+
   (void)memcpy(&this->state, &that->state, sizeof(state_t));
   return (true);
 }

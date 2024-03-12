@@ -322,7 +322,7 @@ NONE_TYPE(array_popf)(ARRAY_TYPE(self), PTR_TYPE(into)) {
 }
 
 BOOL_TYPE(array_insert)(ARRAY_TYPE(self), SIZE_TYPE(p), PTR_TYPE(e)) {
-  HR_COMPLAIN_IF(self == false);
+  HR_COMPLAIN_IF(self == NULL);
   HR_COMPLAIN_IF((p <= _size(self)) == false);
 
   if (unlikely(!array_adjust(self, 1))) {
@@ -537,7 +537,7 @@ __attr_pure SIZE_TYPE(array_uninitialized_size)(RDONLY_ARRAY_TYPE(self)) {
 }
 
 __attr_pure SIZE_TYPE(array_cap)(RDONLY_ARRAY_TYPE(self)) {
-  HR_COMPLAIN_IF(self == false);
+  HR_COMPLAIN_IF(self == NULL);
 
   return (_capacity(self));
 }

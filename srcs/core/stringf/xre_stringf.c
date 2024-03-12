@@ -102,7 +102,7 @@ __ptr(t_iobuf *iob, const uint64_t *p) {
 
 	i = 18;
 
-	if (p == 0)
+	if (p == NULL)
 		hex[--i] = '0';
 
 	ptr = (uint64_t)p;

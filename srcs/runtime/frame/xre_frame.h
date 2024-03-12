@@ -8,12 +8,11 @@ typedef enum {
   STATE_NUMBER,
   STATE_STRING,
   STATE_UNDEFINED,
-} exp_event_e;
+} state_e;
 
 typedef enum {
   NONE,
   RDONLY,
-  TRACED,
   STRICT,
 } varmode_e;
 
@@ -25,7 +24,7 @@ struct varmode_s {
 typedef struct varmode_s varmode_t;
 
 typedef struct {
-  exp_event_e type;
+  state_e type;
 
   union {
     int64_t value;
@@ -40,6 +39,7 @@ typedef struct xre_frame_s {
   xre_expr_kind_t kind;
   xre_expr_type_t type;
   xre_token_t *token;
+
   xre_frame_t *left;
   xre_frame_t *right;
   union {
