@@ -154,7 +154,6 @@ static int get_expr_precedence(xre_expr_kind_t kind) {
 }
 
 static void __make_value_to_b(void) {
-  // printf("merging\n");
 
   xre_ast_t *node = __pop_a();
   assert(node);
@@ -205,6 +204,7 @@ xre_ast_t *xre_expr_parse(array_t *tokens) {
       while (__top_a && (TOP_A_KIND != __LPAREN__))
         __make_value_to_b();
 
+      free((void *)__stack_a[__top_a]);
       __pop_a();
 
       break;

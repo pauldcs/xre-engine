@@ -137,15 +137,14 @@ bool evaluate(xre_frame_t *frame) {
 }
 
 bool call_runtime(xre_ast_t *ast) {
-  //xre_frame_t *frame = state_init(ast);
-  //if (frame) {
-    //bool ret = xre_runtime(frame);
-    //state_deinit(frame);
-    //return (ret);
-  //}
-  //return (false);
-  (void)ast;
-  return (true);
+  xre_frame_t *frame = state_init(ast);
+  if (frame) {
+    bool ret = xre_runtime(frame);
+    state_deinit(frame);
+    return (ret);
+  }
+
+  return (false);
 }
 
 bool xre_runtime(xre_frame_t *frame) {

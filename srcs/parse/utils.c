@@ -76,7 +76,6 @@ ast_free(xre_ast_t *ast) {
             break;
 
         default:
-            break;
             ast_free(ast->_binop.left);
             ast_free(ast->_binop.right);          
     }
