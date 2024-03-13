@@ -121,3 +121,20 @@ jobs:
             --track-fds=yes       \
             --error-exitcode=1    \
             ./xre ./__tests__/tester/infiles/programs/prime_numbers.in
+
+  array:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Configure specs
+        working-directory: srcs/core/array
+        run: >
+          chmod +x configure
+          && ./configure specs "*"
+          && ./tester

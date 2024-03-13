@@ -36,11 +36,11 @@ typedef struct {
 } x_st8_t;
 
 typedef struct {
-  int8_t _v;
+  int16_t _v;
 } x_st16_t;
 
 typedef struct {
-  int8_t _v;
+  int32_t _v;
 } x_st32_t;
 
 typedef struct {
