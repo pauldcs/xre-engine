@@ -178,7 +178,7 @@ function __args_mode() {
                 --show-leak-kinds=all                                \
                 --track-origins=yes                                  \
                 --log-file="$valgrind_log_file"                      \
-                --suppressions="ignore_readline.supp"                  \
+                --suppressions="ignore_readline.supp"                \
                 --error-exitcode=1                                   \
                 ./"$program_name" $extra_args &> "$actual_output_file"
     else

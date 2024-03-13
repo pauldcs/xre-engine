@@ -42,9 +42,6 @@ xre_frame_t *state_init(xre_ast_t *ast) {
 
 void state_free(state_t *state) {
   switch (state->type) {
-  case STATE_NUMBER:
-    break;
-
   case STATE_STRING:
     free((char *)state->string);
     break;
@@ -75,7 +72,7 @@ void state_deinit(xre_frame_t *frame) {
     state_deinit(frame->left);
     state_deinit(frame->right);         
   }
-
+  state_print(frame);
   state_free(&frame->state);
   free(frame);
 }
@@ -119,6 +116,15 @@ bool change_state_copy(xre_frame_t *this, xre_frame_t *that) {
   state_free(&this->state);
 
   (void)memcpy(&this->state, &that->state, sizeof(state_t));
+
+  if (that->state.type == STATE_ARRAY) {
+    this->state.array = array_pull(that->state.array, 0, -1);
+  }
+
+  if (that->state.type == STATE_STRING) {
+    this->state.string = strdup(that->state.string);
+  }
+
   return (true);
 }
 
@@ -204,3 +210,54 @@ void state_print(xre_frame_t *frame) {
     state_print_one(frame->state);
   }
 }
+
+// static void	state_debug(xre_frame_t *frame, size_t depth);
+
+// static void
+// put_binop (xre_frame_t *frame, size_t depth) {
+
+// 	inner(frame->left, depth + 1);
+// 	inner(frame->right, depth + 1);
+// }
+
+// static void
+// put_uniop (xre_frame_t *frame, size_t depth) {
+
+// 	inner(frame->left, depth + 1);
+// }
+
+// static void
+// state_debug (xre_frame_t *frame, size_t depth) {
+// 	size_t	i;
+
+// 	i = 0;
+// 	while (i++ < depth)
+// 		write(1, "   ", 3);
+
+//   if (!frame) {
+//     printf("!NULL!\n");
+// 		return ;
+// 	}
+//   if (frame->state.type == STATE_NUMBER) {
+// #ifdef __linux__
+//     printf("value: %ld\n", frame->state.value);
+// #else
+//     printf("value %lld\n", frame->state.value);
+// #endif
+//   }else if (frame->state.type == STATE_STRING) {
+//     printf("string: '%s'\n", frame->state.string);
+//   } else {
+//     write(1, "> ", 2);
+// 	  printf("[%s]\n", expr_kind_to_string(ast->kind));
+//   }
+
+// 	if (ast->token._type & (EXPR_OP_TYPE_BINOP))
+// 		put_binop(ast, depth);
+// 	else if (ast->token._type & EXPR_OP_TYPE_UNIOP)
+// 		put_uniop(ast, depth);
+// }
+
+// void
+// ast_show (xre_ast_t *ast) {
+// 	inner(ast, 0);
+// }

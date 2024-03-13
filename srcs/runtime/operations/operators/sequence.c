@@ -26,6 +26,7 @@ bool sequence_op(xre_frame_t *frame) {
 
   array_push(array, &right->state);
 
+
   return (change_state_array(frame, array));
 }
 

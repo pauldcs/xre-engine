@@ -1,0 +1,27 @@
+error: Access Error: a = b: Attempt to write on a protected variable
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==48362==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000055 (pc 0xffff97eae930 bp 0xfffffd9438d0 sp 0xfffffd9438a0 T0)
+==48362==The signal is caused by a READ memory access.
+==48362==Hint: address points to the zero page.
+    #0 0xffff97eae930 in __aarch64_cas1_sync ../../../src/libgcc/config/aarch64/lse.S:202
+    #1 0xffff97deaf44 in bool __sanitizer::atomic_compare_exchange_strong<__sanitizer::atomic_uint8_t>(__sanitizer::atomic_uint8_t volatile*, __sanitizer::atomic_uint8_t::Type*, __sanitizer::atomic_uint8_t::Type, __sanitizer::memory_order) ../../../../src/libsanitizer/sanitizer_common/sanitizer_atomic_clang.h:80
+    #2 0xffff97deaf44 in __asan::Allocator::AtomicallySetQuarantineFlagIfAllocated(__asan::AsanChunk*, void*, __sanitizer::BufferedStackTrace*) ../../../../src/libsanitizer/asan/asan_allocator.cpp:620
+    #3 0xffff97deaf44 in __asan::Allocator::Deallocate(void*, unsigned long, unsigned long, __sanitizer::BufferedStackTrace*, __asan::AllocType) ../../../../src/libsanitizer/asan/asan_allocator.cpp:696
+    #4 0xffff97deaf44 in __asan::asan_free(void*, __sanitizer::BufferedStackTrace*, __asan::AllocType) ../../../../src/libsanitizer/asan/asan_allocator.cpp:955
+    #5 0xffff97e6a588 in __interceptor_free ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:53
+    #6 0xaaaae7104f18 in array_kill (/home/polo75/xre-engine/xre+0x64f18)
+    #7 0xaaaae70fb4c0 in state_free srcs/runtime/frame/xre_frame.c:50
+    #8 0xaaaae70fb87c in state_deinit srcs/runtime/frame/xre_frame.c:77
+    #9 0xaaaae70fb794 in state_deinit srcs/runtime/frame/xre_frame.c:73
+    #10 0xaaaae70fb714 in state_deinit srcs/runtime/frame/xre_frame.c:72
+    #11 0xaaaae70f9a48 in call_runtime srcs/runtime/xre_runtime.c:143
+    #12 0xaaaae7103e24 in init_source_file srcs/__main__.c:92
+    #13 0xaaaae7104004 in main srcs/__main__.c:123
+    #14 0xffff9755777c in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #15 0xffff97557854 in __libc_start_main_impl ../csu/libc-start.c:360
+    #16 0xaaaae70d972c in _start (/home/polo75/xre-engine/xre+0x3972c)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV ../../../src/libgcc/config/aarch64/lse.S:202 in __aarch64_cas1_sync
+==48362==ABORTING

@@ -1,0 +1,1 @@
+error: Access Error: const: a = 1; a = 2: Attempt to write on a readonly variable

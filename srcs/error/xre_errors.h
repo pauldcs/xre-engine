@@ -61,21 +61,6 @@ typedef enum {
   XRE_UNMATCHED_PARENTHESIS
 } t_xre_error_subtype;
 
-typedef enum {
-  XRE_MEMORY_WARNING,
-  XRE_INDENTIFIER_WARNING,
-  XRE_SYNTAX_WARNING,
-  XRE_TYPE_WARNING,
-} t_xre_warning_type;
-
-typedef enum {
-  XRE_CHAINED_COMPARISON_WARNING,
-  XRE_CONVERSION_WARNING,
-  XXR_STRING_TO_ARRAY_WARNING,
-  array_TO_STRING_WARNING,
-
-} t_xre_warning_subtype;
-
 typedef struct {
   struct {
     t_xre_error_type type;

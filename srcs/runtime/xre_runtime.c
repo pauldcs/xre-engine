@@ -144,6 +144,7 @@ bool call_runtime(xre_ast_t *ast) {
     return (ret);
   }
 
+  (void)ast;
   return (false);
 }
 
@@ -158,6 +159,9 @@ bool xre_runtime(xre_frame_t *frame) {
   if (!evaluate(frame)) {
     if (error_occurred()) {
       xre_error(&_error, _error.src);
+      if (_error.error.type == XRE_EXIT_ERROR)
+        exit(1);
+      
       goto prison;
     }
   
