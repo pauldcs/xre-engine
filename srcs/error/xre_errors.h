@@ -56,6 +56,10 @@ const char   *error_class_str(error_class_e class);
 const char   *error_type_str(error_type_e type);
 void          xre_error(error_notification_t * notification);
 
-#define __return_error(frame, error_type) return (set_error(frame, error_type));
+//#define __return_error(frame, error_type) return (set_error(frame, error_type));
+#define __return_error(frame, error_type) do { \
+        XRE_LOGGER(debug, "trace"); \
+        return (set_error(frame, error_type)); \
+    } while (0)
 
 #endif /* __XRE_REPL_ERROR_H__ */

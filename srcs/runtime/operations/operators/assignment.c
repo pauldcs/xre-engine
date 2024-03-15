@@ -10,16 +10,14 @@ bool simple_assignment(xre_frame_t *initial_frame, const char *key, xre_frame_t 
     return (false);
   }
   
-  change_state_copy(initial_frame, frame);
-  return (true);
+  return (state_copy_ref(initial_frame, frame));
 }
 
 bool reassignement(xre_frame_t *initial_frame, const char *key, xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
 
   xre_frame_t *left = frame->left;
-  if (!symtab_get(left->initial.string)) {
-    
+  if (!symtab_get(left->identifier)) {
     __return_error(frame, XRE_UNBOUND_LOCAL_ERROR);
   }
 
@@ -27,8 +25,7 @@ bool reassignement(xre_frame_t *initial_frame, const char *key, xre_frame_t *fra
     return (false);
   }
 
-  change_state_copy(initial_frame, frame);
-  return (true);
+  return (state_copy_ref(initial_frame, frame));
 }
 
 bool assignment_op(xre_frame_t *frame) {
@@ -46,10 +43,10 @@ bool assignment_op(xre_frame_t *frame) {
   }
 
   if (frame->kind == __ASSIGN__) {
-    return (simple_assignment(frame, left->initial.string, right));
+    return (simple_assignment(frame, left->identifier, right));
   }
 
-  symtab_entry_t *item = symtab_get(left->initial.string);
+  symtab_entry_t *item = symtab_get(left->identifier);
   if (!item) {
     __return_error(frame, XRE_UNBOUND_LOCAL_ERROR);
   }
@@ -60,7 +57,7 @@ bool assignment_op(xre_frame_t *frame) {
     __return_error(frame, XRE_INVALID_TYPE_FOR_OPERAND_ERROR);
   }
 
-  change_state_value(left, state->value);
+  state_value(left, state->value);
   
   switch (frame->kind) {
   case __ADD_ASSIGN__:
@@ -93,5 +90,5 @@ bool assignment_op(xre_frame_t *frame) {
     __return_error(frame, XRE_UNDEFINED_BEHAVIOR_ERROR);
   }
 
-  return (reassignement(frame, left->initial.string, frame));
+  return (reassignement(frame, left->identifier, frame));
 }

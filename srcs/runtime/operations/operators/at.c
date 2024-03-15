@@ -10,13 +10,8 @@ bool at_op(xre_frame_t *frame) {
   xre_frame_t *left = frame->left;
   xre_frame_t *right = frame->right;
 
-  if (!evaluate(left)) {
-    
-    return (false);
-  }
-
-  if (!evaluate(right)) {
-
+  if (!evaluate(left)
+    || !evaluate(right)) {
     return (false);
   }
 
@@ -41,11 +36,11 @@ bool at_op(xre_frame_t *frame) {
   xre_frame_t *f = (xre_frame_t *)array_at(array, value);
   switch (f->state.type) {
     case STATE_STRING:
-      return (change_state_string(frame, f->state.string));
+      return (state_string_ref(frame, f->state.string));
     case STATE_ARRAY:
-      return (change_state_array(frame, f->state.array));
+      return (state_array_ref(frame, f->state.array));
     case STATE_NUMBER:
-      return (change_state_value(frame, f->state.value));
+      return (state_value(frame, f->state.value));
     case STATE_UNDEFINED:
       break;
   }

@@ -7,30 +7,28 @@
 bool do_identifier(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
-    if (!strcmp(frame->initial.string, "exit")) {
-    
+    if (!strcmp(frame->identifier, "exit")) {
       __return_error(frame, XRE_EXIT_CALLED_ERROR);
     }
 
-    symtab_entry_t *item = symtab_get(frame->initial.string);
-    if (item) {
-      state_t *state = &item->state;
-      if (state->type == STATE_ARRAY) {
-        return (change_state_array(frame, array_pull(state->array, 0, -1)));
-      }
+    symtab_entry_t *item = symtab_get(frame->identifier);
+    if (!item)
+      __return_error(frame, XRE_UNBOUND_LOCAL_ERROR);
 
-      if (state->type == STATE_STRING) {
-        return (change_state_string(frame, strdup(state->string)));
-      }
-
-      if (state->type == STATE_NUMBER) {
-        return (change_state_value(frame, state->value));
-      }
-
-      __return_error(frame, XRE_UNDEFINED_BEHAVIOR_ERROR);
+    state_t *state = &item->state;
+    if (state->type == STATE_ARRAY) {
+      return (state_array_ref(frame, state->array));
     }
 
-    __return_error(frame, XRE_UNBOUND_LOCAL_ERROR);
+    if (state->type == STATE_STRING) {
+      return (state_string_ref(frame, state->string));
+    }
+
+    if (state->type == STATE_NUMBER) {
+      return (state_value(frame, state->value));
+    }
+
+    __return_error(frame, XRE_UNDEFINED_BEHAVIOR_ERROR);
 
 }
 

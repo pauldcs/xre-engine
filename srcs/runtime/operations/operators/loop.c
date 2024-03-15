@@ -16,7 +16,6 @@ bool loop_op(xre_frame_t *frame) {
     }
 
     if (!evaluate(left)) {
-
       return (false);
     }
 
@@ -25,12 +24,11 @@ bool loop_op(xre_frame_t *frame) {
     }
 
     if (!evaluate(right)) {
-
       return (false);
     }
 
-    (void)change_state_copy(frame, right);
+    state_copy_ref(frame, right);
   }
 
-  return (change_state_copy(frame, left));
+  return (state_copy_ref(frame, left));
 }

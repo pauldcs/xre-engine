@@ -15,22 +15,30 @@ xre_frame_t *state_init(xre_ast_t *ast) {
 
   switch (ast->kind) {
   case __VAL__:
-    frame->initial.value = ast->value;
+    frame->state.type = STATE_NUMBER;
+    frame->state.value = ast->value;
     break;
 
   case __STRING_LITERAL__:
+    frame->state.type = STATE_STRING;
+    frame->state.string = strdup(ast->string);
+    break;
+  
   case __IDENTIFIER__:
-    frame->initial.string = strdup(ast->string);
+    frame->identifier = strdup(ast->string);
+    frame->state.type = STATE_UNDEFINED;
     break;
 
   case __NOT__:
   case __PRINT__:
     frame->left = state_init(ast->uniop);
+    frame->state.type = STATE_UNDEFINED;
     break;
   
   default:
     frame->left = state_init(ast->_binop.left);
     frame->right = state_init(ast->_binop.right);
+    frame->state.type = STATE_UNDEFINED;
     break;
   }
 
@@ -38,7 +46,6 @@ xre_frame_t *state_init(xre_ast_t *ast) {
   frame->type = ast->type;
   frame->token = (xre_token_t *)&ast->token;
 
-  frame->state.type = STATE_UNDEFINED;
   return (frame);
 }
 
@@ -58,24 +65,17 @@ void state_free(state_t *state) {
 }
 
 void state_deinit(xre_frame_t *frame) {
-  switch (frame->kind) {
-  case __STRING_LITERAL__:
-  case __IDENTIFIER__:
-    free((void *)frame->initial.string);
-    break;
+  if (frame->left) state_deinit(frame->left);
+  if (frame->right) state_deinit(frame->right);         
   
-  case __VAL__:
-      break;
-
-  default:
-    if (frame->left) state_deinit(frame->left);
-    if (frame->right) state_deinit(frame->right);         
-  }
-  state_free(&frame->state);
+  if (!frame->is_ref)
+    state_free(&frame->state);
+  
   free(frame);
 }
 
-bool change_state_value(xre_frame_t *frame, int64_t value) {
+
+bool state_value(xre_frame_t *frame, int64_t value) {
   __return_val_if_fail__(frame, false);
   
   state_free(&frame->state);
@@ -85,44 +85,56 @@ bool change_state_value(xre_frame_t *frame, int64_t value) {
   return (true);
 }
 
-bool change_state_string(xre_frame_t *frame, char *string) {
+bool state_string_ref(xre_frame_t *frame, char *string) {
   __return_val_if_fail__(frame, false);
   __return_val_if_fail__(string, false);
 
-  state_free(&frame->state);
+  if (!frame->is_ref)
+    state_free(&frame->state);
 
   frame->state.type = STATE_STRING;
   frame->state.string = string;
+
+  frame->is_ref = true;
   return (true);
 }
 
-bool change_state_array(xre_frame_t *frame, array_t *array) {
+bool state_array_ref(xre_frame_t *frame, array_t *array) {
   __return_val_if_fail__(frame, false);
   __return_val_if_fail__(array, false);
 
+  if (!frame->is_ref)
+    state_free(&frame->state);
 
   frame->state.type = STATE_ARRAY;
   frame->state.array = array;
+
+  frame->is_ref = true;
   return (true);
 }
 
-bool change_state_copy(xre_frame_t *this, xre_frame_t *that) {
+bool state_copy_ref(xre_frame_t *this, xre_frame_t *that) {
   __return_val_if_fail__(this, false);
   __return_val_if_fail__(that, false);
 
-  state_free(&this->state);
-
-  (void)memcpy(&this->state, &that->state, sizeof(state_t));
+  if (!this->is_ref)
+    state_free(&this->state);
 
   if (that->state.type == STATE_ARRAY) {
-    this->state.array = array_pull(that->state.array, 0, -1);
+    this->is_ref = true;
+    return (state_array_ref(this, that->state.array));
   }
-
+  
   if (that->state.type == STATE_STRING) {
-    this->state.string = strdup(that->state.string);
+    this->is_ref = true;
+    return (state_string_ref(this, that->state.string));
   }
 
-  return (true);
+  if (that->state.type == STATE_NUMBER) {
+    return (state_value(this, that->state.value));
+  }
+
+  __return_error(this, XRE_UNDEFINED_BEHAVIOR_ERROR);
 }
 
 static bool is_truthy_value(int64_t value) { return (value != 0); }

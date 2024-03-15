@@ -13,5 +13,5 @@ bool print_op(xre_frame_t *frame) {
 
   state_print(uni);
 
-  return (change_state_copy(frame, uni));
+  return (state_copy_ref(frame, uni));
 }

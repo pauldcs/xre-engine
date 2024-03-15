@@ -2,7 +2,7 @@
 #include "xre_parse.h"
 #include "xre_runtime.h"
 
-void push_frame(array_t *array, xre_frame_t *frame) {
+static void push_frame(array_t *array, xre_frame_t *frame) {
   if (frame->state.type == STATE_ARRAY) {
     array_t *array_2 = frame->state.array;
     size_t size = array_size(array_2);
@@ -29,19 +29,16 @@ bool sequence_op(xre_frame_t *frame) {
 
   array_t *array = NULL;
 
-  if (frame->state.type == STATE_ARRAY)
+  if (frame->state.type == STATE_ARRAY) {
     array = frame->state.array;
-  else
+  } else {
     array = array_create(sizeof(xre_frame_t), 8, NULL);
+  }
 
   push_frame(array, left);
   push_frame(array, right);
 
-  frame->state.type = STATE_ARRAY;
-  frame->state.array = array;
-
-
-  return (true);
+  return (state_array_ref(frame, array));
 }
 
 bool separator_op(xre_frame_t *frame) {
@@ -50,9 +47,10 @@ bool separator_op(xre_frame_t *frame) {
   xre_frame_t *left = frame->left;
   xre_frame_t *right = frame->right;
 
-  if (!evaluate(left) || !evaluate(right)) {
+  if (!evaluate(left)
+    || !evaluate(right)) {
     return (false);
   }
 
-  return (change_state_copy(frame, right));
+  return (state_copy_ref(frame, right));
 }

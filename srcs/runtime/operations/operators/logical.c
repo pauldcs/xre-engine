@@ -19,10 +19,10 @@ bool do_op(xre_frame_t *frame) {
 
       return (false);
     }
-    return (change_state_copy(frame, right));
+    return (state_copy_ref(frame, right));
   }
 
-  return (change_state_copy(frame, left));
+  return (state_copy_ref(frame, left));
 }
 
 bool else_op(xre_frame_t *frame) {
@@ -39,10 +39,10 @@ bool else_op(xre_frame_t *frame) {
     if (!evaluate(right)) {
       return (false);
     }
-    return (change_state_copy(frame, right));
+    return (state_copy_ref(frame, right));
   }
 
-  return (change_state_copy(frame, left));
+  return (state_copy_ref(frame, left));
 }
 
 bool and_op(xre_frame_t *frame) {
@@ -61,7 +61,7 @@ bool and_op(xre_frame_t *frame) {
     }
   }
 
-  return (change_state_value(frame, is_true_state(right)));
+  return (state_value(frame, is_true_state(right)));
 }
 
 bool or_op(xre_frame_t *frame) {
@@ -75,14 +75,14 @@ bool or_op(xre_frame_t *frame) {
   }
 
   if (is_true_state(left)) {
-    return (change_state_value(frame, true));
+    return (state_value(frame, true));
   }
 
   if (!evaluate(right)) {
     return (false);
   }
 
-  return (change_state_value(frame, is_true_state(right)));
+  return (state_value(frame, is_true_state(right)));
 }
 
 bool logical_op(xre_frame_t *frame) {

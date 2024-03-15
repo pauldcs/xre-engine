@@ -3,38 +3,33 @@
 #include "xre_parse.h"
 #include "xre_runtime.h"
 
-// BITWISE AND OPERATION
 bool bitwise_and_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
   xre_frame_t *left = frame->left;
   xre_frame_t *right = frame->right;
 
-  change_state_value(frame, left->state.value & right->state.value);
-  return (true);
+  return (state_value(frame, left->state.value & right->state.value));
 }
 
-// BITWISE OR OPERATION
 bool bitwise_or_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
   xre_frame_t *left = frame->left;
   xre_frame_t *right = frame->right;
 
-  return (change_state_value(frame, left->state.value | right->state.value));
+  return (state_value(frame, left->state.value | right->state.value));
 }
 
-// BITWISE XOR OPERATION
 bool bitwise_xor_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
   xre_frame_t *left = frame->left;
   xre_frame_t *right = frame->right;
 
-  return (change_state_value(frame, left->state.value ^ right->state.value));
+  return (state_value(frame, left->state.value ^ right->state.value));
 }
 
-// BITWISE LSHIFT OPERATION
 bool bitwise_lshift_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
@@ -51,10 +46,9 @@ bool bitwise_lshift_op(xre_frame_t *frame) {
     __return_error(frame, XRE_EXCEEDS_SHIFT_LIMIT_ERROR);
   }
 
-  return (change_state_value(frame, left->state.value << right->state.value));
+  return (state_value(frame, left->state.value << right->state.value));
 }
 
-// BITWISE RSHIFT OPERATION
 bool bitwise_rshift_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
@@ -71,33 +65,25 @@ bool bitwise_rshift_op(xre_frame_t *frame) {
     __return_error(frame, XRE_EXCEEDS_SHIFT_LIMIT_ERROR);
   }
 
-  return (change_state_value(frame, left->state.value >> right->state.value));
+  return (state_value(frame, left->state.value >> right->state.value));
 }
 
-// BITWISE OPERAITON
 bool bitwise_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
   xre_frame_t *left = frame->left;
   xre_frame_t *right = frame->right;
 
-  if (!evaluate(left)) {
-    
-    return (false);
-  }
-
-  if (!evaluate(right)) {
-
+  if (!evaluate(left)
+    || !evaluate(right)) {
     return (false);
   }
 
   if (left->state.type != STATE_NUMBER) {
-  
     __return_error(frame, XRE_INVALID_TYPE_FOR_OPERAND_ERROR);
   }
 
   if (left->state.type != right->state.type) {
-  
     __return_error(frame, XRE_TYPE_MISSMATCH_ERROR);
   }
 

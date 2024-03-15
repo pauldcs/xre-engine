@@ -83,7 +83,5 @@ SRCS := \
 	runtime/operations/operators/sequence.c \
 	runtime/operations/operators/at.c \
 	runtime/operations/operators/print.c \
-	runtime/operations/operands/arrays.c \
-	runtime/operations/operands/basic.c \
 	runtime/operations/operands/identifier.c 
 	

@@ -35,12 +35,12 @@ typedef struct xre_frame_s {
 
   xre_frame_t *left;
   xre_frame_t *right;
-  union {
-    const char *string;
-    int64_t value;
-  } initial;
 
+  const char *identifier;
+
+  bool is_ref;
   state_t state;
+
 } xre_frame_t;
 
 xre_frame_t *state_init(xre_ast_t *ast);
@@ -70,10 +70,10 @@ extern error_notification_t _error;
 bool set_error(xre_frame_t *node, error_type_e type);
 bool error_occurred(void);
 
-bool change_state_value(xre_frame_t *frame, int64_t value);
-bool change_state_array(xre_frame_t *frame, array_t *array);
-bool change_state_string(xre_frame_t *frame, char *string);
-bool change_state_copy(xre_frame_t *this, xre_frame_t *that);
+bool state_value(xre_frame_t *frame, int64_t value);
+bool state_array_ref(xre_frame_t *frame, array_t *array);
+bool state_string_ref(xre_frame_t *frame, char *string);
+bool state_copy_ref(xre_frame_t *this, xre_frame_t *that);
 
 bool call_runtime(xre_ast_t *ast);
 bool xre_runtime(xre_frame_t *frame);

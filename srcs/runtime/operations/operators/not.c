@@ -11,5 +11,5 @@ bool not_op(xre_frame_t *frame) {
     return (false);
   }
 
-  return (change_state_value(frame, !is_true_state(uni)));
+  return (state_value(frame, !is_true_state(uni)));
 }

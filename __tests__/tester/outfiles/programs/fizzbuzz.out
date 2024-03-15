@@ -1,99 +1,82 @@
+=================================================================
+==3670==ERROR: AddressSanitizer: attempting double-free on 0x000103900530 in thread T0:
+    #0 0x1015b2ce0 in wrap_free+0x98 (libclang_rt.asan_osx_dynamic.dylib:arm64e+0x52ce0)
+    #1 0x100ca615c in state_free state.c:55
+    #2 0x100ca76ec in change_state_copy state.c:123
+    #3 0x100cadf98 in else_op logical.c:42
+    #4 0x100cae7dc in logical_op logical.c:99
+    #5 0x100ca2d58 in binop_exec xre_runtime.c:74
+    #6 0x100ca348c in evaluate xre_runtime.c:122
+    #7 0x100cadf2c in else_op logical.c:34
+    #8 0x100cae7dc in logical_op logical.c:99
+    #9 0x100ca2d58 in binop_exec xre_runtime.c:74
+    #10 0x100ca348c in evaluate xre_runtime.c:122
+    #11 0x100cadf2c in else_op logical.c:34
+    #12 0x100cae7dc in logical_op logical.c:99
+    #13 0x100ca2d58 in binop_exec xre_runtime.c:74
+    #14 0x100ca348c in evaluate xre_runtime.c:122
+    #15 0x100cb17b0 in loop_op loop.c:26
+    #16 0x100ca2cf8 in binop_exec xre_runtime.c:59
+    #17 0x100ca348c in evaluate xre_runtime.c:122
+    #18 0x100cb344c in sequence_op sequence.c:26
+    #19 0x100ca2d10 in binop_exec xre_runtime.c:62
+    #20 0x100ca348c in evaluate xre_runtime.c:122
+    #21 0x100ca3700 in xre_runtime xre_runtime.c:152
+    #22 0x100ca3584 in call_runtime xre_runtime.c:136
+    #23 0x100c6fa2c in init_source_file main.c:92
+    #24 0x100c6ef2c in main main.c:123
+    #25 0x1856cd054  (<unknown module>)
+
+0x000103900530 is located 0 bytes inside of 5-byte region [0x000103900530,0x000103900535)
+freed by thread T0 here:
+    #0 0x1015b2ce0 in wrap_free+0x98 (libclang_rt.asan_osx_dynamic.dylib:arm64e+0x52ce0)
+    #1 0x100ca615c in state_free state.c:55
+    #2 0x100ca76ec in change_state_copy state.c:123
+    #3 0x100cadcc0 in do_op logical.c:25
+    #4 0x100cae7ac in logical_op logical.c:93
+    #5 0x100ca2d58 in binop_exec xre_runtime.c:74
+    #6 0x100ca348c in evaluate xre_runtime.c:122
+    #7 0x100cadf68 in else_op logical.c:39
+    #8 0x100cae7dc in logical_op logical.c:99
+    #9 0x100ca2d58 in binop_exec xre_runtime.c:74
+    #10 0x100ca348c in evaluate xre_runtime.c:122
+    #11 0x100cadf2c in else_op logical.c:34
+    #12 0x100cae7dc in logical_op logical.c:99
+    #13 0x100ca2d58 in binop_exec xre_runtime.c:74
+    #14 0x100ca348c in evaluate xre_runtime.c:122
+    #15 0x100cadf2c in else_op logical.c:34
+    #16 0x100cae7dc in logical_op logical.c:99
+    #17 0x100ca2d58 in binop_exec xre_runtime.c:74
+    #18 0x100ca348c in evaluate xre_runtime.c:122
+    #19 0x100cb17b0 in loop_op loop.c:26
+    #20 0x100ca2cf8 in binop_exec xre_runtime.c:59
+    #21 0x100ca348c in evaluate xre_runtime.c:122
+    #22 0x100cb344c in sequence_op sequence.c:26
+    #23 0x100ca2d10 in binop_exec xre_runtime.c:62
+    #24 0x100ca348c in evaluate xre_runtime.c:122
+    #25 0x100ca3700 in xre_runtime xre_runtime.c:152
+    #26 0x100ca3584 in call_runtime xre_runtime.c:136
+    #27 0x100c6fa2c in init_source_file main.c:92
+    #28 0x100c6ef2c in main main.c:123
+    #29 0x1856cd054  (<unknown module>)
+
+previously allocated by thread T0 here:
+    #0 0x1015ad23c in wrap_strdup+0x104 (libclang_rt.asan_osx_dynamic.dylib:arm64e+0x4d23c)
+    #1 0x100ca4c10 in state_init state.c:24
+    #2 0x100ca51b0 in state_init state.c:34
+    #3 0x100ca5750 in state_init state.c:40
+    #4 0x100ca5750 in state_init state.c:40
+    #5 0x100ca551c in state_init state.c:39
+    #6 0x100ca551c in state_init state.c:39
+    #7 0x100ca5750 in state_init state.c:40
+    #8 0x100ca5750 in state_init state.c:40
+    #9 0x100ca3564 in call_runtime xre_runtime.c:134
+    #10 0x100c6fa2c in init_source_file main.c:92
+    #11 0x100c6ef2c in main main.c:123
+    #12 0x1856cd054  (<unknown module>)
+
+SUMMARY: AddressSanitizer: double-free (libclang_rt.asan_osx_dynamic.dylib:arm64e+0x52ce0) in wrap_free+0x98
+==3670==ABORTING
 1
 2
-fizz
-4
-buzz
-fizz
-7
-8
-fizz
-buzz
-11
-fizz
-13
-14
-fizzbuzz
-16
-17
-fizz
-19
-buzz
-fizz
-22
-23
-fizz
-buzz
-26
-fizz
-28
-29
-fizzbuzz
-31
-32
-fizz
-34
-buzz
-fizz
-37
-38
-fizz
-buzz
-41
-fizz
-43
-44
-fizzbuzz
-46
-47
-fizz
-49
-buzz
-fizz
-52
-53
-fizz
-buzz
-56
-fizz
-58
-59
-fizzbuzz
-61
-62
-fizz
-64
-buzz
-fizz
-67
-68
-fizz
-buzz
-71
-fizz
-73
-74
-fizzbuzz
-76
-77
-fizz
-79
-buzz
-fizz
-82
-83
-fizz
-buzz
-86
-fizz
-88
-89
-fizzbuzz
-91
-92
-fizz
-94
-buzz
-fizz
-97
-98
 fizz

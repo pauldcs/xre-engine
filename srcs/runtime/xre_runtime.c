@@ -104,7 +104,7 @@ bool operand_exec(xre_frame_t *frame) {
     
     case __VAL__: 
     case __STRING_LITERAL__:
-      return (basic_operand(frame));
+      return (frame);
   
   default:
     __return_error(frame, XRE_UNDEFINED_BEHAVIOR_ERROR);
@@ -144,8 +144,7 @@ bool call_runtime(xre_ast_t *ast) {
 
 bool xre_runtime(xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
-
-
+  
   if (!symtab_init()) {
     return (false);
   }
