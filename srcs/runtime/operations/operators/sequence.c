@@ -43,10 +43,7 @@ bool sequence_op(xre_frame_t *frame) {
   if (!frame->is_ref)
     state_free(&frame->state);
 
-  frame->state.type = STATE_ARRAY;
-  frame->state.array = array;
-
-  return (true);
+  return (state_array(frame, array));
 }
 
 bool separator_op(xre_frame_t *frame) {

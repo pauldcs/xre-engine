@@ -31,15 +31,12 @@ typedef struct xre_frame_s xre_frame_t;
 typedef struct xre_frame_s {
   xre_expr_kind_t kind;
   xre_expr_type_t type;
-  xre_token_t *token;
-
-  xre_frame_t *left;
-  xre_frame_t *right;
-
-  const char *identifier;
-
-  bool is_ref;
-  state_t state;
+  xre_token_t     *token;
+  xre_frame_t     *left;
+  xre_frame_t     *right;
+  const char      *identifier;
+  bool            is_ref;
+  state_t         state;
 
 } xre_frame_t;
 
@@ -72,6 +69,7 @@ bool error_occurred(void);
 
 bool state_value(xre_frame_t *frame, int64_t value);
 bool state_array_ref(xre_frame_t *frame, array_t *array);
+bool state_array(xre_frame_t *frame, array_t *array);
 bool state_string_ref(xre_frame_t *frame, char *string);
 bool state_copy_ref(xre_frame_t *this, xre_frame_t *that);
 

@@ -311,10 +311,10 @@ function run_test() {
         then
             if cmp -s "$actual_output_file" "$expected_output_file";
                 then
-                    output "        └── Status: ${OK_COLOR}SUCCESS${NO_COLOR}"
+                    output "        └── Status: ${OK_COLOR}success${NO_COLOR}"
                     ((passed++))
             else
-                output "        └── Status: ${ERROR_COLOR}FAILURE${NO_COLOR}"
+                output "        └── Status: ${ERROR_COLOR}failure${NO_COLOR}"
                 output "            └── Expected: $expected_output_file"
                 output "            └── Actual: $actual_output_file"
                 output "            └── Diff:"

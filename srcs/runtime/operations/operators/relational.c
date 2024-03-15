@@ -4,7 +4,7 @@
 #include "xre_runtime.h"
 #include <stdbool.h>
 
-static int value_cmp(int64_t a, int64_t b) {
+static inline int value_cmp(int64_t a, int64_t b) {
   if (a < b)
     return (-1);
   if (a > b)
@@ -12,7 +12,7 @@ static int value_cmp(int64_t a, int64_t b) {
   return (0);
 }
 
-static int array_cmp(const array_t *a, const array_t *b) {
+static inline int array_cmp(const array_t *a, const array_t *b) {
   size_t size_a = array_size(a);
   size_t size_b = array_size(b);
 

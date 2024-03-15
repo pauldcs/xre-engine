@@ -21,8 +21,8 @@ bool mul_op(xre_frame_t *frame);
 bool div_op(xre_frame_t *frame);
 bool mod_op(xre_frame_t *frame);
 
-bool identifier_operand(xre_frame_t *frame);
-bool basic_operand(xre_frame_t *frame);
-bool array_operand(xre_frame_t *frame);
+bool identifier_op(xre_frame_t *frame);
+bool value_op(xre_frame_t *frame);
+bool string_op(xre_frame_t *frame);
 
 #endif /* __XRE_OPERATIONS_H__ */

@@ -33,7 +33,7 @@ bool do_identifier(xre_frame_t *frame) {
 
 }
 
-bool identifier_operand(xre_frame_t *frame) {
+bool identifier_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
   if (frame->kind == __IDENTIFIER__) {

@@ -13,7 +13,7 @@
 
 t_xre_state  __xre_state__ = {
 	.title = "xre",
-	.version = "0.5.2",
+	.version = "0.5.3",
 };
 
 static bool
