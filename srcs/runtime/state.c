@@ -54,7 +54,7 @@ void state_free(state_t *state) {
   case STATE_STRING:
     free((char *)state->string);
     break;
-
+  
   case STATE_ARRAY:
     array_kill(state->array);
     break;
@@ -71,6 +71,9 @@ void state_deinit(xre_frame_t *frame) {
   if (!frame->is_ref)
     state_free(&frame->state);
   
+  if (frame->kind == __IDENTIFIER__)
+    free((void *)frame->identifier);
+
   free(frame);
 }
 
@@ -78,7 +81,8 @@ void state_deinit(xre_frame_t *frame) {
 bool state_value(xre_frame_t *frame, int64_t value) {
   __return_val_if_fail__(frame, false);
   
-  state_free(&frame->state);
+  if (!frame->is_ref)
+    state_free(&frame->state);
 
   frame->state.type = STATE_NUMBER;
   frame->state.value = value;
@@ -96,6 +100,20 @@ bool state_string_ref(xre_frame_t *frame, char *string) {
   frame->state.string = string;
 
   frame->is_ref = true;
+  return (true);
+}
+
+bool state_array(xre_frame_t *frame, array_t *array) {
+  __return_val_if_fail__(frame, false);
+  __return_val_if_fail__(array, false);
+
+  if (!frame->is_ref)
+    state_free(&frame->state);
+
+  frame->state.type = STATE_ARRAY;
+  frame->state.array = array;
+
+  frame->is_ref = false;
   return (true);
 }
 
@@ -235,6 +253,7 @@ __state_debug (xre_frame_t *frame, size_t depth) {
 	}
 
   state_print_one(frame->state);
+  //printf("%s\n", frame->is_ref ? "ref" : "owned");
 
 	if (frame->left)
 		__state_debug(frame->left, depth + 1);

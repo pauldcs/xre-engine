@@ -31,14 +31,22 @@ bool sequence_op(xre_frame_t *frame) {
 
   if (frame->state.type == STATE_ARRAY) {
     array = frame->state.array;
+    frame->is_ref = true;
   } else {
     array = array_create(sizeof(xre_frame_t), 8, NULL);
+    frame->is_ref = false;
   }
 
   push_frame(array, left);
   push_frame(array, right);
 
-  return (state_array_ref(frame, array));
+  if (!frame->is_ref)
+    state_free(&frame->state);
+
+  frame->state.type = STATE_ARRAY;
+  frame->state.array = array;
+
+  return (true);
 }
 
 bool separator_op(xre_frame_t *frame) {
@@ -47,8 +55,7 @@ bool separator_op(xre_frame_t *frame) {
   xre_frame_t *left = frame->left;
   xre_frame_t *right = frame->right;
 
-  if (!evaluate(left)
-    || !evaluate(right)) {
+  if (!evaluate(left) || !evaluate(right)) {
     return (false);
   }
 

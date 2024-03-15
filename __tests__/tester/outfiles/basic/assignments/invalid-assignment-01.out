@@ -1,2 +1,1 @@
- 16:31:06 [[0;33mdebug[0m] (srcs/runtime/operations/operators/assignment.c: assignment_op: 40): trace
 error: Type Error: 2 + a = 1: invalid assignement

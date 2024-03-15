@@ -1,3 +1,1 @@
-error: HARDENED_RUNTIME file 'srcs/array.c', line: 401: (p >= self->_nmemb)
-error: HARDENED_RUNTIME file 'srcs/array.c', line: 401: (p >= self->_nmemb)
-8
+12

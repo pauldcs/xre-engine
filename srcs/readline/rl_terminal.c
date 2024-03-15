@@ -29,6 +29,8 @@ rl_init_termcaps(void) {
     "The terminfo database could not be found",
     false
   );
+  
+  (void)ret;
 
   __return_val_if_fail__(ret != 0 && 
     "No such entry",

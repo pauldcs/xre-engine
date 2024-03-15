@@ -40,7 +40,11 @@ bool relational_op(xre_frame_t *frame) {
   if (matching_types) {
     if (left->state.type == STATE_NUMBER) {
       equality = value_cmp(left->state.value, right->state.value);
-    } else {
+    
+    } else if (left->state.type == STATE_STRING) {
+      equality = strcmp(left->state.string, right->state.string);
+    
+    } else if (left->state.type == STATE_ARRAY) {
       equality = array_cmp(left->state.array, right->state.array);
     }
   }

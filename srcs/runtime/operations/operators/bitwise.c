@@ -37,12 +37,10 @@ bool bitwise_lshift_op(xre_frame_t *frame) {
   xre_frame_t *right = frame->right;
 
   if (right->state.value < 0) {
-  
     __return_error(frame, XRE_NEGATIVE_SHIFT_ERROR);
   }
 
   if (right->state.value > 64) {
-  
     __return_error(frame, XRE_EXCEEDS_SHIFT_LIMIT_ERROR);
   }
 
@@ -56,12 +54,10 @@ bool bitwise_rshift_op(xre_frame_t *frame) {
   xre_frame_t *right = frame->right;
 
   if (right->state.value < 0) {
-  
     __return_error(frame, XRE_NEGATIVE_SHIFT_ERROR);
   }
 
   if (right->state.value > 64) {
-  
     __return_error(frame, XRE_EXCEEDS_SHIFT_LIMIT_ERROR);
   }
 
@@ -74,8 +70,7 @@ bool bitwise_op(xre_frame_t *frame) {
   xre_frame_t *left = frame->left;
   xre_frame_t *right = frame->right;
 
-  if (!evaluate(left)
-    || !evaluate(right)) {
+  if (!evaluate(left) || !evaluate(right)) {
     return (false);
   }
 

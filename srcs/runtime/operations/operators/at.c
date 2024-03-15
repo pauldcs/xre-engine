@@ -10,18 +10,15 @@ bool at_op(xre_frame_t *frame) {
   xre_frame_t *left = frame->left;
   xre_frame_t *right = frame->right;
 
-  if (!evaluate(left)
-    || !evaluate(right)) {
+  if (!evaluate(left) || !evaluate(right)) {
     return (false);
   }
 
   if (left->state.type != STATE_ARRAY) {
-  
     __return_error(frame, XRE_INVALID_TYPE_FOR_OPERAND_ERROR);
   }
 
   if (right->state.type != STATE_NUMBER) {
-  
     __return_error(frame, XRE_INVALID_TYPE_FOR_OPERAND_ERROR);
   }
 
@@ -29,7 +26,6 @@ bool at_op(xre_frame_t *frame) {
   size_t value = right->state.value;
   
   if (value >= array_size(array)) {
-
     __return_error(frame,  XRE_OUT_OF_BOUNDS_ACCESS_ERROR);
   }
   
@@ -37,10 +33,13 @@ bool at_op(xre_frame_t *frame) {
   switch (f->state.type) {
     case STATE_STRING:
       return (state_string_ref(frame, f->state.string));
+    
     case STATE_ARRAY:
       return (state_array_ref(frame, f->state.array));
+    
     case STATE_NUMBER:
       return (state_value(frame, f->state.value));
+    
     case STATE_UNDEFINED:
       break;
   }

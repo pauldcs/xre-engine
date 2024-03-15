@@ -12,9 +12,10 @@ bool do_identifier(xre_frame_t *frame) {
     }
 
     symtab_entry_t *item = symtab_get(frame->identifier);
-    if (!item)
+    if (!item) {
       __return_error(frame, XRE_UNBOUND_LOCAL_ERROR);
-
+    }
+    
     state_t *state = &item->state;
     if (state->type == STATE_ARRAY) {
       return (state_array_ref(frame, state->array));

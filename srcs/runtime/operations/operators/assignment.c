@@ -61,8 +61,9 @@ bool assignment_op(xre_frame_t *frame) {
   
   switch (frame->kind) {
   case __ADD_ASSIGN__:
-    if (!add_op(frame))
+    if (!add_op(frame)) {
       return (false);
+    }
     break;
 
   case __SUB_ASSIGN__:
@@ -71,18 +72,21 @@ bool assignment_op(xre_frame_t *frame) {
     break;
 
   case __MUL_ASSIGN__:
-    if (!mul_op(frame))
+    if (!mul_op(frame)) {
       return (false);
+    }  
     break;
 
   case __DIV_ASSIGN__:
-    if (!div_op(frame))
+    if (!div_op(frame)) {
       return (false);
+    }
     break;
 
   case __MOD_ASSIGN__:
-    if (!mod_op(frame))
+    if (!mod_op(frame)) {
       return (false);
+    }
     break;
 
   case __POW_ASSIGN__:
