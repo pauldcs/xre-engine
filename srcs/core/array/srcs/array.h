@@ -423,4 +423,8 @@ __attr_pure PTR_TYPE(array_head)(RDONLY_ARRAY_TYPE(self));
  */
 __attr_pure PTR_TYPE(array_tail)(RDONLY_ARRAY_TYPE(self));
 
+/* Swaps two arrays together array.
+ */
+NONE_TYPE(array_swap)(ARRAY_TYPE(*self), ARRAY_TYPE(*other));
+
 #endif /* __ARRAY_H__*/

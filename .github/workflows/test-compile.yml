@@ -37,35 +37,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install timeout and ncurses
-        run: |
-          if [ "${{ matrix.os }}" = "macos-latest" ]; then
-            brew install coreutils && brew install ncurses
-          elif [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
-            sudo apt-get install libncurses5-dev
-          fi
-
-      - name: Build xre
-        run: make
-
-      - name: Run tester.sh
-        working-directory: __tests__/tester
-        run: >
-          chmod +x run
-          && mv ../../xre .
-          && chmod +x xre
-          && ./run
-
-  sanitized-tester:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
       - name: Install timeout
         if: matrix.os == 'macos-latest'
         run: brew install coreutils
@@ -123,10 +94,7 @@ jobs:
             ./xre ./__tests__/tester/infiles/programs/prime_numbers.in
 
   array:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code

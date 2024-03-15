@@ -17,6 +17,5 @@ bool basic_operand(xre_frame_t *frame) {
     break;
   }
 
-  log_error_condition_reached;
-  return (set_error(frame, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
+  __return_error(frame, XRE_UNDEFINED_BEHAVIOR_ERROR);
 }

@@ -33,7 +33,6 @@ bool relational_op(xre_frame_t *frame) {
 
   if (!evaluate(left) || !evaluate(right)) {
 
-    log_error_return;
     return (false);
   }
 
@@ -70,10 +69,6 @@ bool relational_op(xre_frame_t *frame) {
       }
     }
   
-    log_error_condition_reached;
-    return (set_error(right, XRE_TYPE_ERROR, XRE_TYPE_MISSMATCH_ERROR));
+    __return_error(frame, XRE_TYPE_MISSMATCH_ERROR);
   }
-
-  log_error_condition_reached;
-  return (set_error(right, XRE_INTERNAL_ERROR, XRE_NOT_IMPLEMENTED_ERROR));
 }

@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 xre_frame_t *state_init(xre_ast_t *ast) {
   xre_frame_t *frame = malloc(sizeof(xre_frame_t));
@@ -23,9 +24,10 @@ xre_frame_t *state_init(xre_ast_t *ast) {
     break;
 
   case __NOT__:
+  case __PRINT__:
     frame->left = state_init(ast->uniop);
     break;
-
+  
   default:
     frame->left = state_init(ast->_binop.left);
     frame->right = state_init(ast->_binop.right);
@@ -48,6 +50,7 @@ void state_free(state_t *state) {
 
   case STATE_ARRAY:
     array_kill(state->array);
+    break;
   
   default:
     break;
@@ -64,15 +67,10 @@ void state_deinit(xre_frame_t *frame) {
   case __VAL__:
       break;
 
-  case __NOT__:
-      state_deinit(frame->left);
-      break;
-
   default:
-    state_deinit(frame->left);
-    state_deinit(frame->right);         
+    if (frame->left) state_deinit(frame->left);
+    if (frame->right) state_deinit(frame->right);         
   }
-  state_print(frame);
   state_free(&frame->state);
   free(frame);
 }
@@ -87,17 +85,6 @@ bool change_state_value(xre_frame_t *frame, int64_t value) {
   return (true);
 }
 
-bool change_state_array(xre_frame_t *frame, array_t *array) {
-  __return_val_if_fail__(frame, false);
-  __return_val_if_fail__(array, false);
-
-  state_free(&frame->state);
-
-  frame->state.type = STATE_ARRAY;
-  frame->state.array = array;
-  return (true);
-}
-
 bool change_state_string(xre_frame_t *frame, char *string) {
   __return_val_if_fail__(frame, false);
   __return_val_if_fail__(string, false);
@@ -106,6 +93,16 @@ bool change_state_string(xre_frame_t *frame, char *string) {
 
   frame->state.type = STATE_STRING;
   frame->state.string = string;
+  return (true);
+}
+
+bool change_state_array(xre_frame_t *frame, array_t *array) {
+  __return_val_if_fail__(frame, false);
+  __return_val_if_fail__(array, false);
+
+
+  frame->state.type = STATE_ARRAY;
+  frame->state.array = array;
   return (true);
 }
 
@@ -152,8 +149,7 @@ bool is_true_state(xre_frame_t *frame) {
     return (is_truthy_string(frame->state.string));
   }
 
-  XRE_LOGGER(error, "Unrecognized block type");
-  return (set_error(frame, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
+  __return_error(frame, XRE_UNDEFINED_BEHAVIOR_ERROR);
 }
 
 const char *state_to_str(state_t *state) {
@@ -189,11 +185,11 @@ static void state_print_one(state_t state) {
   }
 
   if (state.type == STATE_ARRAY) {
-    printf("[array: %zu]\n", array_size(state.array));
+    printf("[array %p: %zu]\n", (void*)state.array,  array_size(state.array));
     return;
   }
 
-  printf("[other]\n");
+  printf("[undefined]\n");
 }
 
 void state_print(xre_frame_t *frame) {
@@ -203,7 +199,9 @@ void state_print(xre_frame_t *frame) {
     size_t i = 0;
     while (i < size) {
       printf("%zu.   ", i);
-      state_print_one(*(state_t *)array_at(array, i));
+      xre_frame_t *frame = (xre_frame_t *)array_at(array, i);
+      state_t state = frame->state;
+      state_print_one(state);
       i++;
     }
   } else {
@@ -211,53 +209,28 @@ void state_print(xre_frame_t *frame) {
   }
 }
 
-// static void	state_debug(xre_frame_t *frame, size_t depth);
+static void
+__state_debug (xre_frame_t *frame, size_t depth) {
+	size_t	i;
 
-// static void
-// put_binop (xre_frame_t *frame, size_t depth) {
+	i = 0;
+	while (i++ < depth)
+		write(1, "   ", 3);
 
-// 	inner(frame->left, depth + 1);
-// 	inner(frame->right, depth + 1);
-// }
+  if (!frame) {
+    printf("!NULL!\n");
+		return ;
+	}
 
-// static void
-// put_uniop (xre_frame_t *frame, size_t depth) {
+  state_print_one(frame->state);
 
-// 	inner(frame->left, depth + 1);
-// }
+	if (frame->left)
+		__state_debug(frame->left, depth + 1);
+  if (frame->left)
+		__state_debug(frame->right, depth + 1);
+}
 
-// static void
-// state_debug (xre_frame_t *frame, size_t depth) {
-// 	size_t	i;
-
-// 	i = 0;
-// 	while (i++ < depth)
-// 		write(1, "   ", 3);
-
-//   if (!frame) {
-//     printf("!NULL!\n");
-// 		return ;
-// 	}
-//   if (frame->state.type == STATE_NUMBER) {
-// #ifdef __linux__
-//     printf("value: %ld\n", frame->state.value);
-// #else
-//     printf("value %lld\n", frame->state.value);
-// #endif
-//   }else if (frame->state.type == STATE_STRING) {
-//     printf("string: '%s'\n", frame->state.string);
-//   } else {
-//     write(1, "> ", 2);
-// 	  printf("[%s]\n", expr_kind_to_string(ast->kind));
-//   }
-
-// 	if (ast->token._type & (EXPR_OP_TYPE_BINOP))
-// 		put_binop(ast, depth);
-// 	else if (ast->token._type & EXPR_OP_TYPE_UNIOP)
-// 		put_uniop(ast, depth);
-// }
-
-// void
-// ast_show (xre_ast_t *ast) {
-// 	inner(ast, 0);
-// }
+void
+state_debug (xre_frame_t *frame) {
+	__state_debug(frame, 0);
+}

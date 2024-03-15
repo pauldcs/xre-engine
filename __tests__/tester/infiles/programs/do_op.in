@@ -1,0 +1,13 @@
+
+list = (6, "*", 2);
+
+c = list.1;
+
+$(
+            c == "+"  do list.0 + list.2
+      else  c == "-"  do list.0 - list.2
+      else  c == "*"  do list.0 * list.2
+      else  c == "/"  do list.0 / list.2
+      else
+            exit
+)

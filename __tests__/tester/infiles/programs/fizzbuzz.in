@@ -2,8 +2,8 @@ i = 0,
 
 (i += 1) < 100
 loop 
-	      ! i % 15 do fmt :: "fizzbuzz"
-	else  ! i %  3 do fmt :: "fizz"
-	else  ! i %  5 do fmt :: "buzz"
-	else              fmt :: i
+	      ! i % 15 do $"fizzbuzz"
+	else  ! i %  3 do $"fizz"
+	else  ! i %  5 do $"buzz"
+	else              $i
 	

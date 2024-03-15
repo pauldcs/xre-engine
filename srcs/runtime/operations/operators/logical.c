@@ -1,5 +1,4 @@
 #include "xre_assert.h"
-#include "xre_frame.h"
 #include "xre_log.h"
 #include "xre_runtime.h"
 #include <stdbool.h>
@@ -12,14 +11,12 @@ bool do_op(xre_frame_t *frame) {
 
   if (!evaluate(left)) {
 
-    log_error_return;
     return (false);
   }
 
   if (is_true_state(left)) {
     if (!evaluate(right)) {
 
-      log_error_return;
       return (false);
     }
     return (change_state_copy(frame, right));
@@ -35,15 +32,11 @@ bool else_op(xre_frame_t *frame) {
   xre_frame_t *right = frame->right;
 
   if (!evaluate(left)) {
-
-    log_error_return;
     return (false);
   }
 
   if (!is_true_state(left)) {
     if (!evaluate(right)) {
-
-      log_error_return;
       return (false);
     }
     return (change_state_copy(frame, right));
@@ -59,15 +52,11 @@ bool and_op(xre_frame_t *frame) {
   xre_frame_t *right = frame->right;
 
   if (!evaluate(left)) {
-
-    log_error_return;
     return (false);
   }
 
   if (is_true_state(left)) {
     if (!evaluate(right)) {
-
-      log_error_return;
       return (false);
     }
   }
@@ -82,8 +71,6 @@ bool or_op(xre_frame_t *frame) {
   xre_frame_t *right = frame->right;
 
   if (!evaluate(left)) {
-
-    log_error_return;
     return (false);
   }
 
@@ -92,8 +79,6 @@ bool or_op(xre_frame_t *frame) {
   }
 
   if (!evaluate(right)) {
-
-    log_error_return;
     return (false);
   }
 
@@ -120,6 +105,5 @@ bool logical_op(xre_frame_t *frame) {
     break;
   }
 
-  log_error_condition_reached;
-  return (set_error(frame, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
+  __return_error(frame, XRE_UNDEFINED_BEHAVIOR_ERROR);
 }

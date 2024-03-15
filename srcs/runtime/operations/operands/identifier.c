@@ -9,11 +9,10 @@ bool do_identifier(xre_frame_t *frame) {
 
     if (!strcmp(frame->initial.string, "exit")) {
     
-      log_error_condition_reached;
-      return (set_error(frame, XRE_EXIT_ERROR, XRE_EXIT_CALLED_ERROR));
+      __return_error(frame, XRE_EXIT_CALLED_ERROR);
     }
 
-    stack_item_t *item = runtime_variables_get(frame->initial.string);
+    symtab_entry_t *item = symtab_get(frame->initial.string);
     if (item) {
       state_t *state = &item->state;
       if (state->type == STATE_ARRAY) {
@@ -28,12 +27,10 @@ bool do_identifier(xre_frame_t *frame) {
         return (change_state_value(frame, state->value));
       }
 
-      log_error_condition_reached;
-      return (set_error(frame, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
+      __return_error(frame, XRE_UNDEFINED_BEHAVIOR_ERROR);
     }
 
-    log_error_condition_reached;
-    return (set_error(frame, XRE_RUNTIME_ERROR, XRE_UNBOUND_LOCAL_ERROR));
+    __return_error(frame, XRE_UNBOUND_LOCAL_ERROR);
 
 }
 
@@ -44,6 +41,5 @@ bool identifier_operand(xre_frame_t *frame) {
     return (do_identifier(frame));
   }
 
-  log_error_condition_reached;
-  return (set_error(frame, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
+  __return_error(frame, XRE_UNDEFINED_BEHAVIOR_ERROR);
 }

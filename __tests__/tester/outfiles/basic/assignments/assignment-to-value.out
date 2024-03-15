@@ -1,1 +1,1 @@
-error: Syntax Error: 1 + 1 = 2: Invalid assignement
+error: Type Error: 1 + 1 = 2: invalid assignement

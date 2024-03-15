@@ -8,7 +8,7 @@
 #define PREV_TOKEN_KIND ((xre_token_t *)array_at(tokens, idx - 2))->_kind
 #define PREV_TOKEN_TYPE ((xre_token_t *)array_at(tokens, idx - 2))->_type
 
-t_xre_error syntax_error;
+error_notification_t syntax_error_g;
 
 bool xre_expr_syntax(array_t *tokens) {
   __return_val_if_fail__(tokens, false);
@@ -18,7 +18,7 @@ bool xre_expr_syntax(array_t *tokens) {
   size_t idx = 0;
   int open = 0;
 
-  (void)memset(&syntax_error, 0, sizeof(syntax_error));
+  (void)memset(&syntax_error_g, 0, sizeof(syntax_error_g));
 
   while (size--) {
     token = (xre_token_t *)array_at(tokens, idx++);
@@ -42,10 +42,9 @@ bool xre_expr_syntax(array_t *tokens) {
         || PREV_TOKEN_KIND == __LPAREN__ || PREV_TOKEN_KIND == __START__)
         continue;
 
-      syntax_error.error.type = XRE_SYNTAX_ERROR;
-      syntax_error.error.subtype = XRE_UNEXPECTED_OPERAND;
+      syntax_error_g.class = error_type_to_class(XRE_UNEXPECTED_OPERAND_ERROR);
+      syntax_error_g.type = XRE_UNEXPECTED_OPERAND_ERROR;
 
-      // assert(false);
       goto syntax_error;
       
     case __ASSIGN__:
@@ -59,30 +58,28 @@ bool xre_expr_syntax(array_t *tokens) {
       if (PREV_TOKEN_KIND == __IDENTIFIER__)
         continue;
 
-      syntax_error.error.type = XRE_SYNTAX_ERROR;
-      syntax_error.error.subtype = XRE_INVALID_ASSIGMENT_ERROR;
+      syntax_error_g.class = error_type_to_class(XRE_INVALID_ASSIGMENT_ERROR);
+      syntax_error_g.type = XRE_INVALID_ASSIGMENT_ERROR;
 
-      //assert(false);
       goto syntax_error;
       
     case __NOT__:
+    case __PRINT__:
       if (PREV_TOKEN_TYPE & (EXPR_OP_TYPE_BINOP | EXPR_OP_TYPE_UNIOP)
           || PREV_TOKEN_KIND == __LPAREN__ || PREV_TOKEN_KIND == __START__)
         continue;
 
-      syntax_error.error.type = XRE_SYNTAX_ERROR;
-      syntax_error.error.subtype = XRE_UNEXPECTED_OPERATOR;
+      syntax_error_g.class = error_type_to_class(XRE_UNEXPECTED_OPERATOR_ERROR);
+      syntax_error_g.type = XRE_UNEXPECTED_OPERATOR_ERROR;
 
-      // assert(false);
       goto syntax_error;
 
     case __RPAREN__:
       if (open == 0) {
 
-        syntax_error.error.type = XRE_SYNTAX_ERROR;
-        syntax_error.error.subtype = XRE_UNMATCHED_PARENTHESIS;
+      syntax_error_g.class = error_type_to_class(XRE_UNMATCHED_PARENTHESIS_ERROR);
+      syntax_error_g.type = XRE_UNMATCHED_PARENTHESIS_ERROR;
 
-        // assert(false);
         goto syntax_error;
       }
       open--;
@@ -113,6 +110,7 @@ bool xre_expr_syntax(array_t *tokens) {
     case __BXOR__:
     case __SEQUENCE_POINT__:
     case __SEPARATOR__:
+    case __AT__:
     case __INJECT__:
     case __LOOP__:
     case __ANNOTATE__:
@@ -122,10 +120,9 @@ bool xre_expr_syntax(array_t *tokens) {
       if (PREV_TOKEN_TYPE & EXPR_TYPE_VALUE || PREV_TOKEN_KIND == __RPAREN__)
         continue;
 
-      syntax_error.error.type = XRE_SYNTAX_ERROR;
-      syntax_error.error.subtype = XRE_UNEXPECTED_OPERATOR;
+      syntax_error_g.class = error_type_to_class(XRE_UNEXPECTED_OPERATOR_ERROR);
+      syntax_error_g.type = XRE_UNEXPECTED_OPERATOR_ERROR;
 
-      // assert(false);
       goto syntax_error;
     }
 
@@ -133,17 +130,17 @@ bool xre_expr_syntax(array_t *tokens) {
   }
 
   if (open) {
-    syntax_error.error.type = XRE_SYNTAX_ERROR;
-    syntax_error.error.subtype = XRE_UNMATCHED_PARENTHESIS;
+    syntax_error_g.class = error_type_to_class(XRE_UNMATCHED_PARENTHESIS_ERROR);
+    syntax_error_g.type = XRE_UNMATCHED_PARENTHESIS_ERROR;
 
-    // assert(false);
     goto syntax_error;
   }
 
   return (true);
 
 syntax_error:
-  xre_error(&syntax_error, token);
+  syntax_error_g.src = token;
+  xre_error(&syntax_error_g);
 
 prison:
   return (false);

@@ -1,5 +1,4 @@
 #include "xre_assert.h"
-#include "xre_frame.h"
 #include "xre_log.h"
 #include "xre_parse.h"
 #include "xre_runtime.h"
@@ -42,8 +41,7 @@ bool div_op(xre_frame_t *frame) {
   xre_frame_t *right = frame->right;
 
   if (right->state.value == 0) {
-    log_error_condition_reached;
-    return set_error(right, XRE_ARITHMETIC_ERROR, XRE_ZERO_DIVISION_ERROR);
+    __return_error(frame, XRE_ZERO_DIVISION_ERROR);
   }
 
   return (change_state_value(frame, left->state.value / right->state.value));
@@ -57,8 +55,7 @@ bool mod_op(xre_frame_t *frame) {
   xre_frame_t *right = frame->right;
 
   if (right->state.value == 0) {
-    log_error_condition_reached;
-    return set_error(right, XRE_ARITHMETIC_ERROR, XRE_ZERO_DIVISION_ERROR);
+    __return_error(frame, XRE_ZERO_DIVISION_ERROR);
   }
 
   return (change_state_value(frame, left->state.value % right->state.value));
@@ -72,27 +69,21 @@ bool arithmetic_op(xre_frame_t *frame) {
   xre_frame_t *right = frame->right;
 
   if (!evaluate(left)) {
-    
-    log_error_return;
     return (false);
   }
 
   if (!evaluate(right)) {
-
-    log_error_return;
     return (false);
   }
 
   if (left->state.type != STATE_NUMBER) {
   
-    log_error_condition_reached;
-    return (set_error(left, XRE_TYPE_ERROR, XRE_INVALID_TYPE_FOR_OPERAND));
+    __return_error(frame, XRE_INVALID_TYPE_FOR_OPERAND_ERROR);
   }
 
   if (left->state.type != right->state.type) {
   
-    log_error_condition_reached;
-    return (set_error(right, XRE_TYPE_ERROR, XRE_TYPE_MISSMATCH_ERROR));
+    __return_error(frame, XRE_TYPE_MISSMATCH_ERROR);
   }
 
   switch (frame->kind) {
@@ -123,6 +114,5 @@ bool arithmetic_op(xre_frame_t *frame) {
     break;
   }
 
-  log_error_condition_reached;
-  return (set_error(frame, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
+  __return_error(frame, XRE_UNDEFINED_BEHAVIOR_ERROR);
 }

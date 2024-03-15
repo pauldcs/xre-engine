@@ -12,13 +12,11 @@ bool loop_op(xre_frame_t *frame) {
 
   for (;;) {
     if (!max_iterations--) {
-      log_error_condition_reached;
-      return (set_error(frame, XRE_RUNTIME_ERROR, XRE_NOT_TERMINATED_ERROR));
+      __return_error(frame, XRE_MAX_ITERATIONS_ERROR);
     }
 
     if (!evaluate(left)) {
 
-      log_error_return;
       return (false);
     }
 
@@ -28,7 +26,6 @@ bool loop_op(xre_frame_t *frame) {
 
     if (!evaluate(right)) {
 
-      log_error_return;
       return (false);
     }
 

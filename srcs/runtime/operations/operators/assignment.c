@@ -1,18 +1,12 @@
 #include "xre_assert.h"
-#include "xre_frame.h"
 #include "xre_log.h"
 #include "xre_operations.h"
 #include "xre_runtime.h"
 
-bool simple_assignment(xre_frame_t *initial_frame, const char *key, varmode_e mode, xre_frame_t *frame) {
+bool simple_assignment(xre_frame_t *initial_frame, const char *key, xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
   
-  if (!runtime_variables_set(
-      initial_frame,
-      key,
-      frame->state,
-      mode
-    )) {
+  if (!symtab_set(initial_frame, key, frame->state)) {
     return (false);
   }
   
@@ -20,22 +14,16 @@ bool simple_assignment(xre_frame_t *initial_frame, const char *key, varmode_e mo
   return (true);
 }
 
-bool reassignement(xre_frame_t *initial_frame, const char *key, varmode_e mode, xre_frame_t *frame) {
+bool reassignement(xre_frame_t *initial_frame, const char *key, xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
 
   xre_frame_t *left = frame->left;
-  if (!runtime_variables_get(left->initial.string)) {
+  if (!symtab_get(left->initial.string)) {
     
-    log_error_condition_reached;
-    return (set_error(left, XRE_RUNTIME_ERROR, XRE_UNBOUND_LOCAL_ERROR));
+    __return_error(frame, XRE_UNBOUND_LOCAL_ERROR);
   }
 
-  if (!runtime_variables_set(
-      initial_frame,
-      key,
-      frame->state,
-      mode
-    )) {
+  if (!symtab_set(initial_frame, key, frame->state)) {
     return (false);
   }
 
@@ -49,39 +37,27 @@ bool assignment_op(xre_frame_t *frame) {
   xre_frame_t *left = frame->left;
   xre_frame_t *right = frame->right;
 
-  if (left->kind == __ANNOTATE__
-    && !evaluate(left)) {
-
-    log_error_return;
-    return (false);
-  }
-
   if (left->kind != __IDENTIFIER__ ) {
-    log_error_condition_reached;
-    return set_error(frame, XRE_TYPE_ERROR, XRE_INVALID_ASSIGMENT_ERROR);
+    __return_error(frame, XRE_INVALID_ASSIGMENT_ERROR);
   }
 
   if (!evaluate(right)) {
-
-    log_error_return;
     return (false);
   }
 
   if (frame->kind == __ASSIGN__) {
-    return (simple_assignment(frame, left->initial.string, left->mode, right));
+    return (simple_assignment(frame, left->initial.string, right));
   }
 
-  stack_item_t *item = runtime_variables_get(left->initial.string);
+  symtab_entry_t *item = symtab_get(left->initial.string);
   if (!item) {
-    log_error_condition_reached;
-    return set_error(right, XRE_RUNTIME_ERROR, XRE_UNBOUND_LOCAL_ERROR);
+    __return_error(frame, XRE_UNBOUND_LOCAL_ERROR);
   }
 
   state_t *state = &item->state;
 
   if (state->type != STATE_NUMBER) {
-    log_error_condition_reached;
-    return set_error(right, XRE_TYPE_ERROR, XRE_INVALID_TYPE_FOR_OPERAND);
+    __return_error(frame, XRE_INVALID_TYPE_FOR_OPERAND_ERROR);
   }
 
   change_state_value(left, state->value);
@@ -114,9 +90,8 @@ bool assignment_op(xre_frame_t *frame) {
 
   case __POW_ASSIGN__:
   default:
-    log_error_condition_reached;
-    return (set_error(frame, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
+    __return_error(frame, XRE_UNDEFINED_BEHAVIOR_ERROR);
   }
 
-  return (reassignement(frame, left->initial.string, left->mode, frame));
+  return (reassignement(frame, left->initial.string, frame));
 }

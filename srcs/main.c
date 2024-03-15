@@ -13,7 +13,7 @@
 
 t_xre_state  __xre_state__ = {
 	.title = "xre",
-	.version = "0.5",
+	.version = "0.5.1",
 };
 
 static bool
@@ -143,6 +143,7 @@ main(int ac, char *av[]) {
 					}
 				
 					ast_free(ast);
+					free(args);
 					return (true);
 		
 			} else {

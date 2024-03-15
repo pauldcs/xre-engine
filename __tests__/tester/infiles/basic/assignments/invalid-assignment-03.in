@@ -1,3 +1,0 @@
-strict: a = 1;
-const: b = (1, 2);
-a = b

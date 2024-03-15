@@ -554,6 +554,12 @@ BOOL_TYPE(array_append_from_capacity)(ARRAY_TYPE(self), SIZE_TYPE(n)) {
   return (true);
 }
 
+NONE_TYPE(array_swap)(ARRAY_TYPE(*self), ARRAY_TYPE(*other)) {
+  ARRAY_TYPE(tmp) = *self;
+  *self = *other;
+  *other = tmp;
+}
+
 BOOL_TYPE(array_slimcheck)(ARRAY_TYPE(self)) {
   HR_COMPLAIN_IF(self == NULL);
 

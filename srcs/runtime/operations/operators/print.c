@@ -2,7 +2,7 @@
 #include "xre_parse.h"
 #include "xre_runtime.h"
 
-bool not_op(xre_frame_t *frame) {
+bool print_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
   xre_frame_t *uni = frame->left;
@@ -11,5 +11,7 @@ bool not_op(xre_frame_t *frame) {
     return (false);
   }
 
-  return (change_state_value(frame, !is_true_state(uni)));
+  state_print(uni);
+
+  return (change_state_copy(frame, uni));
 }

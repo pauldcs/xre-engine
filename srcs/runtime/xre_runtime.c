@@ -2,18 +2,16 @@
 #include "xre_parse.h"
 #include "xre_args.h"
 #include "xre_assert.h"
-#include "xre_frame.h"
 #include "xre_log.h"
 #include "xre_operations.h"
 #include <stdbool.h>
 
 bool _has_error = false;
-t_xre_error _error;
+error_notification_t _error;
 
-bool set_error(xre_frame_t *frame, t_xre_error_type type,
-               t_xre_error_subtype subtype) {
-  _error.error.type = type;
-  _error.error.subtype = subtype;
+bool set_error(xre_frame_t *frame, error_type_e type) {
+  _error.class = error_type_to_class(type);
+  _error.type = type;
   _error.src = frame->token;
   _has_error = true;
   return (false);
@@ -57,9 +55,6 @@ bool binop_exec(xre_frame_t *frame) {
   case __RSHIFT__:
     return (bitwise_op(frame));
   
-  case __ANNOTATE__:
-    return (annotation_op(frame));
-    
   case __LOOP__:
     return (loop_op(frame));
 
@@ -68,9 +63,9 @@ bool binop_exec(xre_frame_t *frame) {
 
   case __SEPARATOR__:
     return (separator_op(frame));
-
-  case __INJECT__:
-    return (inject_op(frame));
+  
+  case __AT__:
+    return (at_op(frame));
 
   case __DO__:
   case __ELSE__:
@@ -82,20 +77,21 @@ bool binop_exec(xre_frame_t *frame) {
     break;
   }
 
-  log_error_condition_reached;
-  return (set_error(frame, XRE_INTERNAL_ERROR, XRE_NOT_IMPLEMENTED_ERROR));
+  __return_error(frame, XRE_NOT_IMPLEMENTED_ERROR);
 }
 
 bool uniop_exec(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
   switch (frame->kind) {
+  case __PRINT__:
+    return (print_op(frame));
+  
   case __NOT__:
     return (not_op(frame));
 
   default:
-    log_error_condition_reached;
-    return (set_error(frame, XRE_INTERNAL_ERROR, XRE_NOT_IMPLEMENTED_ERROR));
+    __return_error(frame, XRE_NOT_IMPLEMENTED_ERROR);
   }
 }
 
@@ -111,15 +107,14 @@ bool operand_exec(xre_frame_t *frame) {
       return (basic_operand(frame));
   
   default:
-    log_error_condition_reached;
-    return (set_error(frame, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
+    __return_error(frame, XRE_UNDEFINED_BEHAVIOR_ERROR);
   }
 }
 
 bool evaluate(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
-  switch (frame->type) {
+  switch (expr_type_by_kind(frame->kind)) {
   case EXPR_TYPE_VALUE:
     return operand_exec(frame);
 
@@ -131,8 +126,7 @@ bool evaluate(xre_frame_t *frame) {
 
   case EXPR_TYPE_OTHER:
   default:
-    log_error_condition_reached;
-    return (set_error(frame, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
+    __return_error(frame, XRE_UNDEFINED_BEHAVIOR_ERROR);
   }
 }
 
@@ -152,14 +146,14 @@ bool xre_runtime(xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
 
 
-  if (!runtime_variables_init()) {
+  if (!symtab_init()) {
     return (false);
   }
 
   if (!evaluate(frame)) {
     if (error_occurred()) {
-      xre_error(&_error, _error.src);
-      if (_error.error.type == XRE_EXIT_ERROR)
+      xre_error(&_error);
+      if (_error.type == XRE_EXIT_CALLED_ERROR)
         exit(1);
       
       goto prison;
@@ -173,10 +167,11 @@ bool xre_runtime(xre_frame_t *frame) {
     state_print(frame);
   }
 
-  runtime_variables_deinit();
+  //state_debug(frame);
+  symtab_deinit();
   return (true);
 
 prison:
-  runtime_variables_deinit();
+  symtab_deinit();
   return (false);
 }

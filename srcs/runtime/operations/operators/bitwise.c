@@ -43,14 +43,12 @@ bool bitwise_lshift_op(xre_frame_t *frame) {
 
   if (right->state.value < 0) {
   
-    log_error_condition_reached;
-    return set_error(right, XRE_VALUE_ERROR, XRE_NEGATIVE_SHIFT_ERROR);
+    __return_error(frame, XRE_NEGATIVE_SHIFT_ERROR);
   }
 
   if (right->state.value > 64) {
   
-    log_error_condition_reached;
-    return set_error(right, XRE_VALUE_ERROR, XRE_EXCEEDS_SHIFT_LIMIT_ERROR);
+    __return_error(frame, XRE_EXCEEDS_SHIFT_LIMIT_ERROR);
   }
 
   return (change_state_value(frame, left->state.value << right->state.value));
@@ -65,14 +63,12 @@ bool bitwise_rshift_op(xre_frame_t *frame) {
 
   if (right->state.value < 0) {
   
-    log_error_condition_reached;
-    return set_error(right, XRE_VALUE_ERROR, XRE_NEGATIVE_SHIFT_ERROR);
+    __return_error(frame, XRE_NEGATIVE_SHIFT_ERROR);
   }
 
   if (right->state.value > 64) {
   
-    log_error_condition_reached;
-    return set_error(right, XRE_VALUE_ERROR, XRE_EXCEEDS_SHIFT_LIMIT_ERROR);
+    __return_error(frame, XRE_EXCEEDS_SHIFT_LIMIT_ERROR);
   }
 
   return (change_state_value(frame, left->state.value >> right->state.value));
@@ -87,26 +83,22 @@ bool bitwise_op(xre_frame_t *frame) {
 
   if (!evaluate(left)) {
     
-    log_error_return;
     return (false);
   }
 
   if (!evaluate(right)) {
 
-    log_error_return;
     return (false);
   }
 
   if (left->state.type != STATE_NUMBER) {
   
-    log_error_condition_reached;
-    return (set_error(left, XRE_TYPE_ERROR, XRE_INVALID_TYPE_FOR_OPERAND));
+    __return_error(frame, XRE_INVALID_TYPE_FOR_OPERAND_ERROR);
   }
 
   if (left->state.type != right->state.type) {
   
-    log_error_condition_reached;
-    return (set_error(right, XRE_TYPE_ERROR, XRE_TYPE_MISSMATCH_ERROR));
+    __return_error(frame, XRE_TYPE_MISSMATCH_ERROR);
   }
 
   switch (frame->kind) {
@@ -129,6 +121,5 @@ bool bitwise_op(xre_frame_t *frame) {
     XRE_LOGGER(error, "Unrecognized arithmetic operation");
   }
 
-  log_error_condition_reached;
-  return (set_error(frame, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
+  __return_error(frame, XRE_UNDEFINED_BEHAVIOR_ERROR);
 }
