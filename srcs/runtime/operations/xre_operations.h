@@ -2,6 +2,7 @@
 # define __XRE_OPERATIONS_H__
 
 # include "xre_runtime.h"
+# include <stdbool.h>
 
 bool arithmetic_op(xre_frame_t *frame);
 bool relational_op(xre_frame_t *frame);

@@ -47,22 +47,6 @@ bool xre_expr_syntax(array_t *tokens) {
 
       goto syntax_error;
       
-    case __ASSIGN__:
-    case __ADD_ASSIGN__:
-    case __SUB_ASSIGN__:
-    case __MUL_ASSIGN__:
-    case __DIV_ASSIGN__:
-    case __MOD_ASSIGN__:
-    case __POW_ASSIGN__:
-
-      if (PREV_TOKEN_KIND == __IDENTIFIER__)
-        continue;
-
-      syntax_error_g.class = error_type_to_class(XRE_INVALID_ASSIGMENT_ERROR);
-      syntax_error_g.type = XRE_INVALID_ASSIGMENT_ERROR;
-
-      goto syntax_error;
-      
     case __NOT__:
     case __PRINT__:
       if (PREV_TOKEN_TYPE & (EXPR_OP_TYPE_BINOP | EXPR_OP_TYPE_UNIOP)
@@ -116,6 +100,13 @@ bool xre_expr_syntax(array_t *tokens) {
     case __ANNOTATE__:
     case __SCOPE_RESOLUTION__:
     case __END__:
+    case __ASSIGN__:
+    case __ADD_ASSIGN__:
+    case __SUB_ASSIGN__:
+    case __MUL_ASSIGN__:
+    case __DIV_ASSIGN__:
+    case __MOD_ASSIGN__:
+    case __POW_ASSIGN__:
 
       if (PREV_TOKEN_TYPE & EXPR_TYPE_VALUE || PREV_TOKEN_KIND == __RPAREN__)
         continue;
