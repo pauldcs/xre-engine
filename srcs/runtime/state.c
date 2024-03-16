@@ -22,12 +22,14 @@ xre_frame_t *state_init(xre_ast_t *ast) {
 
   case __STRING_LITERAL__:
     frame->state.attrs = STATE_STRING;
-    frame->state.string = strdup(ast->string);
+    frame->state.string = (char *)ast->string;
+    frame->state.attrs |= REFERENCE_FLAG;
     break;
   
   case __IDENTIFIER__:
     frame->state.attrs = STATE_UNDEFINED;
-    frame->identifier = strdup(ast->string);
+    frame->identifier = (char *)ast->string;
+    frame->state.attrs |= REFERENCE_FLAG;
     break;
 
   case __NOT__:
@@ -50,10 +52,7 @@ xre_frame_t *state_init(xre_ast_t *ast) {
 }
 
 void state_free(xre_state_t *state) {
-  if (IS_FLAG_SET(*state, STATE_STRING)) {
-    free((char *)state->string);
-  
-  } else if (IS_FLAG_SET(*state, STATE_ARRAY)) {
+  if (IS_FLAG_SET(*state, STATE_ARRAY)) {
     array_kill(state->array);
   }  
 }
@@ -65,9 +64,6 @@ void state_deinit(xre_frame_t *frame) {
   if (!IS_REF_STATE(frame->state)) {
     state_free(&frame->state);
   }
-  
-  if (frame->kind == __IDENTIFIER__)
-    free((void *)frame->identifier);
 
   free(frame);
 }
@@ -76,6 +72,10 @@ void state_deinit(xre_frame_t *frame) {
 bool state_value(xre_frame_t *frame, int64_t value) {
   __return_val_if_fail__(frame, false);
 
+  if (!IS_REF_STATE(frame->state)) {
+    state_free(&frame->state);
+  }
+  
   frame->state.attrs = STATE_NUMBER;
   frame->state.value = value;
   return (true);

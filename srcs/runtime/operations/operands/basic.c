@@ -6,5 +6,5 @@ bool value_op(xre_frame_t *frame) {
 }
 
 bool string_op(xre_frame_t *frame) {
-  return (frame);
+    return (frame);
 }
