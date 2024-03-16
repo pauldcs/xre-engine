@@ -32,7 +32,7 @@ symtab_entry_t *symtab_get(const char *key) {
   return (NULL);
 }
 
-static bool symtab_add(const char *key, state_t state, xre_frame_t *frame) {
+static bool symtab_add(const char *key, xre_state_t state, xre_frame_t *frame) {
   __return_val_if_fail__(key, false);
 
   symtab_entry_t item;
@@ -48,7 +48,7 @@ static bool symtab_add(const char *key, state_t state, xre_frame_t *frame) {
   return (true);
 }
 
-bool symtab_set(xre_frame_t *frame, const char *key, state_t state) {
+bool symtab_set(xre_frame_t *frame, const char *key, xre_state_t state) {
   __return_val_if_fail__(key, false);
   __return_val_if_fail__(frame, false);
   
@@ -57,7 +57,7 @@ bool symtab_set(xre_frame_t *frame, const char *key, state_t state) {
     return (symtab_add(key, state, frame));
   }
 
-  (void)memmove(&override->state, &state, sizeof(state_t));
+  (void)memmove(&override->state, &state, sizeof(xre_state_t));
 
   return (true);
 }

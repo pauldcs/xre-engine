@@ -11,65 +11,60 @@
 
 xre_frame_t *state_init(xre_ast_t *ast) {
   xre_frame_t *frame = malloc(sizeof(xre_frame_t));
-  (void)memset(frame, 0, sizeof(xre_frame_t));
+  
+  (void)memset(frame, 0x00, sizeof(xre_frame_t));
 
   switch (ast->kind) {
   case __VAL__:
-    frame->state.type = STATE_NUMBER;
+    frame->state.attrs = STATE_NUMBER;
     frame->state.value = ast->value;
     break;
 
   case __STRING_LITERAL__:
-    frame->state.type = STATE_STRING;
+    frame->state.attrs = STATE_STRING;
     frame->state.string = strdup(ast->string);
     break;
   
   case __IDENTIFIER__:
+    frame->state.attrs = STATE_UNDEFINED;
     frame->identifier = strdup(ast->string);
-    frame->state.type = STATE_UNDEFINED;
     break;
 
   case __NOT__:
   case __PRINT__:
+    frame->state.attrs = STATE_UNDEFINED;
     frame->left = state_init(ast->uniop);
-    frame->state.type = STATE_UNDEFINED;
     break;
   
   default:
+    frame->state.attrs = STATE_UNDEFINED;
     frame->left = state_init(ast->_binop.left);
     frame->right = state_init(ast->_binop.right);
-    frame->state.type = STATE_UNDEFINED;
     break;
   }
 
   frame->kind = ast->kind;
-  frame->type = ast->type;
   frame->token = (xre_token_t *)&ast->token;
 
   return (frame);
 }
 
-void state_free(state_t *state) {
-  switch (state->type) {
-  case STATE_STRING:
+void state_free(xre_state_t *state) {
+  if (IS_FLAG_SET(*state, STATE_STRING)) {
     free((char *)state->string);
-    break;
   
-  case STATE_ARRAY:
+  } else if (IS_FLAG_SET(*state, STATE_ARRAY)) {
     array_kill(state->array);
-    break;
-  
-  default:
-    break;
-  }
+  }  
 }
 
 void state_deinit(xre_frame_t *frame) {
   if (frame->left) state_deinit(frame->left);
   if (frame->right) state_deinit(frame->right);         
   
-  if (!frame->is_ref)
+  if (!IS_REF_STATE(frame->state)) {
     state_free(&frame->state);
+  }
   
   if (frame->kind == __IDENTIFIER__)
     free((void *)frame->identifier);
@@ -80,26 +75,19 @@ void state_deinit(xre_frame_t *frame) {
 
 bool state_value(xre_frame_t *frame, int64_t value) {
   __return_val_if_fail__(frame, false);
-  
-  if (!frame->is_ref)
-    state_free(&frame->state);
 
-  frame->state.type = STATE_NUMBER;
+  frame->state.attrs = STATE_NUMBER;
   frame->state.value = value;
   return (true);
 }
 
-bool state_string_ref(xre_frame_t *frame, char *string) {
+bool state_string(xre_frame_t *frame, char *string) {
   __return_val_if_fail__(frame, false);
   __return_val_if_fail__(string, false);
 
-  if (!frame->is_ref)
-    state_free(&frame->state);
-
-  frame->state.type = STATE_STRING;
+  frame->state.attrs = STATE_STRING;
   frame->state.string = string;
 
-  frame->is_ref = true;
   return (true);
 }
 
@@ -107,27 +95,23 @@ bool state_array(xre_frame_t *frame, array_t *array) {
   __return_val_if_fail__(frame, false);
   __return_val_if_fail__(array, false);
 
-  if (!frame->is_ref)
-    state_free(&frame->state);
-
-  frame->state.type = STATE_ARRAY;
+  frame->state.attrs = STATE_ARRAY;
   frame->state.array = array;
 
-  frame->is_ref = false;
+  return (true);
+}
+
+bool state_string_ref(xre_frame_t *frame, char *string) {
+  (void)state_string(frame, string);
+  ADD_FLAG(frame->state, REFERENCE_FLAG);
+
   return (true);
 }
 
 bool state_array_ref(xre_frame_t *frame, array_t *array) {
-  __return_val_if_fail__(frame, false);
-  __return_val_if_fail__(array, false);
+  (void)state_array(frame, array);
+  ADD_FLAG(frame->state, REFERENCE_FLAG);
 
-  if (!frame->is_ref)
-    state_free(&frame->state);
-
-  frame->state.type = STATE_ARRAY;
-  frame->state.array = array;
-
-  frame->is_ref = true;
   return (true);
 }
 
@@ -135,20 +119,15 @@ bool state_copy_ref(xre_frame_t *this, xre_frame_t *that) {
   __return_val_if_fail__(this, false);
   __return_val_if_fail__(that, false);
 
-  if (!this->is_ref)
-    state_free(&this->state);
-
-  if (that->state.type == STATE_ARRAY) {
-    this->is_ref = true;
+  if (IS_FLAG_SET(that->state, STATE_ARRAY)) {
     return (state_array_ref(this, that->state.array));
   }
   
-  if (that->state.type == STATE_STRING) {
-    this->is_ref = true;
+  if (IS_FLAG_SET(that->state, STATE_STRING)) {
     return (state_string_ref(this, that->state.string));
   }
 
-  if (that->state.type == STATE_NUMBER) {
+  if (IS_FLAG_SET(that->state, STATE_NUMBER)) {
     return (state_value(this, that->state.value));
   }
 
@@ -167,40 +146,40 @@ static bool is_truthy_array(const array_t *array) {
 
 bool is_true_state(xre_frame_t *frame) {
 
-  if (frame->state.type == STATE_NUMBER) {
+  if (IS_FLAG_SET(frame->state, STATE_NUMBER)) {
     return (is_truthy_value(frame->state.value));
   }
 
-  if (frame->state.type == STATE_ARRAY) {
+  if (IS_FLAG_SET(frame->state, STATE_ARRAY)) {
     return (is_truthy_array(frame->state.array));
   }
 
-  if (frame->state.type == STATE_STRING) {
+  if (IS_FLAG_SET(frame->state, STATE_STRING)) {
     return (is_truthy_string(frame->state.string));
   }
 
   __return_error(frame, XRE_UNDEFINED_BEHAVIOR_ERROR);
 }
 
-const char *state_to_str(state_t *state) {
+const char *state_to_str(xre_state_t *state) {
 
-  if (state->type == STATE_NUMBER) {
+  if (IS_FLAG_SET(*state, STATE_NUMBER)) {
     return ("number");
   }
 
-  if (state->type == STATE_ARRAY) {
+  if (IS_FLAG_SET(*state, STATE_ARRAY)) {
     return ("array");
   }
 
-  if (state->type == STATE_STRING) {
+  if (IS_FLAG_SET(*state, STATE_STRING)) {
     return ("array");
   }
 
   return ("unknown");
 }
 
-static void state_print_one(state_t state) {
-  if (state.type == STATE_NUMBER) {
+static void state_print_one(xre_state_t state) {
+  if (IS_FLAG_SET(state, STATE_NUMBER)) {
 #if defined(__linux__)
     printf("%ld\n", state.value);
 #else
@@ -209,12 +188,12 @@ static void state_print_one(state_t state) {
     return;
   }
 
-  if (state.type == STATE_STRING) {
+  if (IS_FLAG_SET(state, STATE_STRING)) {
     printf("%s\n", state.string);
     return;
   }
 
-  if (state.type == STATE_ARRAY) {
+  if (IS_FLAG_SET(state, STATE_ARRAY)) {
     printf("[array %p: %zu]\n", (void*)state.array,  array_size(state.array));
     return;
   }
@@ -223,14 +202,14 @@ static void state_print_one(state_t state) {
 }
 
 void state_print(xre_frame_t *frame) {
-  if (frame->state.type == STATE_ARRAY) {
+  if (IS_FLAG_SET(frame->state, STATE_ARRAY)) {
     array_t *array = frame->state.array;
     size_t size = array_size(array);
     size_t i = 0;
     while (i < size) {
       printf("%zu.   ", i);
       xre_frame_t *frame = (xre_frame_t *)array_at(array, i);
-      state_t state = frame->state;
+      xre_state_t state = frame->state;
       state_print_one(state);
       i++;
     }

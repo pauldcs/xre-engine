@@ -3,7 +3,7 @@
 #include "xre_runtime.h"
 
 static void push_frame(array_t *array, xre_frame_t *frame) {
-  if (frame->state.type == STATE_ARRAY) {
+  if (IS_FLAG_SET(frame->state, STATE_ARRAY)) {
     array_t *array_2 = frame->state.array;
     size_t size = array_size(array_2);
     size_t i = 0;
@@ -27,21 +27,9 @@ bool sequence_op(xre_frame_t *frame) {
     return (false);
   }
 
-  array_t *array = NULL;
-
-  if (frame->state.type == STATE_ARRAY) {
-    array = frame->state.array;
-    frame->is_ref = true;
-  } else {
-    array = array_create(sizeof(xre_frame_t), 8, NULL);
-    frame->is_ref = false;
-  }
-
+  array_t *array = array_create(sizeof(xre_frame_t), 8, NULL);
   push_frame(array, left);
   push_frame(array, right);
-
-  if (!frame->is_ref)
-    state_free(&frame->state);
 
   return (state_array(frame, array));
 }

@@ -9,7 +9,7 @@ bool simple_assignment(xre_frame_t *initial_frame, const char *key, xre_frame_t 
   if (!symtab_set(initial_frame, key, frame->state)) {
     return (false);
   }
-  
+
   return (state_copy_ref(initial_frame, frame));
 }
 
@@ -51,13 +51,13 @@ bool assignment_op(xre_frame_t *frame) {
     __return_error(frame, XRE_UNBOUND_LOCAL_ERROR);
   }
 
-  state_t *state = &item->state;
+  xre_state_t *state = &item->state;
 
-  if (state->type != STATE_NUMBER) {
+  if (!IS_FLAG_SET(*state, STATE_NUMBER)) {
     __return_error(frame, XRE_INVALID_TYPE_FOR_OPERAND_ERROR);
   }
 
-  state_value(left, state->value);
+  (void)state_value(left, state->value);
   
   switch (frame->kind) {
   case __ADD_ASSIGN__:

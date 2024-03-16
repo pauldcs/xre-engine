@@ -74,11 +74,11 @@ bool bitwise_op(xre_frame_t *frame) {
     return (false);
   }
 
-  if (left->state.type != STATE_NUMBER) {
+  if (!IS_FLAG_SET(left->state, STATE_NUMBER)) {
     __return_error(frame, XRE_INVALID_TYPE_FOR_OPERAND_ERROR);
   }
 
-  if (left->state.type != right->state.type) {
+  if (COMPARE_FLAGS(left->state, right->state)) {
     __return_error(frame, XRE_TYPE_MISSMATCH_ERROR);
   }
 

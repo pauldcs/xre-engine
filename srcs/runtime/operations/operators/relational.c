@@ -33,18 +33,18 @@ bool relational_op(xre_frame_t *frame) {
     return (false);
   }
 
-  bool matching_types = left->state.type == right->state.type;
+  bool matching_types = !COMPARE_FLAGS(left->state, right->state);
 
   int equality = 0;
 
   if (matching_types) {
-    if (left->state.type == STATE_NUMBER) {
+    if (IS_FLAG_SET(left->state, STATE_NUMBER)) {
       equality = value_cmp(left->state.value, right->state.value);
     
-    } else if (left->state.type == STATE_STRING) {
+    } else if (IS_FLAG_SET(left->state, STATE_STRING)) {
       equality = strcmp(left->state.string, right->state.string);
     
-    } else if (left->state.type == STATE_ARRAY) {
+    } else if (IS_FLAG_SET(left->state, STATE_ARRAY)) {
       equality = array_cmp(left->state.array, right->state.array);
     }
   }

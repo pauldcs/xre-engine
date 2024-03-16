@@ -14,52 +14,62 @@ typedef enum {
   STATE_NUMBER,
   STATE_STRING,
   STATE_UNDEFINED,
-} state_e;
-
-typedef struct {
-  state_e type;
-
-  union {
-    int64_t value;
-    array_t *array;
-    char *string;
-  };
-} state_t;
+} xre_state_e;
 
 typedef struct xre_frame_s xre_frame_t;
 
+#define STATE_UNDEFINED  (1UL << 0)
+#define STATE_NUMBER     (1UL << 1)
+#define STATE_STRING   (1UL << 2)
+#define STATE_ARRAY    (1UL << 3)
+#define REFERENCE_FLAG (1UL << 16)
+
+#define IS_FLAG_SET(state, flag)    (((state).attrs) & (flag))
+#define IS_REF_STATE(state)         (IS_FLAG_SET(state, REFERENCE_FLAG))
+
+#define REMOVE_FLAG(state, flag) ((state.attrs) &= ~(flag))
+#define ADD_FLAG(state, flag) ((state.attrs) |= (flag))
+
+#define COMPARE_FLAGS(state1, state2) \
+    ((REMOVE_FLAG(state1, REFERENCE_FLAG) == REMOVE_FLAG(state2, REFERENCE_FLAG)) ? 0 : 1)
+typedef struct {
+  xre_state_e attrs;
+  union {
+    int64_t value;
+    array_t *array;
+    char    *string;
+  };
+} xre_state_t;
+
+
 typedef struct xre_frame_s {
   xre_expr_kind_t kind;
-  xre_expr_type_t type;
   xre_token_t     *token;
+  const char      *identifier;
+  xre_state_t     state;
   xre_frame_t     *left;
   xre_frame_t     *right;
-  const char      *identifier;
-  bool            is_ref;
-  state_t         state;
-
 } xre_frame_t;
 
 xre_frame_t *state_init(xre_ast_t *ast);
-void state_deinit(xre_frame_t *frame);
-void state_free(state_t *state);
-void state_print(xre_frame_t *frame);
-bool is_true_state(xre_frame_t *frame);
-const char *state_to_str(state_t *state);
-void state_debug (xre_frame_t *frame);
+void        state_deinit(xre_frame_t *frame);
+void        state_free(xre_state_t *state);
+void        state_print(xre_frame_t *frame);
+bool        is_true_state(xre_frame_t *frame);
+const char  *state_to_str(xre_state_t *state);
+void        state_debug (xre_frame_t *frame);
 
 extern array_t *symtab;
 
 typedef struct {
-  const char *key;
-  state_t state;
+  const char  *key;
+  xre_state_t state;
 } symtab_entry_t;
 
-bool symtab_init(void);
-void symtab_deinit(void);
-
+bool           symtab_init(void);
+void           symtab_deinit(void);
 symtab_entry_t *symtab_get(const char *key);
-bool            symtab_set(xre_frame_t *frame, const char *key, state_t state);
+bool           symtab_set(xre_frame_t *frame, const char *key, xre_state_t state);
 
 extern bool                 _has_error;
 extern error_notification_t _error;
@@ -71,6 +81,7 @@ bool state_value(xre_frame_t *frame, int64_t value);
 bool state_array_ref(xre_frame_t *frame, array_t *array);
 bool state_array(xre_frame_t *frame, array_t *array);
 bool state_string_ref(xre_frame_t *frame, char *string);
+bool state_string(xre_frame_t *frame, char *string);
 bool state_copy_ref(xre_frame_t *this, xre_frame_t *that);
 
 bool call_runtime(xre_ast_t *ast);
