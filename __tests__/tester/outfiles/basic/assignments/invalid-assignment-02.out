@@ -1,0 +1,45 @@
+error: Access Error: const: a = 1; a = 2: Attempt to write on a readonly variable
+
+=================================================================
+==13693==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 64 byte(s) in 1 object(s) allocated from:
+    #0 0xffffa8fdb734 in __interceptor_malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0xaaaad2fbbe48 in state_init srcs/runtime/frame/xre_frame.c:13
+    #2 0xaaaad2fbc2fc in state_init srcs/runtime/frame/xre_frame.c:32
+    #3 0xaaaad2fbc2fc in state_init srcs/runtime/frame/xre_frame.c:32
+    #4 0xaaaad2fbc2fc in state_init srcs/runtime/frame/xre_frame.c:32
+    #5 0xaaaad2fbb128 in call_runtime srcs/runtime/xre_runtime.c:143
+    #6 0xaaaad2f9a9f8 in init_source_file srcs/main.c:92
+    #7 0xaaaad2f9abd8 in main srcs/main.c:123
+    #8 0xffffa86c777c in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #9 0xffffa86c7854 in __libc_start_main_impl ../csu/libc-start.c:360
+    #10 0xaaaad2f9a46c in _start (/home/polo75/xre-engine/xre+0x3a46c)
+
+Direct leak of 64 byte(s) in 1 object(s) allocated from:
+    #0 0xffffa8fdb734 in __interceptor_malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0xaaaad2fbbe48 in state_init srcs/runtime/frame/xre_frame.c:13
+    #2 0xaaaad2fbc3fc in state_init srcs/runtime/frame/xre_frame.c:33
+    #3 0xaaaad2fbc2fc in state_init srcs/runtime/frame/xre_frame.c:32
+    #4 0xaaaad2fbc2fc in state_init srcs/runtime/frame/xre_frame.c:32
+    #5 0xaaaad2fbb128 in call_runtime srcs/runtime/xre_runtime.c:143
+    #6 0xaaaad2f9a9f8 in init_source_file srcs/main.c:92
+    #7 0xaaaad2f9abd8 in main srcs/main.c:123
+    #8 0xffffa86c777c in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #9 0xffffa86c7854 in __libc_start_main_impl ../csu/libc-start.c:360
+    #10 0xaaaad2f9a46c in _start (/home/polo75/xre-engine/xre+0x3a46c)
+
+Indirect leak of 6 byte(s) in 1 object(s) allocated from:
+    #0 0xffffa8f9d7e4 in __interceptor_strdup ../../../../src/libsanitizer/asan/asan_interceptors.cpp:439
+    #1 0xaaaad2fbc0f4 in state_init srcs/runtime/frame/xre_frame.c:23
+    #2 0xaaaad2fbc2fc in state_init srcs/runtime/frame/xre_frame.c:32
+    #3 0xaaaad2fbc2fc in state_init srcs/runtime/frame/xre_frame.c:32
+    #4 0xaaaad2fbc2fc in state_init srcs/runtime/frame/xre_frame.c:32
+    #5 0xaaaad2fbb128 in call_runtime srcs/runtime/xre_runtime.c:143
+    #6 0xaaaad2f9a9f8 in init_source_file srcs/main.c:92
+    #7 0xaaaad2f9abd8 in main srcs/main.c:123
+    #8 0xffffa86c777c in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #9 0xffffa86c7854 in __libc_start_main_impl ../csu/libc-start.c:360
+    #10 0xaaaad2f9a46c in _start (/home/polo75/xre-engine/xre+0x3a46c)
+
+SUMMARY: AddressSanitizer: 134 byte(s) leaked in 3 allocation(s).

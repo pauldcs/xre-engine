@@ -7,44 +7,38 @@
 bool do_identifier(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
-    if (!strcmp(frame->initial.string, "exit")) {
-      log_error_condition_reached;
-      return (set_error(frame, XRE_EXIT_ERROR, XRE_EXIT_CALLED_ERROR));
+    if (!strcmp(frame->identifier, "exit")) {
+      __return_error(frame, XRE_EXIT_CALLED_ERROR);
     }
 
-    stack_item_t *item = runtime_variables_get(frame->initial.string);
-
-    if (item) {
-      state_t *state = &item->state;
-      if (state->type == STATE_ARRAY) {
-        array_t *array = array_pull(state->array, 0, -1);
-        return (change_state_array(frame, array));
-      }
-
-      if (state->type == STATE_NUMBER) {
-        return (change_state_value(frame, state->value));
-      }
-
-      if (state->type == STATE_STRING) {
-        return (change_state_string(frame, strdup(state->string)));
-      }
-
-      log_error_condition_reached;
-      return (set_error(frame, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
+    symtab_entry_t *item = symtab_get(frame->identifier);
+    if (!item) {
+      __return_error(frame, XRE_UNBOUND_LOCAL_ERROR);
+    }
+    
+    xre_state_t *state = &item->state;
+    if (IS_FLAG_SET(*state, STATE_ARRAY)) {
+      return (state_array_ref(frame, state->array));
     }
 
-    log_error_condition_reached;
-    return (set_error(frame, XRE_RUNTIME_ERROR, XRE_UNBOUND_LOCAL_ERROR));
+    if (IS_FLAG_SET(*state, STATE_STRING)) {
+      return (state_string_ref(frame, state->string));
+    }
+
+    if (IS_FLAG_SET(*state, STATE_NUMBER)) {
+      return (state_value(frame, state->value));
+    }
+
+    __return_error(frame, XRE_UNDEFINED_BEHAVIOR_ERROR);
 
 }
 
-bool identifier_operand(xre_frame_t *frame) {
+bool identifier_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
   if (frame->kind == __IDENTIFIER__) {
     return (do_identifier(frame));
   }
 
-  log_error_condition_reached;
-  return (set_error(frame, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
+  __return_error(frame, XRE_UNDEFINED_BEHAVIOR_ERROR);
 }

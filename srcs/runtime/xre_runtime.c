@@ -1,18 +1,17 @@
 #include "xre_runtime.h"
+#include "xre_parse.h"
 #include "xre_args.h"
 #include "xre_assert.h"
-#include "xre_frame.h"
 #include "xre_log.h"
 #include "xre_operations.h"
 #include <stdbool.h>
 
 bool _has_error = false;
-t_xre_error _error;
+error_notification_t _error;
 
-bool set_error(xre_frame_t *frame, t_xre_error_type type,
-               t_xre_error_subtype subtype) {
-  _error.error.type = type;
-  _error.error.subtype = subtype;
+bool set_error(xre_frame_t *frame, error_type_e type) {
+  _error.class = error_type_to_class(type);
+  _error.type = type;
   _error.src = frame->token;
   _has_error = true;
   return (false);
@@ -20,148 +19,106 @@ bool set_error(xre_frame_t *frame, t_xre_error_type type,
 
 bool error_occurred(void) { return (_has_error); }
 
-bool binop_exec(xre_frame_t *frame) {
-  __return_val_if_fail__(frame, NULL);
+typedef bool (*frame_function)(xre_frame_t *);
 
-  switch (frame->kind) {
-  case __ASSIGN__:
-  case __ADD_ASSIGN__:
-  case __SUB_ASSIGN__:
-  case __DIV_ASSIGN__:
-  case __MOD_ASSIGN__:
-  case __POW_ASSIGN__:
-  case __MUL_ASSIGN__:
-    return (assignment_op(frame));
-
-  case __ADD__:
-  case __SUB__:
-  case __MUL__:
-  case __DIV__:
-  case __MOD__:
-  case __POW__:
-    return (arithmetic_op(frame));
-
-  case __EQ__:
-  case __NE__:
-  case __LT__:
-  case __GT__:
-  case __LE__:
-  case __GE__:
-    return (relational_op(frame));
-
-  case __BAND__:
-  case __BOR__:
-  case __BXOR__:
-  case __LSHIFT__:
-  case __RSHIFT__:
-    return (bitwise_op(frame));
-  
-  case __ANNOTATE__:
-    return (annotation_op(frame));
-    
-  case __LOOP__:
-    return (loop_op(frame));
-
-  case __SEQUENCE_POINT__:
-    return (sequence_op(frame));
-
-  case __SEPARATOR__:
-    return (separator_op(frame));
-
-  case __INJECT__:
-    return (inject_op(frame));
-
-  case __DO__:
-  case __ELSE__:
-  case __AND__:
-  case __OR__:
-    return (logical_op(frame));
-
-  default:
-    break;
-  }
-
-  log_error_condition_reached;
-  return (set_error(frame, XRE_INTERNAL_ERROR, XRE_NOT_IMPLEMENTED_ERROR));
-}
-
-bool uniop_exec(xre_frame_t *frame) {
-  __return_val_if_fail__(frame, NULL);
-
-  switch (frame->kind) {
-  case __NOT__:
-    return (not_op(frame));
-
-  default:
-    log_error_condition_reached;
-    return (set_error(frame, XRE_INTERNAL_ERROR, XRE_NOT_IMPLEMENTED_ERROR));
-  }
-}
-
-bool operand_exec(xre_frame_t *frame) {
-  __return_val_if_fail__(frame, NULL);
-
-  switch (frame->kind) {
-    case __IDENTIFIER__:
-      return (identifier_operand(frame));
-    
-    case __VAL__: 
-    case __STRING_LITERAL__:
-      return (basic_operand(frame));
-  
-  default:
-    log_error_condition_reached;
-    return (set_error(frame, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
-  }
-}
+static frame_function dispatch_table[] = {
+    [__ASSIGN__] = assignment_op,
+    [__ADD_ASSIGN__] = assignment_op,
+    [__SUB_ASSIGN__] = assignment_op,
+    [__DIV_ASSIGN__] = assignment_op,
+    [__MOD_ASSIGN__] = assignment_op,
+    [__POW_ASSIGN__] = assignment_op,
+    [__MUL_ASSIGN__] = assignment_op,
+    [__ADD__] = arithmetic_op,
+    [__SUB__] = arithmetic_op,
+    [__MUL__] = arithmetic_op,
+    [__DIV__] = arithmetic_op,
+    [__MOD__] = arithmetic_op,
+    [__POW__] = arithmetic_op,
+    [__EQ__] = relational_op,
+    [__NE__] = relational_op,
+    [__LT__] = relational_op,
+    [__GT__] = relational_op,
+    [__LE__] = relational_op,
+    [__GE__] = relational_op,
+    [__BAND__] = bitwise_op,
+    [__BOR__] = bitwise_op,
+    [__BXOR__] = bitwise_op,
+    [__LSHIFT__] = bitwise_op,
+    [__RSHIFT__] = bitwise_op,
+    [__LOOP__] = loop_op,
+    [__SEQUENCE_POINT__] = sequence_op,
+    [__SEPARATOR__] = separator_op,
+    [__AT__] = at_op,
+    [__DO__] = logical_op,
+    [__ELSE__] = logical_op,
+    [__AND__] = logical_op,
+    [__OR__] = logical_op,
+    [__PRINT__] = print_op,
+    [__NOT__] = not_op,
+    [__IDENTIFIER__] = identifier_op,
+    [__VAL__] = value_op,
+    [__STRING_LITERAL__] = string_op
+};
 
 bool evaluate(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
+    
+    if (frame->kind < 0 || frame->kind >= sizeof(dispatch_table) / sizeof(dispatch_table[0])) {
+        __return_error(frame, XRE_UNDEFINED_BEHAVIOR_ERROR);
+    }
 
-  switch (frame->type) {
-  case EXPR_TYPE_VALUE:
-    return operand_exec(frame);
-
-  case EXPR_OP_TYPE_BINOP:
-    return binop_exec(frame);
-
-  case EXPR_OP_TYPE_UNIOP:
-    return uniop_exec(frame);
-
-  case EXPR_TYPE_OTHER:
-  default:
-    log_error_condition_reached;
-    return (set_error(frame, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
-  }
+    frame_function func = dispatch_table[frame->kind];
+    if (func) {
+      return func(frame);
+    }
+  
+    __return_error(frame, XRE_NOT_IMPLEMENTED_ERROR);
 }
 
-bool xre_runtime(xre_ast_t *ast) {
-  __return_val_if_fail__(ast, false);
+bool call_runtime(xre_ast_t *ast) {
+  if (init_frame_tree(ast) < 0)
+    return (false);
+  
+  bool ret = xre_runtime();
+    
+  deinit_frame_tree(&frame_tree_g[0]);
+  free(frame_tree_g);
+  frame_tree_g = NULL;
+  
+  return (ret);
+}
 
-  xre_frame_t *frame = state_init(ast);
+bool xre_runtime(void) {
+  xre_frame_t *frame = &frame_tree_g[0];
 
-  if (!runtime_variables_init()) {
-    return (state_deinit(frame), false);
+  if (!symtab_init()) {
+    return (false);
   }
 
   if (!evaluate(frame)) {
-    
-    log_error_return;
     if (error_occurred()) {
-      xre_error(&_error, _error.src);
-      return (state_deinit(frame), false);
+      xre_error(&_error);
+      if (_error.type == XRE_EXIT_CALLED_ERROR)
+        exit(1);
+      
+      goto prison;
     }
   
-    XRE_LOGGER(error, "Failed without error message");
-    return (state_deinit(frame), false);
+    XRE_LOGGER(error, "Failed unexpectedly");
+    goto prison;
   }
 
   if (__xre_args__.flags & SHOW_EXPR_RESULT) {
     state_print(frame);
   }
 
-  runtime_variables_deinit();
-  state_deinit(frame);
+  //state_debug(frame);
 
+  symtab_deinit();
   return (true);
+
+prison:
+  symtab_deinit();
+  return (false);
 }

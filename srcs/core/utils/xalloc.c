@@ -18,7 +18,7 @@ void *
 xrealloc(void *ptr, size_t n) {
 	__return_val_if_fail__(ptr, NULL);
 
-  	if ((ptr = realloc(ptr, (unsigned)n)) == 0) {
+  	if ((ptr = realloc(ptr, (unsigned)n)) == NULL) {
 		write(STDERR_FILENO, "virtual memory exceeded", 23);
 		exit(1);
 	}

@@ -1,5 +1,4 @@
 #include "xre_assert.h"
-#include "xre_frame.h"
 #include "xre_log.h"
 #include "xre_runtime.h"
 #include <stdbool.h>
@@ -7,97 +6,83 @@
 bool do_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
   if (!evaluate(left)) {
 
-    log_error_return;
     return (false);
   }
 
   if (is_true_state(left)) {
     if (!evaluate(right)) {
 
-      log_error_return;
       return (false);
     }
-    return (change_state_copy(frame, right));
+    return (state_copy_ref(frame, right));
   }
 
-  return (change_state_copy(frame, left));
+  return (state_copy_ref(frame, left));
 }
 
 bool else_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
   if (!evaluate(left)) {
-
-    log_error_return;
     return (false);
   }
 
   if (!is_true_state(left)) {
     if (!evaluate(right)) {
-
-      log_error_return;
       return (false);
     }
-    return (change_state_copy(frame, right));
+    return (state_copy_ref(frame, right));
   }
 
-  return (change_state_copy(frame, left));
+  return (state_copy_ref(frame, left));
 }
 
 bool and_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
   if (!evaluate(left)) {
-
-    log_error_return;
     return (false);
   }
 
   if (is_true_state(left)) {
     if (!evaluate(right)) {
-
-      log_error_return;
       return (false);
     }
   }
 
-  return (change_state_value(frame, is_true_state(right)));
+  return (state_value(frame, is_true_state(right)));
 }
 
 bool or_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
   if (!evaluate(left)) {
-
-    log_error_return;
     return (false);
   }
 
   if (is_true_state(left)) {
-    return (change_state_value(frame, true));
+    return (state_value(frame, true));
   }
 
   if (!evaluate(right)) {
-
-    log_error_return;
     return (false);
   }
 
-  return (change_state_value(frame, is_true_state(right)));
+  return (state_value(frame, is_true_state(right)));
 }
 
 bool logical_op(xre_frame_t *frame) {
@@ -120,6 +105,5 @@ bool logical_op(xre_frame_t *frame) {
     break;
   }
 
-  log_error_condition_reached;
-  return (set_error(frame, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
+  __return_error(frame, XRE_UNDEFINED_BEHAVIOR_ERROR);
 }

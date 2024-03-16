@@ -31,17 +31,16 @@ inner (xre_ast_t *ast, size_t depth) {
 	}
   if (ast->kind == __VAL__) {
 #ifdef __linux__
-    printf("> %ld\n", ast->value);
+    printf("%ld\n", ast->value);
 #else
-    printf("> %lld\n", ast->value);
+    printf("%lld\n", ast->value);
 #endif
   }else if (ast->kind == __STRING_LITERAL__) {
-    printf("> string: '%s'\n", ast->string);
+    printf("string: '%s'\n", ast->string);
   }
   else if (ast->kind == __IDENTIFIER__) {
-	printf("> id: '%s'\n", ast->string);
+	printf("id: '%s'\n", ast->string);
 } else {
-    write(1, "> ", 2);
 	  printf("[%s]\n", expr_kind_to_string(ast->kind));
   }
 
@@ -59,24 +58,28 @@ ast_show (xre_ast_t *ast) {
 void
 ast_free(xre_ast_t *ast) {
 
-    // if (!ast)
-    //     return ;
-    // switch(ast->kind) {
-    //     case __STRING_LITERAL__:
-    //     case __IDENTIFIER__:
-    //         free((void *)ast->string);
-    //         break;
+    if (!ast)
+        return ;
+    
+    switch(ast->kind) {
+        case __STRING_LITERAL__:
+        case __IDENTIFIER__:
+            free((void *)ast->string);
+            break;
 
-    //     case __NOT__:
-    //         ast_free(ast->uniop);
-    //         break;
-        
-    //     default:
-    //         ast_free(ast->_binop.left);
-    //         ast_free(ast->_binop.right);          
-    // }
-    // free(ast);
-    (void)ast;
+        case __NOT__:
+        case __PRINT__:
+            ast_free(ast->uniop);
+            break;
+
+        case __VAL__:
+            break;
+
+        default:
+            ast_free(ast->_binop.left);
+            ast_free(ast->_binop.right);          
+    }
+    free(ast);
 }
 
 const char *
@@ -118,6 +121,8 @@ expr_kind_to_string(xre_expr_kind_t kind) {
     case __NE__:               return "not equal";
     case __SEQUENCE_POINT__:   return "sequence point";
     case __SEPARATOR__:        return "separator";
+    case __AT__:               return "at";
+    case __PRINT__:            return "print";
     case __INJECT__:           return "injection";
     case __ANNOTATE__:         return "annotation";
     case __LOOP__:             return "loop";
@@ -125,7 +130,8 @@ expr_kind_to_string(xre_expr_kind_t kind) {
     case __ELSE__:             return "else";
     case __SCOPE_RESOLUTION__: return "scope resolution";
     }
-    return "????????";
+
+    __builtin_unreachable();
 }
 
 xre_expr_type_t
@@ -168,12 +174,14 @@ expr_type_by_kind(xre_expr_kind_t kind) {
         case __LOOP__:             
         case __DO__:             
         case __ELSE__:             
+        case __AT__:             
         case __AND__:              
         case __OR__:               
         
             return (EXPR_OP_TYPE_BINOP);
         
         case __NOT__:
+        case __PRINT__:
             return (EXPR_OP_TYPE_UNIOP);
 
         case __START__:            
@@ -182,5 +190,6 @@ expr_type_by_kind(xre_expr_kind_t kind) {
         case __RPAREN__:           
             return (EXPR_TYPE_OTHER);
     }
-    return (-1000);
+    
+    __builtin_unreachable();
 }

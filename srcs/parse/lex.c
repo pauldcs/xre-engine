@@ -6,7 +6,7 @@
 #include <string.h>
 #include <sys/types.h>
 
-t_xre_error __lexer_err_report__;
+error_notification_t lexer_error_g;
 
 xre_token_t _token;
 size_t _line;
@@ -24,13 +24,6 @@ static size_t get_cur_line_len(void) {
   }
   return (size);
 }
-//   __token__._line_len = size;
-// }
-
-// static void save_line_ptr(const char *ptr) {
-//   __token__._line_ptr = ptr;
-//   save_line_len();
-// }
 
 static void init_token(void) {
   _token._line = _line;
@@ -84,13 +77,13 @@ xre_expr_lex (const char *expr, array_t *tokens) {
   _line_len = get_cur_line_len();
   _token._kind = __START__;
 
-  (void)memset(&__lexer_err_report__, 0, sizeof(__lexer_err_report__));
+  (void)memset(&lexer_error_g, 0, sizeof(lexer_error_g));
 
   init_token();
   if (!accept_token(tokens, 0)) {
 
-    __lexer_err_report__.error.type = XRE_MEMORY_ERROR;
-    __lexer_err_report__.error.subtype = XRE_ALLOCATION_ERROR;
+    lexer_error_g.class = error_type_to_class(XRE_OUT_OF_MEMORY_ERROR);
+    lexer_error_g.type = XRE_OUT_OF_MEMORY_ERROR;
     
     //assert(false);
     goto lexer_error;
@@ -113,8 +106,8 @@ xre_expr_lex (const char *expr, array_t *tokens) {
       tmp = str_to_int32(ptr, &result);
       if (!tmp) {
 
-        __lexer_err_report__.error.type = XRE_ARITHMETIC_ERROR;
-        __lexer_err_report__.error.subtype = XRE_OVERFLOW_ERROR;
+        lexer_error_g.class = error_type_to_class(XRE_OVERFLOW_ERROR);
+        lexer_error_g.type = XRE_OVERFLOW_ERROR;
     
         //assert(false);
         goto lexer_error;
@@ -172,9 +165,12 @@ not_a_constant_value:
 
         break;
         case ';': _token._kind = __SEPARATOR__; tf = 1;
-        
+
         break;
-        case '$': _token._kind = __INJECT__; tf = 1;
+        case '.': _token._kind = __AT__; tf = 1;
+
+        break;
+        case '$': _token._kind = __PRINT__; tf = 1;
         
         break;
         case ':':
@@ -261,9 +257,9 @@ not_a_constant_value:
           }
 
           if (!*tmp) {
-            __lexer_err_report__.error.type = XRE_SYNTAX_ERROR;
-            __lexer_err_report__.error.subtype = XRE_UNTERMINATED_STRING_ERROR;
-        
+            lexer_error_g.class = error_type_to_class(XRE_UNTERMINATED_STRING_ERROR);
+            lexer_error_g.type = XRE_UNTERMINATED_STRING_ERROR;
+          
             //assert(false);
             goto lexer_error;
           } else {
@@ -316,8 +312,8 @@ not_a_constant_value:
     }
 
     if (!accept_token(tokens, tf)) {
-      __lexer_err_report__.error.type = XRE_MEMORY_ERROR;
-      __lexer_err_report__.error.subtype = XRE_ALLOCATION_ERROR;
+      lexer_error_g.class = error_type_to_class(XRE_OUT_OF_MEMORY_ERROR);
+      lexer_error_g.type = XRE_OUT_OF_MEMORY_ERROR;
 
       // assert(false);
       goto lexer_error;
@@ -329,8 +325,8 @@ not_a_constant_value:
 
   _token._kind = __END__;
   if (!accept_token(tokens, 0)) {
-    __lexer_err_report__.error.type = XRE_MEMORY_ERROR;
-    __lexer_err_report__.error.subtype = XRE_ALLOCATION_ERROR;
+    lexer_error_g.class = error_type_to_class(XRE_OUT_OF_MEMORY_ERROR);
+    lexer_error_g.type = XRE_OUT_OF_MEMORY_ERROR;
 
     // assert(false);
     goto lexer_error;
@@ -339,7 +335,8 @@ not_a_constant_value:
   return (true);
 
 lexer_error:
-  xre_error(&__lexer_err_report__, &_token);
+  lexer_error_g.src = &_token;
+  xre_error(&lexer_error_g);
 
   return (false);
 }

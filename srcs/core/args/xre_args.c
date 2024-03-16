@@ -66,7 +66,7 @@ static unsigned char *next_arg(size_t *ac, unsigned char ***av) {
 		--(*ac);
 		return ((unsigned char *)*++*av);
 	}
-	return (0);
+	return (NULL);
 }
 
 static void xre_getopts_init(t_xre_getopts *opt, size_t ac, const char *av[], const char *ostr) {

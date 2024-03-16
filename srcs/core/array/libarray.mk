@@ -25,11 +25,6 @@ CFLAGS := \
 CFLAGS_DBG := \
 	-g3                      \
 	-O0                      
-# -fsanitize=address       \
-# -fsanitize=undefined     \
-# -fno-omit-frame-pointer  \
-# -fstack-protector-strong \
-# -fno-optimize-sibling-calls 
 
 SRCS := \
 	array.c 
