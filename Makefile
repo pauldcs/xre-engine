@@ -21,7 +21,6 @@ $(NAME): $(SRCS_OBJS)
 	$(CC) \
 		$^ \
 		$(CFLAGS) \
-		$(MAIN) \
 		-o $(NAME) \
 		-I $(INCS_DIR) \
 		-L $(LIBARRAY_DIR) \
@@ -40,7 +39,7 @@ clean:
 
 fclean: clean
 	$(MAKE) fclean -C $(LIBARRAY_DIR)
-	rm -rf $(NAME)
+	rm -f $(NAME)
 
 re: fclean all
 

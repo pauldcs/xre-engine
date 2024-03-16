@@ -3,110 +3,83 @@
 #include "xre_parse.h"
 #include "xre_runtime.h"
 
-// BITWISE AND OPERATION
 bool bitwise_and_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
-  change_state_value(frame, left->state.value & right->state.value);
-  return (true);
+  return (state_value(frame, left->state.value & right->state.value));
 }
 
-// BITWISE OR OPERATION
 bool bitwise_or_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
-  return (change_state_value(frame, left->state.value | right->state.value));
+  return (state_value(frame, left->state.value | right->state.value));
 }
 
-// BITWISE XOR OPERATION
 bool bitwise_xor_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
-  return (change_state_value(frame, left->state.value ^ right->state.value));
+  return (state_value(frame, left->state.value ^ right->state.value));
 }
 
-// BITWISE LSHIFT OPERATION
 bool bitwise_lshift_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
   if (right->state.value < 0) {
-  
-    log_error_condition_reached;
-    return set_error(right, XRE_VALUE_ERROR, XRE_NEGATIVE_SHIFT_ERROR);
+    __return_error(frame, XRE_NEGATIVE_SHIFT_ERROR);
   }
 
   if (right->state.value > 64) {
-  
-    log_error_condition_reached;
-    return set_error(right, XRE_VALUE_ERROR, XRE_EXCEEDS_SHIFT_LIMIT_ERROR);
+    __return_error(frame, XRE_EXCEEDS_SHIFT_LIMIT_ERROR);
   }
 
-  return (change_state_value(frame, left->state.value << right->state.value));
+  return (state_value(frame, left->state.value << right->state.value));
 }
 
-// BITWISE RSHIFT OPERATION
 bool bitwise_rshift_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
   if (right->state.value < 0) {
-  
-    log_error_condition_reached;
-    return set_error(right, XRE_VALUE_ERROR, XRE_NEGATIVE_SHIFT_ERROR);
+    __return_error(frame, XRE_NEGATIVE_SHIFT_ERROR);
   }
 
   if (right->state.value > 64) {
-  
-    log_error_condition_reached;
-    return set_error(right, XRE_VALUE_ERROR, XRE_EXCEEDS_SHIFT_LIMIT_ERROR);
+    __return_error(frame, XRE_EXCEEDS_SHIFT_LIMIT_ERROR);
   }
 
-  return (change_state_value(frame, left->state.value >> right->state.value));
+  return (state_value(frame, left->state.value >> right->state.value));
 }
 
-// BITWISE OPERAITON
 bool bitwise_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
-  if (!evaluate(left)) {
-    
-    log_error_return;
+  if (!evaluate(left) || !evaluate(right)) {
     return (false);
   }
 
-  if (!evaluate(right)) {
-
-    log_error_return;
-    return (false);
+  if (!IS_FLAG_SET(left->state, STATE_NUMBER)) {
+    __return_error(frame, XRE_INVALID_TYPE_FOR_OPERAND_ERROR);
   }
 
-  if (left->state.type != STATE_NUMBER) {
-  
-    log_error_condition_reached;
-    return (set_error(left, XRE_TYPE_ERROR, XRE_INVALID_TYPE_FOR_OPERAND));
-  }
-
-  if (left->state.type != right->state.type) {
-  
-    log_error_condition_reached;
-    return (set_error(right, XRE_TYPE_ERROR, XRE_TYPE_MISSMATCH_ERROR));
+  if (COMPARE_FLAGS(left->state, right->state)) {
+    __return_error(frame, XRE_TYPE_MISSMATCH_ERROR);
   }
 
   switch (frame->kind) {
@@ -129,6 +102,5 @@ bool bitwise_op(xre_frame_t *frame) {
     XRE_LOGGER(error, "Unrecognized arithmetic operation");
   }
 
-  log_error_condition_reached;
-  return (set_error(frame, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
+  __return_error(frame, XRE_UNDEFINED_BEHAVIOR_ERROR);
 }

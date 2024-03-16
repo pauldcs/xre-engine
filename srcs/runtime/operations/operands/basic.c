@@ -1,22 +1,10 @@
-#include "xre_assert.h"
-#include "xre_log.h"
 #include "xre_runtime.h"
-#include "xre_utils.h"
-#include <string.h>
+#include "xre_assert.h"
 
-bool basic_operand(xre_frame_t *frame) {
-  __return_val_if_fail__(frame, NULL);
+bool value_op(xre_frame_t *frame) {
+  return (frame);
+}
 
-  switch (frame->kind) {
-  case __VAL__:
-    return change_state_value(frame, frame->initial.value);
-
-  case __STRING_LITERAL__:
-    return change_state_string(frame, strdup(frame->initial.string));
-  default:
-    break;
-  }
-
-  log_error_condition_reached;
-  return (set_error(frame, XRE_INTERNAL_ERROR, XRE_CONFUSING_CONDITION));
+bool string_op(xre_frame_t *frame) {
+    return (frame);
 }

@@ -1,5 +1,19 @@
-# xre-engine
+# xre-engine - Expression Evaluation Engine
 
-A key to the realm of gods within the digital cosmos. Take it, for you are worthy...
+This project aims to provide a simple framework to evaluate and run
+expressions on basic data types.
 
-...patience, Good Hunter. The Code is but a reflection of your potential. Embed it in your soul, let the lines of logic intertwine with your essence.
+## Installation
+
+install xre is via Git using the install script:
+
+```bash
+$ git clone https://github.com/pauldcs/xre-engine
+$ ./xre-engine/install.sh
+ ...
+$ xre -h
+```
+
+## Usage
+
+see examples in `__tests__/examples`

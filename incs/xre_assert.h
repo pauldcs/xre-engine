@@ -7,7 +7,7 @@
 # include "xre_log.h"
 # include <stdio.h>
 
-# ifdef G_DISABLE_ASSERT
+# ifdef DISABLE_ASSERTS
 
 #define xre_assert(expr)
 #define xre_assert_not_reached()

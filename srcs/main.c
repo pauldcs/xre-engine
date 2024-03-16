@@ -13,7 +13,7 @@
 
 t_xre_state  __xre_state__ = {
 	.title = "xre",
-	.version = "0.5",
+	.version = "0.5.5",
 };
 
 static bool
@@ -124,9 +124,8 @@ main(int ac, char *av[]) {
 					goto prison;
 				}
 			} else {
-				fprintf(stderr, "%s: Failed to import '%s'\n",
-					__xre_state__.title,
-					file
+				fprintf(stderr, "%s: Failed to import input file\n",
+					__xre_state__.title
 				);
 				goto prison;
 			}
@@ -143,6 +142,7 @@ main(int ac, char *av[]) {
 					}
 				
 					ast_free(ast);
+					free(args);
 					return (true);
 		
 			} else {

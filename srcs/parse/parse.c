@@ -16,23 +16,19 @@ static size_t __top_b;
 #define TOP_B_KIND ((xre_ast_t *)__stack_b[__top_b])->kind
 
 static void __push_a(xre_ast_t *node) {
-  // printf("push A %s\n", expr_kind_to_string(node->kind));
   if (__top_a < MICROSTACK_SIZE - 1)
     __stack_a[++__top_a] = node;
 }
 static void __push_b(xre_ast_t *node) {
-  // printf("push B %s\n", expr_kind_to_string(node->kind));
   if (__top_b < MICROSTACK_SIZE - 1)
     __stack_b[++__top_b] = node;
 }
 static void *__pop_a(void) {
-  // printf("pop A\n");
   if (__top_a > 0)
     return ((void *)__stack_a[__top_a--]);
   return ((void *)0);
 }
 static void *__pop_b(void) {
-  // printf("pop B\n");
   if (__top_b > 0)
     return ((void *)__stack_b[__top_b--]);
   return ((void *)0);
@@ -74,6 +70,7 @@ static int get_expr_precedence(xre_expr_kind_t kind) {
     return (-2);
 
   case __INJECT__:
+  case __AT__:
     return (-3);
 
   case __MUL__:
@@ -93,29 +90,30 @@ static int get_expr_precedence(xre_expr_kind_t kind) {
   case __GT__:
   case __LE__:
   case __GE__:
-    return (-7);
+    return (-8);
 
   case __EQ__:
   case __NE__:
-    return (-8);
-
-  case __BAND__:
     return (-9);
 
-  case __BXOR__:
+  case __BAND__:
     return (-10);
 
-  case __BOR__:
+  case __BXOR__:
     return (-11);
+
+  case __BOR__:
+    return (-12);
 
   case __AND__:
   case __NOT__:
+  case __PRINT__:
   case __DO__:
-    return (-12);
+    return (-13);
 
   case __OR__:
   case __ELSE__:
-    return (-13);
+    return (-14);
 
   case __ASSIGN__:
   case __ADD_ASSIGN__:
@@ -124,16 +122,16 @@ static int get_expr_precedence(xre_expr_kind_t kind) {
   case __MOD_ASSIGN__:
   case __POW_ASSIGN__:
   case __MUL_ASSIGN__:
-    return (-14);
-
-  case __LOOP__:
     return (-15);
 
-  case __SEQUENCE_POINT__:
+  case __LOOP__:
     return (-16);
 
+  case __SEQUENCE_POINT__:
+    return (-17);
+
   case __SEPARATOR__:
-    return (-16);
+    return (-18);
 
   case __LPAREN__:
   case __RPAREN__:
@@ -196,6 +194,7 @@ xre_ast_t *xre_expr_parse(array_t *tokens) {
       break;
 
     case __NOT__:
+    case __PRINT__:
       __push_a(__ast_new_node(token));
 
       break;

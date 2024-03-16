@@ -19,17 +19,6 @@ void xre_report_error(const char* format, ...)
     fprintf(stderr, "\n");
 }
 
-static inline void get_current_time(char* buffer, size_t buffer_size)
-{
-    struct timeval tv;
-	struct tm tm_time;
-
-    gettimeofday(&tv, NULL);
-    localtime_r(&tv.tv_sec, &tm_time);
-    strftime(buffer, buffer_size, " %H:%M:%S", &tm_time);
-    snprintf(buffer + 19, buffer_size - 19, ".%03d", (int)tv.tv_usec / 1000);
-}
-
 static const char* level_tags[] = {
 	[verbose]  = "verbose",
     [debug]    = "debug",
@@ -66,24 +55,19 @@ void xre_logger(t_log_level level, const char *filename, const char *func, uint3
 	if (level < log_level)
         return;
 
-    char ts[24];
-    get_current_time(ts, sizeof(ts));
-
     const char* level_string = level_tags[level];
     const char* level_color = level_colors[level];
 
     if (level == info) {
         fprintf(stderr,
-            "%s [%s%s%s]: ",
-            ts,
+            "[%s%s%s]: ",
             level_color,
             level_string,
             "\033[0m"
         );
     } else {
         fprintf(stderr,
-            "%s [%s%s%s] (%s: %s: %u): ",
-            ts,
+            "[%s%s%s] (%s: %s: %u): ",
             level_color,
             level_string,
             "\033[0m",

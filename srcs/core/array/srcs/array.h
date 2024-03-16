@@ -36,11 +36,11 @@ typedef struct {
 } x_st8_t;
 
 typedef struct {
-  int8_t _v;
+  int16_t _v;
 } x_st16_t;
 
 typedef struct {
-  int8_t _v;
+  int32_t _v;
 } x_st32_t;
 
 typedef struct {
@@ -422,5 +422,9 @@ __attr_pure PTR_TYPE(array_head)(RDONLY_ARRAY_TYPE(self));
 /* Returns a pointer to the last element in the array.
  */
 __attr_pure PTR_TYPE(array_tail)(RDONLY_ARRAY_TYPE(self));
+
+/* Swaps two arrays together array.
+ */
+NONE_TYPE(array_swap)(ARRAY_TYPE(*self), ARRAY_TYPE(*other));
 
 #endif /* __ARRAY_H__*/

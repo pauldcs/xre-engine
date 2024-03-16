@@ -16,7 +16,7 @@ readonly             DEFAULT_MODE="args"
 readonly     DEFAULT_INPUT_SUFFIX="in"
 readonly  DEFAULT_INPUT_DIRECTORY="infiles"
 readonly DEFAULT_OUTPUT_DIRECTORY="outfiles"
-readonly          DEFAULT_TIMEOUT=2
+readonly          DEFAULT_TIMEOUT=3
 
 readonly       OK_COLOR=$(tput -T "xterm" setaf 2) # green
 readonly    ERROR_COLOR=$(tput -T "xterm" setaf 1) # red
@@ -178,7 +178,7 @@ function __args_mode() {
                 --show-leak-kinds=all                                \
                 --track-origins=yes                                  \
                 --log-file="$valgrind_log_file"                      \
-                --suppressions="ignore_readline.supp"                  \
+                --suppressions="ignore_readline.supp"                \
                 --error-exitcode=1                                   \
                 ./"$program_name" $extra_args &> "$actual_output_file"
     else
@@ -311,10 +311,10 @@ function run_test() {
         then
             if cmp -s "$actual_output_file" "$expected_output_file";
                 then
-                    output "        └── Status: ${OK_COLOR}SUCCESS${NO_COLOR}"
+                    output "        └── Status: ${OK_COLOR}success${NO_COLOR}"
                     ((passed++))
             else
-                output "        └── Status: ${ERROR_COLOR}FAILURE${NO_COLOR}"
+                output "        └── Status: ${ERROR_COLOR}failure${NO_COLOR}"
                 output "            └── Expected: $expected_output_file"
                 output "            └── Actual: $actual_output_file"
                 output "            └── Diff:"

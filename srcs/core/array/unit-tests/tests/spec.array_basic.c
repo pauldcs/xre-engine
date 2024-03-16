@@ -7,7 +7,7 @@
 #include <unistd.h>
 
 static bool __test_001__(void) {
-	array_t *v = array_create(sizeof(str_t), 10, NULL);
+	array_t *v = array_create(sizeof(const char *), 10, NULL);
 	assert(array_insert(v, 0, __PTRIZE_STR__("333")));
 	assert(array_insert(v, 0, __PTRIZE_STR__("222")));
 	assert(array_insert(v, 0, __PTRIZE_STR__("111")));
