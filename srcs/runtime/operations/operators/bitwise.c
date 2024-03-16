@@ -6,8 +6,8 @@
 bool bitwise_and_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
   return (state_value(frame, left->state.value & right->state.value));
 }
@@ -15,8 +15,8 @@ bool bitwise_and_op(xre_frame_t *frame) {
 bool bitwise_or_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
   return (state_value(frame, left->state.value | right->state.value));
 }
@@ -24,8 +24,8 @@ bool bitwise_or_op(xre_frame_t *frame) {
 bool bitwise_xor_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
   return (state_value(frame, left->state.value ^ right->state.value));
 }
@@ -33,8 +33,8 @@ bool bitwise_xor_op(xre_frame_t *frame) {
 bool bitwise_lshift_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
   if (right->state.value < 0) {
     __return_error(frame, XRE_NEGATIVE_SHIFT_ERROR);
@@ -50,8 +50,8 @@ bool bitwise_lshift_op(xre_frame_t *frame) {
 bool bitwise_rshift_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
   if (right->state.value < 0) {
     __return_error(frame, XRE_NEGATIVE_SHIFT_ERROR);
@@ -67,8 +67,8 @@ bool bitwise_rshift_op(xre_frame_t *frame) {
 bool bitwise_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
   if (!evaluate(left) || !evaluate(right)) {
     return (false);

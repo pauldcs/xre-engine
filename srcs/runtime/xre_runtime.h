@@ -47,12 +47,20 @@ typedef struct xre_frame_s {
   xre_token_t     *token;
   const char      *identifier;
   xre_state_t     state;
-  xre_frame_t     *left;
-  xre_frame_t     *right;
+  int             left_index;
+  int             right_index;
 } xre_frame_t;
 
-xre_frame_t *state_init(xre_ast_t *ast);
-void        state_deinit(xre_frame_t *frame);
+extern xre_frame_t *frame_tree_g;
+
+#define LEFT_CHILD(frame) (&frame_tree_g[frame->left_index])
+#define RIGHT_CHILD(frame) (&frame_tree_g[frame->right_index])
+#define HAS_LEFT_CHILD(frame) (frame->left_index != -1)
+#define HAS_RIGHT_CHILD(frame) (frame->right_index != -1)
+
+int init_frame_tree(xre_ast_t *ast);
+void deinit_frame_tree(xre_frame_t *frame);
+
 void        state_free(xre_state_t *state);
 void        state_print(xre_frame_t *frame);
 bool        is_true_state(xre_frame_t *frame);
@@ -85,7 +93,7 @@ bool state_string(xre_frame_t *frame, char *string);
 bool state_copy_ref(xre_frame_t *this, xre_frame_t *that);
 
 bool call_runtime(xre_ast_t *ast);
-bool xre_runtime(xre_frame_t *frame);
+bool xre_runtime(void);
 bool evaluate(xre_frame_t *frame);
 
 #endif /* __XRE_RUNTIME_H__ */

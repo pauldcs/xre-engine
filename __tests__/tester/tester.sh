@@ -16,7 +16,7 @@ readonly             DEFAULT_MODE="args"
 readonly     DEFAULT_INPUT_SUFFIX="in"
 readonly  DEFAULT_INPUT_DIRECTORY="infiles"
 readonly DEFAULT_OUTPUT_DIRECTORY="outfiles"
-readonly          DEFAULT_TIMEOUT=6
+readonly          DEFAULT_TIMEOUT=3
 
 readonly       OK_COLOR=$(tput -T "xterm" setaf 2) # green
 readonly    ERROR_COLOR=$(tput -T "xterm" setaf 1) # red

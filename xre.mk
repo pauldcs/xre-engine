@@ -73,6 +73,7 @@ SRCS := \
 	readline/rl_buffer.c \
 \
 	runtime/xre_runtime.c \
+	runtime/frame_tree.c \
 	runtime/symbols.c \
 	runtime/state.c \
 \

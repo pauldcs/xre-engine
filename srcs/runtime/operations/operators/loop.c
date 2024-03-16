@@ -5,8 +5,8 @@
 bool loop_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
   size_t max_iterations = DEFAULT_MAX_ITERATIONS;
 

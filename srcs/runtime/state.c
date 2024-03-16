@@ -9,66 +9,6 @@
 #include <string.h>
 #include <unistd.h>
 
-xre_frame_t *state_init(xre_ast_t *ast) {
-  xre_frame_t *frame = malloc(sizeof(xre_frame_t));
-  
-  (void)memset(frame, 0x00, sizeof(xre_frame_t));
-
-  switch (ast->kind) {
-  case __VAL__:
-    frame->state.attrs = STATE_NUMBER;
-    frame->state.value = ast->value;
-    break;
-
-  case __STRING_LITERAL__:
-    frame->state.attrs = STATE_STRING;
-    frame->state.string = (char *)ast->string;
-    frame->state.attrs |= REFERENCE_FLAG;
-    break;
-  
-  case __IDENTIFIER__:
-    frame->state.attrs = STATE_UNDEFINED;
-    frame->identifier = (char *)ast->string;
-    frame->state.attrs |= REFERENCE_FLAG;
-    break;
-
-  case __NOT__:
-  case __PRINT__:
-    frame->state.attrs = STATE_UNDEFINED;
-    frame->left = state_init(ast->uniop);
-    break;
-  
-  default:
-    frame->state.attrs = STATE_UNDEFINED;
-    frame->left = state_init(ast->_binop.left);
-    frame->right = state_init(ast->_binop.right);
-    break;
-  }
-
-  frame->kind = ast->kind;
-  frame->token = (xre_token_t *)&ast->token;
-
-  return (frame);
-}
-
-void state_free(xre_state_t *state) {
-  if (IS_FLAG_SET(*state, STATE_ARRAY)) {
-    array_kill(state->array);
-  }  
-}
-
-void state_deinit(xre_frame_t *frame) {
-  if (frame->left) state_deinit(frame->left);
-  if (frame->right) state_deinit(frame->right);         
-  
-  if (!IS_REF_STATE(frame->state)) {
-    state_free(&frame->state);
-  }
-
-  free(frame);
-}
-
-
 bool state_value(xre_frame_t *frame, int64_t value) {
   __return_val_if_fail__(frame, false);
 
@@ -234,10 +174,13 @@ __state_debug (xre_frame_t *frame, size_t depth) {
   state_print_one(frame->state);
   //printf("%s\n", frame->is_ref ? "ref" : "owned");
 
-	if (frame->left)
-		__state_debug(frame->left, depth + 1);
-  if (frame->left)
-		__state_debug(frame->right, depth + 1);
+	if (HAS_LEFT_CHILD(frame)) {
+		__state_debug(LEFT_CHILD(frame), depth + 1);
+  }
+  
+  if (HAS_RIGHT_CHILD(frame)) {
+		__state_debug(RIGHT_CHILD(frame), depth + 1);
+  }
 }
 
 void

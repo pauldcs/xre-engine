@@ -6,8 +6,8 @@
 bool add_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
   return (state_value(frame, left->state.value + right->state.value));
 }
@@ -15,8 +15,8 @@ bool add_op(xre_frame_t *frame) {
 bool sub_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
   return (state_value(frame, left->state.value - right->state.value));
 }
@@ -24,8 +24,8 @@ bool sub_op(xre_frame_t *frame) {
 bool mul_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
   return (state_value(frame, left->state.value * right->state.value));
 }
@@ -33,8 +33,8 @@ bool mul_op(xre_frame_t *frame) {
 bool div_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
   if (right->state.value == 0) {
     __return_error(frame, XRE_ZERO_DIVISION_ERROR);
@@ -46,8 +46,8 @@ bool div_op(xre_frame_t *frame) {
 bool mod_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
   if (right->state.value == 0) {
     __return_error(frame, XRE_ZERO_DIVISION_ERROR);
@@ -59,8 +59,8 @@ bool mod_op(xre_frame_t *frame) {
 bool arithmetic_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
   if (!evaluate(left) || !evaluate(right)) {
     return (false);

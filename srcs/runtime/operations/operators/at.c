@@ -7,8 +7,8 @@
 bool at_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
   if (!evaluate(left) || !evaluate(right)) {
     return (false);

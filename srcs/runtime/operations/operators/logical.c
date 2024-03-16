@@ -6,8 +6,8 @@
 bool do_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
   if (!evaluate(left)) {
 
@@ -28,8 +28,8 @@ bool do_op(xre_frame_t *frame) {
 bool else_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
   if (!evaluate(left)) {
     return (false);
@@ -48,8 +48,8 @@ bool else_op(xre_frame_t *frame) {
 bool and_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
   if (!evaluate(left)) {
     return (false);
@@ -67,8 +67,8 @@ bool and_op(xre_frame_t *frame) {
 bool or_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
   if (!evaluate(left)) {
     return (false);

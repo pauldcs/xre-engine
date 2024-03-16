@@ -77,20 +77,21 @@ bool evaluate(xre_frame_t *frame) {
 }
 
 bool call_runtime(xre_ast_t *ast) {
-  xre_frame_t *frame = state_init(ast);
-  if (frame) {
-    bool ret = xre_runtime(frame);
-    state_deinit(frame);
-    return (ret);
-  }
-
-  (void)ast;
-  return (false);
+  if (init_frame_tree(ast) < 0)
+    return (false);
+  
+  bool ret = xre_runtime();
+    
+  deinit_frame_tree(&frame_tree_g[0]);
+  free(frame_tree_g);
+  frame_tree_g = NULL;
+  
+  return (ret);
 }
 
-bool xre_runtime(xre_frame_t *frame) {
-  __return_val_if_fail__(frame, false);
-  
+bool xre_runtime(void) {
+  xre_frame_t *frame = &frame_tree_g[0];
+
   if (!symtab_init()) {
     return (false);
   }

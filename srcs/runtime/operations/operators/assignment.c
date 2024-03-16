@@ -16,7 +16,7 @@ bool simple_assignment(xre_frame_t *initial_frame, const char *key, xre_frame_t 
 bool reassignement(xre_frame_t *initial_frame, const char *key, xre_frame_t *frame) {
   __return_val_if_fail__(frame, false);
 
-  xre_frame_t *left = frame->left;
+  xre_frame_t *left = LEFT_CHILD(frame);
   if (!symtab_get(left->identifier)) {
     __return_error(frame, XRE_UNBOUND_LOCAL_ERROR);
   }
@@ -31,10 +31,10 @@ bool reassignement(xre_frame_t *initial_frame, const char *key, xre_frame_t *fra
 bool assignment_op(xre_frame_t *frame) {
   __return_val_if_fail__(frame, NULL);
 
-  xre_frame_t *left = frame->left;
-  xre_frame_t *right = frame->right;
+  xre_frame_t *left = LEFT_CHILD(frame);
+  xre_frame_t *right = RIGHT_CHILD(frame);
 
-  if (left->kind != __IDENTIFIER__ ) {
+  if (left->kind != __IDENTIFIER__) {
     __return_error(frame, XRE_INVALID_ASSIGMENT_ERROR);
   }
 
@@ -48,7 +48,7 @@ bool assignment_op(xre_frame_t *frame) {
 
   symtab_entry_t *item = symtab_get(left->identifier);
   if (!item) {
-    __return_error(frame, XRE_UNBOUND_LOCAL_ERROR);
+    __return_error(left, XRE_UNBOUND_LOCAL_ERROR);
   }
 
   xre_state_t *state = &item->state;
