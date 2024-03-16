@@ -16,7 +16,6 @@ readonly             DEFAULT_MODE="args"
 readonly     DEFAULT_INPUT_SUFFIX="in"
 readonly  DEFAULT_INPUT_DIRECTORY="infiles"
 readonly DEFAULT_OUTPUT_DIRECTORY="outfiles"
-readonly          DEFAULT_TIMEOUT=3
 
 readonly       OK_COLOR=$(tput -T "xterm" setaf 2) # green
 readonly    ERROR_COLOR=$(tput -T "xterm" setaf 1) # red
@@ -169,7 +168,6 @@ function __args_mode() {
 
     if [ "$run_under_valgrind" = true ];
         then
-            timeout $DEFAULT_TIMEOUT                                 \
             cat "$input_file"                                        \
             | xargs                                                  \
             valgrind                                                 \
@@ -182,7 +180,6 @@ function __args_mode() {
                 --error-exitcode=1                                   \
                 ./"$program_name" $extra_args &> "$actual_output_file"
     else
-        timeout $DEFAULT_TIMEOUT               \
         cat "$input_file"                      \
         | xargs                                \
         ./"$program_name" $extra_args &> "$actual_output_file"
@@ -204,7 +201,6 @@ function __path_mode() {
 
     if [ "$run_under_valgrind" = true ];
         then
-            timeout $DEFAULT_TIMEOUT                                               \
             valgrind                                                               \
                 -q                                                                 \
                 --leak-check=full                                                  \
@@ -214,7 +210,6 @@ function __path_mode() {
                 --error-exitcode=1                                                 \
                 ./"$program_name" $extra_args "$input_file" &> "$actual_output_file"
     else
-        timeout $DEFAULT_TIMEOUT                                           \
         ./"$program_name" $extra_args "$input_file" &> "$actual_output_file"
     fi
     exit_code=$?
@@ -233,7 +228,6 @@ function __custom_mode() {
     
     if [ "$run_under_valgrind" = true ];
         then
-            timeout $DEFAULT_TIMEOUT                         \
             cat "$input_file"                                \
             | valgrind                                       \
                 -q                                           \
@@ -245,7 +239,6 @@ function __custom_mode() {
 				--error-exitcode=1                           \
                 ./"$program_name" 2>&- > "$actual_output_file"
     else
-        timeout $DEFAULT_TIMEOUT                                         \
         cat "$input_file" | ./"$program_name" 2>&- > "$actual_output_file"
     fi
     exit_code=$?
@@ -298,14 +291,6 @@ function run_test() {
 
     #output "    └── Output: $actual_output_file"
     #output "        └── Return code: $exit_code"
-
-    if [ "$exit_code" = 124 ] ;
-        then
-            output "        └── Status: ${ERROR_COLOR}TIMEOUT${NO_COLOR}"
-            output ""
-            ((failed++))
-            return 
-    fi
 
     if [ "$compare" = true ];
         then

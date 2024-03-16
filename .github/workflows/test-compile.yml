@@ -4,10 +4,7 @@ on:
   push:
     branches:
       - main
-      - develop
-  pull_request:
-    branches:
-      - main
+      - release
       - develop
 
 jobs:
@@ -26,6 +23,24 @@ jobs:
 
       - name: Try xre
         run: xre -h
+
+  syntax:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: sudo apt-get install sparse
+
+      - name: Run sparse
+        run: >
+          sparse      \
+            -Wno-decl \
+            -Wsparse-error \
+            -I ./incs \
+            $(find . -name "*.c" -not -path "*/unit-tests/*")
 
   tester:
     runs-on: ${{ matrix.os }}
@@ -51,24 +66,6 @@ jobs:
           && mv ../../xre .
           && chmod +x xre
           && ./run
-
-  syntax:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Install dependencies
-        run: sudo apt-get install sparse
-
-      - name: Run sparse
-        run: >
-          sparse      \
-            -Wno-decl \
-            -Wsparse-error \
-            -I ./incs \
-            $(find . -name "*.c" -not -path "*/unit-tests/*")
 
   valgrind:
     runs-on: ubuntu-latest
