@@ -1,9 +1,6 @@
 #ifndef __ARRAY_H__
 #define __ARRAY_H__
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdio.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <stddef.h>

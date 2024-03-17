@@ -1,27 +1,26 @@
 #ifndef __XRE_LOGGERGER_H__
-# define __XRE_LOGGERGER_H__
+#define __XRE_LOGGERGER_H__
 
-# if defined(__APPLE__)
-# pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
-# endif
+#pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
 
-# include <stdint.h>
+#include <stdint.h>
 
 #if __MINGW32__ || (defined(_WIN32) || defined(_WIN64)) && !defined(__GNUC__)
 #define MACRO_LOG_FUNC __FUNCTION__
 #define MACRO_WEAK_SYM
-#elif defined(__EMSCRIPTEN__) 
+#elif defined(__EMSCRIPTEN__)
 #define MACRO_LOG_FUNC __func__
 #define MACRO_WEAK_SYM
 #else
 #define MACRO_LOG_FUNC __func__
-#define MACRO_WEAK_SYM __attribute__ ((weak))
-#endif 
+#define MACRO_WEAK_SYM __attribute__((weak))
+#endif
 
-# define XRE_LOGGER(lvl, fmtstr, ...) xre_logger(lvl, __FILE__, MACRO_LOG_FUNC, __LINE__, fmtstr, ##__VA_ARGS__);  
+#define XRE_LOGGER(lvl, fmtstr, ...)                                           \
+  xre_logger(lvl, __FILE__, MACRO_LOG_FUNC, __LINE__, fmtstr, ##__VA_ARGS__);
 
-typedef enum e_log_level{
-	verbose,
+typedef enum e_log_level {
+  verbose,
   info,
   debug,
   warning,
@@ -31,7 +30,8 @@ typedef enum e_log_level{
 
 extern t_log_level __log_level__;
 
-void xre_logger(t_log_level level, const char *filename, const char *func, uint32_t lineno, const char* format, ...);
-void xre_report_error(const char* format, ...);
+void xre_logger(t_log_level level, const char *filename, const char *func,
+                uint32_t lineno, const char *format, ...);
+void xre_report_error(const char *format, ...);
 
 #endif /* __XRE_LOGGER_H__ */

@@ -1,11 +1,10 @@
-#include <strings.h>
-#include <stdlib.h>
-#include <errno.h>
 #include <ctype.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <strings.h>
 
-size_t
-stresc2chr(char *s) {
-
+size_t stresc2chr(char *s)
+{
 	char *p, *q, c;
 	int esc = 0;
 	int x;
@@ -60,7 +59,7 @@ stresc2chr(char *s) {
 				break;
 
 			case 'x':
-				for (x = 0; (c = *++p) != '\0'; ) {
+				for (x = 0; (c = *++p) != '\0';) {
 					if (c >= '0' && c <= '9')
 						x = x * 16 + c - '0';
 					else if (c >= 'a' && c <= 'f')
