@@ -1,5 +1,5 @@
 NAME          := xre
-CC            := gcc
+CC            := clang
 SRCS_DIR      := srcs
 OBJS_DIR      := .objs
 INCS_DIR      := incs
@@ -11,8 +11,7 @@ CFLAGS   := \
 	-Wall     \
 	-Wextra   \
 	-Werror   \
-	-pedantic \
-	-g3 \
+	-pedantic 
 #-O3 \
 #-D XRE_DISABLE_CHECKS=1 \
 #-D XRE_DISABLE_ASSERTS=1

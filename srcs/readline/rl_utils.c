@@ -1,86 +1,72 @@
-#include "xre_readline.h"
 #include "xre_assert.h"
+#include "xre_readline.h"
 #include <errno.h>
-#include <unistd.h>
 #include <string.h>
 #include <termcap.h>
+#include <unistd.h>
 
-int
-clamp(int v, int min, int max) {
-
-	return (v < min)
-		? min
-		: ((v > max)
-			? max 
-			: v
-		);
+int clamp(int v, int min, int max)
+{
+	return (v < min) ? min : ((v > max) ? max : v);
 }
 
-ssize_t
-rl_xwrite(int fildes, const char *buf, size_t nbytes)
+ssize_t rl_xwrite(int fildes, const char *buf, size_t nbytes)
 {
 	int i;
 	int ntry = 0;
 
 	size_t limit = 0x7FFFFFFF;
-  size_t n = nbytes < limit ? nbytes : limit;
+	size_t n = nbytes < limit ? nbytes : limit;
 
-	for (;;)
-	{
+	for (;;) {
 		i = write(fildes, buf, n);
-		if (i > 0)
-		{
+		if (i > 0) {
 			if ((n -= i) <= 0)
 				return (nbytes);
 			buf += i;
 			ntry = 0;
-	
-		} else if (i == 0)
-		{
+
+		} else if (i == 0) {
 			if (++ntry > 10)
 				return (nbytes - n);
-	
+
 		} else if (errno != EINTR)
 			return (-1);
 	}
 }
 
-ssize_t
-rl_xgetchr(int fildes) {
-
-  ssize_t nread;
-  unsigned char ch;
+ssize_t rl_xgetchr(int fildes)
+{
+	ssize_t nread;
+	unsigned char ch;
 
 try_read:
-  nread = read(fildes, &ch, sizeof(unsigned char));
-  if (nread == -1) {
-    switch (errno) {
-      case EINTR:  return (3 /* Ctrl-C as ascii */);
-      case EAGAIN: goto try_read;
-    }
-    fprintf(stderr,
-      "read: %s\r\n",
-      strerror(errno)
-    );
-    return (-1);
-  }
-  if (nread == 0)
-    return (0);
-  return ((int)ch);
+	nread = read(fildes, &ch, sizeof(unsigned char));
+	if (nread == -1) {
+		switch (errno) {
+		case EINTR:
+			return (3 /* Ctrl-C as ascii */);
+		case EAGAIN:
+			goto try_read;
+		}
+		fprintf(stderr, "read: %s\r\n", strerror(errno));
+		return (-1);
+	}
+	if (nread == 0)
+		return (0);
+	return ((int)ch);
 }
 
-int
-rl_xputchar(int c) {
-
+int rl_xputchar(int c)
+{
 	return ((int)write(STDOUT_FILENO, &c, sizeof(char)));
 }
 
-
-void	rl_putnbr(const int32_t c)
+void rl_putnbr(const int32_t c)
 {
-	char		nbr[20];
-	uint32_t	n;
-	size_t		i;
+	char nbr[20];
+	uint32_t n;
+	size_t i;
 
 	if (c < 0)
 		n = c * -1;
@@ -89,8 +75,7 @@ void	rl_putnbr(const int32_t c)
 	i = 20;
 	if (n == 0)
 		nbr[--i] = '0';
-	while (n)
-	{
+	while (n) {
 		nbr[--i] = (n % 10) | 0x30;
 		n /= 10;
 	}
@@ -110,7 +95,7 @@ void	rl_putnbr(const int32_t c)
 
 // 	size_t x = index % config.screencols;
 // 	size_t y = index / config.screencols;
-	
+
 // 	if (y > (size_t)__state__._cc.y) {
 // 		rl_scroll_forward(1);
 // 	}
@@ -132,8 +117,7 @@ void	rl_putnbr(const int32_t c)
 // 	);
 // }
 
-size_t
-rl_esc_to_str(char *s)
+size_t rl_esc_to_str(char *s)
 {
 	char *p, *q, c;
 	int esc = 0;
@@ -189,7 +173,7 @@ rl_esc_to_str(char *s)
 				break;
 
 			case 'x':
-				for (x = 0; (c = *++p) != '\0'; ) {
+				for (x = 0; (c = *++p) != '\0';) {
 					if (c >= '0' && c <= '9')
 						x = x * 16 + c - '0';
 					else if (c >= 'a' && c <= 'f')

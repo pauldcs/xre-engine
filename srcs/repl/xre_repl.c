@@ -8,20 +8,20 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-bool xre_process_block(const char *block) {
+bool xre_process_block(const char *block)
+{
+	if (!block || !*block)
+		return (true);
 
-  if (!block || !*block)
-    return (true);
+	xre_ast_t *ast = xre_ast_compose(block);
+	if (ast) {
+		(void)call_runtime(ast);
 
-  xre_ast_t *ast = xre_ast_compose(block);
-  if (ast) {
-    (void)call_runtime(ast);
-    
-    ast_free(ast);
-    return (true);
-  }
+		ast_free(ast);
+		return (true);
+	}
 
-  return (false);
+	return (false);
 }
 
 // void print_hist(array_t *hist) {
@@ -32,36 +32,36 @@ bool xre_process_block(const char *block) {
 //   }
 // }
 
-bool xre_repl_entrypoint(void) {
-
-  /*
+bool xre_repl_entrypoint(void)
+{
+	/*
    *   Load the history from a file
    */
-  //array_t *hist = array_create(sizeof(char *), 10, NULL);
-  void *buffer;
-  // if (!hist)
-  //   return (false);
+	// array_t *hist = array_create(sizeof(char *), 10, NULL);
+	void *buffer;
+	// if (!hist)
+	//   return (false);
 
-  (void)xre_repl_sigset_default();
+	(void)xre_repl_sigset_default();
 
-  for (;;) {
-    if (!xre_read_block(&buffer, NULL)) {
-      xre_repl_clear_signals();
-      return (/*array_kill(hist),*/ false);
-    }
-    
-    (void)xre_process_block(buffer);
-    
-    free(buffer);
-    /*if (!array_push(hist, &buffer)) {
+	for (;;) {
+		if (!xre_read_block(&buffer, NULL)) {
+			xre_repl_clear_signals();
+			return (/*array_kill(hist),*/ false);
+		}
+
+		(void)xre_process_block(buffer);
+
+		free(buffer);
+		/*if (!array_push(hist, &buffer)) {
       return (array_kill(hist), free(buffer), false);
     }
     array_kill(hist);
     // print_hist(hist);
     */
-  }
+	}
 
-  free(buffer);
-  xre_repl_clear_signals();
-  return (true);
+	free(buffer);
+	xre_repl_clear_signals();
+	return (true);
 }

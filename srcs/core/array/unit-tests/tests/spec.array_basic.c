@@ -1,12 +1,13 @@
 #include "array.h"
 #include "unit_tests.h"
 #include <assert.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdbool.h>
 #include <unistd.h>
 
-static bool __test_001__(void) {
+static bool __test_001__(void)
+{
 	array_t *v = array_create(sizeof(const char *), 10, NULL);
 	assert(array_insert(v, 0, __PTRIZE_STR__("333")));
 	assert(array_insert(v, 0, __PTRIZE_STR__("222")));
@@ -18,19 +19,20 @@ static bool __test_001__(void) {
 	assert(array_insert(v, 0, __PTRIZE_STR__("000")));
 	array_swap_elems(v, 0, 7);
 	array_swap_elems(v, 1, 6);
-	assert(!strcmp(*(char**)array_at(v, 0), "777"));
-	assert(!strcmp(*(char**)array_at(v, 1), "666"));
-	assert(!strcmp(*(char**)array_at(v, 2), "222"));
-	assert(!strcmp(*(char**)array_at(v, 3), "333"));
-	assert(!strcmp(*(char**)array_at(v, 4), "444"));
-	assert(!strcmp(*(char**)array_at(v, 5), "555"));
-	assert(!strcmp(*(char**)array_at(v, 6), "111"));
-	assert(!strcmp(*(char**)array_at(v, 7), "000"));
+	assert(!strcmp(*(char **)array_at(v, 0), "777"));
+	assert(!strcmp(*(char **)array_at(v, 1), "666"));
+	assert(!strcmp(*(char **)array_at(v, 2), "222"));
+	assert(!strcmp(*(char **)array_at(v, 3), "333"));
+	assert(!strcmp(*(char **)array_at(v, 4), "444"));
+	assert(!strcmp(*(char **)array_at(v, 5), "555"));
+	assert(!strcmp(*(char **)array_at(v, 6), "111"));
+	assert(!strcmp(*(char **)array_at(v, 7), "000"));
 	array_kill(v);
 	return (true);
 }
 
-static bool __test_002__(void) {
+static bool __test_002__(void)
+{
 	array_t *v = array_create(sizeof(int32_t), 10, NULL);
 	assert(array_push(v, __PTRIZE_ST32__(0)));
 	assert(array_push(v, __PTRIZE_ST32__(111)));
@@ -52,7 +54,8 @@ static bool __test_002__(void) {
 	return (true);
 }
 
-static bool __test_003__(void) {
+static bool __test_003__(void)
+{
 	array_t *v = array_create(sizeof(int64_t), 10, NULL);
 
 	assert(array_push(v, __PTRIZE_ST64__(0)));
@@ -85,7 +88,8 @@ static bool __test_003__(void) {
 	return (true);
 }
 
-static bool __test_004__(void) {
+static bool __test_004__(void)
+{
 	array_t *v = array_create(sizeof(int64_t), 10, NULL);
 
 	assert(array_pushf(v, __PTRIZE_ST64__(0)));
@@ -116,7 +120,8 @@ static bool __test_004__(void) {
 	return (true);
 }
 
-static bool __test_005__(void) {
+static bool __test_005__(void)
+{
 	array_t *v = array_create(sizeof(int64_t), 10, NULL);
 
 	assert(array_push(v, __PTRIZE_ST64__(0)));
@@ -136,7 +141,7 @@ static bool __test_005__(void) {
 
 	pull = array_pull(v, -1, 1);
 	assert(array_size(pull) == 5);
-	
+
 	assert(*(int64_t *)array_at(pull, 0) == 5);
 	assert(*(int64_t *)array_at(pull, 1) == 4);
 	assert(*(int64_t *)array_at(pull, 2) == 3);
@@ -146,7 +151,7 @@ static bool __test_005__(void) {
 
 	pull = array_pull(v, 2, 0);
 	assert(array_size(pull) == 3);
-	
+
 	assert(*(int64_t *)array_at(pull, 0) == 2);
 	assert(*(int64_t *)array_at(pull, 1) == 1);
 	assert(*(int64_t *)array_at(pull, 2) == 0);
@@ -154,7 +159,7 @@ static bool __test_005__(void) {
 
 	pull = array_pull(v, -1, -5);
 	assert(array_size(pull) == 5);
-	
+
 	assert(*(int64_t *)array_at(pull, 0) == 5);
 	assert(*(int64_t *)array_at(pull, 1) == 4);
 	assert(*(int64_t *)array_at(pull, 2) == 3);
@@ -164,7 +169,7 @@ static bool __test_005__(void) {
 
 	pull = array_pull(v, 2, 2);
 	assert(array_size(pull) == 1);
-	
+
 	assert(*(int64_t *)array_at(pull, 0) == 2);
 	array_kill(pull);
 
@@ -180,13 +185,14 @@ static bool __test_005__(void) {
 	return (true);
 }
 
-static bool __test_006__(void) {
+static bool __test_006__(void)
+{
 	array_t *v = array_create(sizeof(char), 10, NULL);
 
 	assert(array_append(v, "Hello", 5));
 	assert(array_append(v, ", ", 2));
 	assert(array_append(v, "World!\0", 7));
-	assert(!strcmp((char*)array_at(v, 0), "Hello, World!"));
+	assert(!strcmp((char *)array_at(v, 0), "Hello, World!"));
 
 	array_kill(v);
 
@@ -207,7 +213,8 @@ static bool __test_006__(void) {
 	return (true);
 }
 
-static bool __test_007__(void) {
+static bool __test_007__(void)
+{
 	array_t *v = array_create(sizeof(char), 10, NULL);
 
 	assert(array_append(v, "0123456789abcdef", 17));
@@ -231,14 +238,15 @@ static bool __test_007__(void) {
 	return (true);
 }
 
-static bool __test_008__(void) {
+static bool __test_008__(void)
+{
 	array_t *v = array_create(sizeof(char), 10, NULL);
 
 	assert(array_inject(v, 0, "0123456789abcdef", 17));
 	assert(array_size(v) == 17);
 	assert(!strcmp(v->_ptr, "0123456789abcdef"));
 	assert(array_inject(v, 0, "_", 1));
-	assert(array_size(v) == 18);	
+	assert(array_size(v) == 18);
 	assert(!strcmp(v->_ptr, "_0123456789abcdef"));
 	assert(array_inject(v, 1, "_", 1));
 	assert(array_size(v) == 19);
@@ -248,7 +256,8 @@ static bool __test_008__(void) {
 	return (true);
 }
 
-TEST_FUNCTION void array_normal_specs(void) {
+TEST_FUNCTION void array_normal_specs(void)
+{
 	__test_start__;
 
 	run_test(&__test_001__, "Creating array only insert");
