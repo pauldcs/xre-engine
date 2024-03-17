@@ -70,11 +70,14 @@ const char *state_to_str(xre_state_t *state);
 void state_debug(xre_frame_t *frame);
 
 extern array_t *symtab;
-
+extern size_t  st_read_count;
+extern size_t  st_write_count;
 typedef struct {
   const char *key;
   xre_state_t state;
 } symtab_entry_t;
+
+
 
 bool symtab_init(void);
 void symtab_deinit(void);

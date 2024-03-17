@@ -52,7 +52,7 @@ static frame_function dispatch_table[] = { [__ASSIGN__] = assignment_op,
 					   [__LOOP__] = loop_op,
 					   [__SEQUENCE_POINT__] = sequence_op,
 					   [__SEPARATOR__] = separator_op,
-					   [__AT__] = at_op,
+					   [__MEMBER__] = member_op,
 					   [__DO__] = logical_op,
 					   [__ELSE__] = logical_op,
 					   [__AND__] = logical_op,
@@ -105,9 +105,6 @@ bool xre_runtime(void)
 	if (!evaluate(frame)) {
 		if (error_occurred()) {
 			xre_error(&_error);
-			if (_error.type == XRE_EXIT_CALLED_ERROR)
-				exit(1);
-
 			goto prison;
 		}
 

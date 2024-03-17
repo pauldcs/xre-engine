@@ -14,7 +14,7 @@ bool not_op(xre_frame_t *frame);
 bool separator_op(xre_frame_t *frame);
 bool sequence_op(xre_frame_t *frame);
 bool print_op(xre_frame_t *frame);
-bool at_op(xre_frame_t *frame);
+bool member_op(xre_frame_t *frame);
 
 bool add_op(xre_frame_t *frame);
 bool sub_op(xre_frame_t *frame);
