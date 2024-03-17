@@ -3,6 +3,8 @@
 #include "xre_parse.h"
 #include "xre_runtime.h"
 
+#define DEFAULT_NO_CHILD -1
+
 xre_frame_t *frame_tree_g = NULL;
 
 static bool alloc_frame_tree(size_t size)
@@ -16,6 +18,32 @@ static bool alloc_frame_tree(size_t size)
 	return (true);
 }
 
+static void create_value_frame(xre_frame_t *frame, int64_t value)
+{
+	frame->state.value = value;
+	frame->left_index = DEFAULT_NO_CHILD;
+	frame->state.attrs = STATE_NUMBER;
+	frame->right_index = DEFAULT_NO_CHILD;
+}
+
+static void create_string_frame(xre_frame_t *frame, const char *string)
+{
+	frame->state.string = (char *)string;
+	frame->state.attrs = STATE_STRING;
+	frame->state.attrs |= REFERENCE_FLAG;
+	frame->left_index = DEFAULT_NO_CHILD;
+	frame->right_index = DEFAULT_NO_CHILD;
+}
+
+static void create_identifier_frame(xre_frame_t *frame, const char *string)
+{
+	frame->identifier = (char *)string;
+	frame->state.attrs = STATE_UNDEFINED;
+	frame->state.attrs |= REFERENCE_FLAG;
+	frame->left_index = DEFAULT_NO_CHILD;
+	frame->right_index = DEFAULT_NO_CHILD;
+}
+
 static int frame_tree_create(xre_ast_t *ast)
 {
 	static int index = 0;
@@ -24,33 +52,22 @@ static int frame_tree_create(xre_ast_t *ast)
 
 	switch (ast->kind) {
 	case __VAL__:
-		frame->state.attrs = STATE_NUMBER;
-		frame->state.value = ast->value;
-		frame->left_index = -1;
-		frame->right_index = -1;
+		create_value_frame(frame, ast->value);
 		break;
 
 	case __STRING_LITERAL__:
-		frame->state.attrs = STATE_STRING;
-		frame->state.string = (char *)ast->string;
-		frame->state.attrs |= REFERENCE_FLAG;
-		frame->left_index = -1;
-		frame->right_index = -1;
+		create_string_frame(frame, ast->string);
 		break;
 
 	case __IDENTIFIER__:
-		frame->state.attrs = STATE_UNDEFINED;
-		frame->identifier = (char *)ast->string;
-		frame->state.attrs |= REFERENCE_FLAG;
-		frame->left_index = -1;
-		frame->right_index = -1;
+		create_identifier_frame(frame, ast->string);
 		break;
 
 	case __NOT__:
 	case __PRINT__:
 		frame->state.attrs = STATE_UNDEFINED;
 		frame->left_index = frame_tree_create(ast->uniop);
-		frame->right_index = -1;
+		frame->right_index = DEFAULT_NO_CHILD;
 		break;
 
 	default:
