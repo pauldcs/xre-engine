@@ -32,8 +32,8 @@
 // 		}
 // 		/*
 // 		 *     if the file is regular we can just
-// 		 *     lseek to the desired offset, if not, we 
-// 		 *     move the cursor by reading and discarding 
+// 		 *     lseek to the desired offset, if not, we
+// 		 *     move the cursor by reading and discarding
 // 		 *     data until the offset is met
 // 		*/
 // 		if (S_ISREG(st.st_mode))
@@ -43,13 +43,13 @@
 // 				__log__(error, "%s", ERROR_MSG);
 // 				goto prison;
 // 			}
-	
+
 // 		} else
 // 		{
 // 			char 	buf[4096];
 // 			size_t  i = offset;
 // 			ssize_t ret;
-	
+
 // 			while (i)
 // 			{
 // 				ret = read(fd, buf, i < 4096 ? i : 4096);
@@ -74,20 +74,20 @@
 // 				rd_size = n;
 // 			else
 // 				rd_size = hexxer->data.cap;
-// 		} 
-// 		else 
+// 		}
+// 		else
 // 			rd_size = hexxer->data.cap;
 
 // 		ret = read(fd, (ptr_t)hexxer->data.ptr, rd_size);
 // 		switch (ret)
 // 		{
-// 			case -1: 
+// 			case -1:
 // 				__log__(error, "%s", ERROR_MSG);
 // 				goto prison;
 // 			case  0:
 // 				goto beach;
 // 		}
-		
+
 //     	switch (mode)
 //     	{
 //     	    case XDP_REGULAR:

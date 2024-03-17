@@ -1,19 +1,18 @@
-#include <stddef.h>
 #include <ctype.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <string.h>
 
-#define RCAST(T, b)	((T)(uintptr_t)(b))
-#define CAST(T, b)	((T)(b))
+#define RCAST(T, b) ((T)(uintptr_t)(b))
+#define CAST(T, b) ((T)(b))
 
-char *
-str2print(char *buf, size_t bufsiz, const char *str) {
-
+char *str2print(char *buf, size_t bufsiz, const char *str)
+{
 	char *ptr, *eptr = buf + bufsiz - 1;
 	const uint8_t *s = RCAST(const uint8_t *, str);
 	const uint8_t *es = s + strlen(str);
 
-	for (ptr = buf;  ptr < eptr && s < es && *s; s++) {
+	for (ptr = buf; ptr < eptr && s < es && *s; s++) {
 		if (isprint(*s)) {
 			*ptr++ = *s;
 			continue;

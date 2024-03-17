@@ -151,7 +151,7 @@ function check_prerequisites() {
     fi
     
     if [ "$run_under_valgrind" = true ] && [ ! -x "$(command -v valgrind)" ]; then
-        exit_with_error "Valgrind: Not found (-v argument)" 
+        run_under_valgrind=false 
     fi
 }
 

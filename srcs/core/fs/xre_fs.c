@@ -1,45 +1,49 @@
+#include "xre_assert.h"
 #include "xre_core.h"
 #include "xre_log.h"
 #include "xre_utils.h"
-#include "xre_assert.h"
-#include <string.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <fcntl.h>
 
-bool xre_file_exists(const char *fn) {
+bool xre_file_exists(const char *fn)
+{
 	__return_val_if_fail__(fn, 0);
 	__return_val_if_fail__(*fn, 0);
 
 	return (access(fn, F_OK) == 0);
 }
 
-bool xre_file_is_dir(const char *fn) {
+bool xre_file_is_dir(const char *fn)
+{
 	__return_val_if_fail__(xre_file_exists(fn), 0);
 
-	struct stat sb = {0};
+	struct stat sb = { 0 };
 	if (stat(fn, &sb) == 0) {
 		return ((S_IFDIR & sb.st_mode) == S_IFDIR);
 	}
 	return (false);
 }
 
-bool xre_file_is_regular(const char *fn) {
+bool xre_file_is_regular(const char *fn)
+{
 	__return_val_if_fail__(xre_file_exists(fn), 0);
 
-	struct stat sb = {0};
+	struct stat sb = { 0 };
 	if (stat(fn, &sb) == 0) {
 		return ((S_IFREG & sb.st_mode) == S_IFREG);
 	}
 	return (false);
 }
 
-bool xre_file_get_size(const char *fn, size_t *size) {
+bool xre_file_get_size(const char *fn, size_t *size)
+{
 	__return_val_if_fail__(xre_file_exists(fn), 0);
-	
-	struct stat sb = {0};
+
+	struct stat sb = { 0 };
 	if (stat(fn, &sb) == 0) {
 		*size = sb.st_size;
 		return (true);
@@ -47,69 +51,74 @@ bool xre_file_get_size(const char *fn, size_t *size) {
 	return (false);
 }
 
-bool xre_fd_is_block_device(const int fd) {
-    __return_val_if_fail__(fd != -1, 0);
-
-    struct stat st;
-    if (fstat(fd, &st) == -1)
-        return (false);
-
-    return (S_ISBLK(st.st_mode));
-}
-
-bool xre_fd_is_character_device(const int fd) {
+bool xre_fd_is_block_device(const int fd)
+{
 	__return_val_if_fail__(fd != -1, 0);
 
-    struct stat st;
-    if (fstat(fd, &st) == -1)
-        return (false);
+	struct stat st;
+	if (fstat(fd, &st) == -1)
+		return (false);
 
-    return (S_ISCHR(st.st_mode));
+	return (S_ISBLK(st.st_mode));
 }
 
-bool xre_fd_is_pipe(const int fd) {
+bool xre_fd_is_character_device(const int fd)
+{
+	__return_val_if_fail__(fd != -1, 0);
+
+	struct stat st;
+	if (fstat(fd, &st) == -1)
+		return (false);
+
+	return (S_ISCHR(st.st_mode));
+}
+
+bool xre_fd_is_pipe(const int fd)
+{
 	__return_val_if_fail__(fd != -1, 0);
 
 	errno = 0;
-	return (
-		(lseek (fd, 0L, SEEK_CUR) < 0)
-		&& (errno == ESPIPE)
-	);
+	return ((lseek(fd, 0L, SEEK_CUR) < 0) && (errno == ESPIPE));
 }
 
-bool xre_fd_is_readable(const int fd) {
-    __return_val_if_fail__(fd != -1, 0);
+bool xre_fd_is_readable(const int fd)
+{
+	__return_val_if_fail__(fd != -1, 0);
 
-    int ret = fcntl(fd, F_GETFL);
-    return (ret != -1 && (ret & O_ACCMODE) != O_WRONLY);
+	int ret = fcntl(fd, F_GETFL);
+	return (ret != -1 && (ret & O_ACCMODE) != O_WRONLY);
 }
 
-bool xre_fd_is_regular(const int fd) {
-    __return_val_if_fail__(fd != -1, 0);
-    
-    struct stat st;
-    if (fstat(fd, &st) == -1)
-        return (false);
+bool xre_fd_is_regular(const int fd)
+{
+	__return_val_if_fail__(fd != -1, 0);
 
-    return (S_ISREG(st.st_mode));
+	struct stat st;
+	if (fstat(fd, &st) == -1)
+		return (false);
+
+	return (S_ISREG(st.st_mode));
 }
 
-bool xre_fd_is_valid(const int fd) {
-    __return_val_if_fail__(fd != -1, 0);
+bool xre_fd_is_valid(const int fd)
+{
+	__return_val_if_fail__(fd != -1, 0);
 
 	errno = 0;
-    int ret = fcntl(fd, F_GETFD);
-    return (ret != -1 || errno != EBADF);
+	int ret = fcntl(fd, F_GETFD);
+	return (ret != -1 || errno != EBADF);
 }
 
-bool xre_fd_is_writable(const int fd) {
-    __return_val_if_fail__(fd != -1, 0);
+bool xre_fd_is_writable(const int fd)
+{
+	__return_val_if_fail__(fd != -1, 0);
 
-    int ret = fcntl(fd, F_GETFL);
-    return (ret != -1 && (ret & O_ACCMODE) != O_RDONLY);
+	int ret = fcntl(fd, F_GETFL);
+	return (ret != -1 && (ret & O_ACCMODE) != O_RDONLY);
 }
 
-bool xre_file_open_read(const char *fn, int *fd) {
+bool xre_file_open_read(const char *fn, int *fd)
+{
 	__return_val_if_fail__(xre_file_exists(fn), 0);
 
 	*fd = open(fn, O_RDONLY, 0666);
@@ -120,18 +129,20 @@ bool xre_file_open_read(const char *fn, int *fd) {
 	return (false);
 }
 
-bool xre_file_open_append(const char *fn, int *fd) {
+bool xre_file_open_append(const char *fn, int *fd)
+{
 	__return_val_if_fail__(xre_file_exists(fn), 0);
 
 	*fd = open(fn, O_CREAT | O_APPEND | O_WRONLY, 0666);
 	if (*fd != -1)
 		return (true);
-	
+
 	XRE_LOGGER(error, "%s: %s", fn, strerror(errno));
 	return (false);
 }
 
-bool xre_file_open_write(const char *fn, int *fd) {
+bool xre_file_open_write(const char *fn, int *fd)
+{
 	__return_val_if_fail__(xre_file_exists(fn), 0);
 
 	*fd = open(fn, O_CREAT | O_TRUNC | O_WRONLY, 0666);
@@ -142,22 +153,25 @@ bool xre_file_open_write(const char *fn, int *fd) {
 	return (false);
 }
 
-bool xre_fd_read_at(int fd, void *dest, size_t n, off_t offset) {
+bool xre_fd_read_at(int fd, void *dest, size_t n, off_t offset)
+{
 	__return_val_if_fail__(fd != -1, 0);
 
 	ssize_t ret;
 
 	ret = lseek(fd, offset, SEEK_SET);
 	if (ret == -1) {
-		XRE_LOGGER(error, "Cannot lseek to offset: %s", strerror(errno));
+		XRE_LOGGER(error, "Cannot lseek to offset: %s",
+			   strerror(errno));
 		return (false);
 	}
 	if (ret != (ssize_t)offset) {
-		XRE_LOGGER(error, "Seeked to offset %d instead of %d", ret, offset);
+		XRE_LOGGER(error, "Seeked to offset %d instead of %d", ret,
+			   offset);
 		return (false);
 	}
 
-    ret = read(fd, dest, n);
+	ret = read(fd, dest, n);
 	if (ret == -1) {
 		XRE_LOGGER(error, "Cannot read the file: %s", strerror(errno));
 		return (false);
@@ -166,10 +180,11 @@ bool xre_fd_read_at(int fd, void *dest, size_t n, off_t offset) {
 		XRE_LOGGER(error, "Could only read %d bytes out of %d", ret, n);
 		return (false);
 	}
-    return (true);
+	return (true);
 }
 
-bool xre_fd_sneek_read(int fd, void *dest, size_t n) {
+bool xre_fd_sneek_read(int fd, void *dest, size_t n)
+{
 	__return_val_if_fail__(fd != -1, 0);
 
 	off_t start_offset;
@@ -181,7 +196,7 @@ bool xre_fd_sneek_read(int fd, void *dest, size_t n) {
 		return (false);
 	}
 
-    ret = read(fd, dest, n);
+	ret = read(fd, dest, n);
 	if (ret == -1) {
 		XRE_LOGGER(error, "Cannot read the file: %s", strerror(errno));
 		return (false);
@@ -197,16 +212,18 @@ bool xre_fd_sneek_read(int fd, void *dest, size_t n) {
 		return (false);
 	}
 	if (ret != (ssize_t)start_offset) {
-		XRE_LOGGER(error, "Seeked to offset %d instead of %d", ret, start_offset);
+		XRE_LOGGER(error, "Seeked to offset %d instead of %d", ret,
+			   start_offset);
 		return (false);
 	}
-    return (true);
+	return (true);
 }
 
-bool xre_fd_read(int fd, void *dest, size_t n) {
-    ssize_t ret;
+bool xre_fd_read(int fd, void *dest, size_t n)
+{
+	ssize_t ret;
 
-    ret = read(fd, dest, n);
+	ret = read(fd, dest, n);
 	if (ret == -1) {
 		XRE_LOGGER(error, "Read failed: %s", strerror(errno));
 		return (false);
@@ -215,13 +232,14 @@ bool xre_fd_read(int fd, void *dest, size_t n) {
 		XRE_LOGGER(error, "Could only read %d bytes out of %d", ret, n);
 		return (false);
 	}
-    return (true);
+	return (true);
 }
 
 // #ifdef __linux__
 
 // void print_mode(struct stat *sb) {
-//     char mode[11] = "----------";  // Initialize with default values for no permission
+//     char mode[11] = "----------";  // Initialize with default values for no
+//     permission
 
 //     if (S_ISDIR(sb->st_mode)) mode[0] = 'd';  // Directory
 //     if (S_ISCHR(sb->st_mode)) mode[0] = 'c';  // Character device
@@ -246,7 +264,8 @@ bool xre_fd_read(int fd, void *dest, size_t n) {
 // void print_time(const char *label, time_t time) {
 //     char buffer[20];
 //     struct tm tm;
-//     if (strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", localtime_r(&time, &tm))) {
+//     if (strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S",
+//     localtime_r(&time, &tm))) {
 //         printf("%s: %s\n", label, buffer);
 //     }
 // }
@@ -264,8 +283,8 @@ bool xre_fd_read(int fd, void *dest, size_t n) {
 //         default:       printf("???\n"); break;
 //     }
 //     printf("Device:                  0x%lx\n", sb->st_dev);
-//     printf("Inode Number:            0x%llx\n", (unsigned long long)sb->st_ino);
-//     printf("Hard Links:              %d\n", sb->st_nlink);
+//     printf("Inode Number:            0x%llx\n", (unsigned long
+//     long)sb->st_ino); printf("Hard Links:              %d\n", sb->st_nlink);
 //     printf("Owner's User ID:         %d\n", sb->st_uid);
 //     printf("Group ID:                %d\n", sb->st_gid);
 //     printf("Device Type:             %lu\n", sb->st_rdev);
@@ -288,10 +307,12 @@ bool xre_fd_read(int fd, void *dest, size_t n) {
 // 	char dates[64] = {0};
 
 // 	(void)st_mode_to_string(sb->st_mode,           (char*)mode, 32);
-// 	(void)timespec_to_string(sb->st_birthtimespec, (char*)dateb, "%Y-%m-%d %H:%M:%S", 32);
-// 	(void)timespec_to_string(sb->st_atimespec,     (char*)datea, "%Y-%m-%d %H:%M:%S", 32);
-// 	(void)timespec_to_string(sb->st_mtimespec,     (char*)datem, "%Y-%m-%d %H:%M:%S", 32);
-// 	(void)timespec_to_string(sb->st_ctimespec,     (char*)dates, "%Y-%m-%d %H:%M:%S", 32);
+// 	(void)timespec_to_string(sb->st_birthtimespec, (char*)dateb, "%Y-%m-%d
+// %H:%M:%S", 32); 	(void)timespec_to_string(sb->st_atimespec, (char*)datea,
+// "%Y-%m-%d %H:%M:%S", 32); 	(void)timespec_to_string(sb->st_mtimespec,
+// (char*)datem, "%Y-%m-%d %H:%M:%S", 32);
+// 	(void)timespec_to_string(sb->st_ctimespec,     (char*)dates, "%Y-%m-%d
+// %H:%M:%S", 32);
 
 // 	printf("\nFile Type:               ");
 // 	switch (sb->st_mode & S_IFMT) {
