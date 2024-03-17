@@ -11,10 +11,10 @@ CFLAGS   := \
 	-Wall     \
 	-Wextra   \
 	-Werror   \
-	-pedantic 
-#-O3 \
-#-D XRE_DISABLE_CHECKS=1 \
-#-D XRE_DISABLE_ASSERTS=1
+	-pedantic  \
+	# -O3 \
+	# -D XRE_DISABLE_CHECKS=1 \
+	# -D XRE_DISABLE_ASSERTS=1
 
 # export ASAN_OPTIONS="log_path=sanitizer.log"
 # export ASAN_OPTIONS="detect_leaks=1"
@@ -84,7 +84,7 @@ SRCS := \
 	runtime/operations/operators/not.c \
 	runtime/operations/operators/relational.c \
 	runtime/operations/operators/sequence.c \
-	runtime/operations/operators/at.c \
+	runtime/operations/operators/member.c \
 	runtime/operations/operators/print.c \
 	runtime/operations/operands/identifier.c \
 	runtime/operations/operands/basic.c 

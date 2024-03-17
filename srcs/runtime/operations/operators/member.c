@@ -4,7 +4,7 @@
 #include "xre_runtime.h"
 #include <stdbool.h>
 
-bool at_op(xre_frame_t *frame)
+bool member_op(xre_frame_t *frame)
 {
 	__return_val_if_fail__(frame, NULL);
 

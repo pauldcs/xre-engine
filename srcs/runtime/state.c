@@ -13,10 +13,6 @@ bool state_value(xre_frame_t *frame, int64_t value)
 {
 	__return_val_if_fail__(frame, false);
 
-	if (!IS_REF_STATE(frame->state)) {
-		state_free(&frame->state);
-	}
-
 	frame->state.attrs = STATE_NUMBER;
 	frame->state.value = value;
 	return (true);

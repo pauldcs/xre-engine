@@ -102,7 +102,7 @@ bool xre_expr_syntax(array_t *tokens)
 		case __BXOR__:
 		case __SEQUENCE_POINT__:
 		case __SEPARATOR__:
-		case __AT__:
+		case __MEMBER__:
 		case __INJECT__:
 		case __LOOP__:
 		case __ANNOTATE__:

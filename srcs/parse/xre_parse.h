@@ -38,7 +38,7 @@ typedef enum {
   /*    ^^= */ __POW_ASSIGN__,
   /*      , */ __SEQUENCE_POINT__,
   /*      ; */ __SEPARATOR__,
-  /*      @ */ __AT__,
+  /*      . */ __MEMBER__,
   /*      # */ __PRINT__,
   /*     <- */ __INJECT__,
   /*      : */ __ANNOTATE__,
