@@ -30,6 +30,14 @@ $(NAME): $(SRCS_OBJS)
 g: CFLAGS += $(CFLAGS_DBG)
 g: all
 
+format:
+	find . \
+		-name "*.c" \
+		-exec \
+			clang-format \
+			--verbose \
+			-style=file -i {} \;
+
 clean:
 	$(MAKE) clean -C $(LIBARRAY_DIR)
 	rm -rf *.dSYM
@@ -43,4 +51,4 @@ fclean: clean
 
 re: fclean all
 
-.PHONY	: all clean g fclean re 
+.PHONY	: all clean g fclean format re 

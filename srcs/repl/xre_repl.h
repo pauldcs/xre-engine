@@ -1,8 +1,8 @@
 #ifndef __XRE_REPL_H__
-# define __XRE_REPL_H__
+#define __XRE_REPL_H__
 
-# include "array.h"
-# include <stdbool.h>
+#include "array.h"
+#include <stdbool.h>
 
 bool xre_repl_entrypoint(void);
 bool xre_read_block(void **block, array_t *history);

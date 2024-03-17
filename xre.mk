@@ -1,5 +1,5 @@
 NAME          := xre
-CC            := gcc
+CC            := clang
 SRCS_DIR      := srcs
 OBJS_DIR      := .objs
 INCS_DIR      := incs
