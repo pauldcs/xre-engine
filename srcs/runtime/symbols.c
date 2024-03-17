@@ -8,9 +8,14 @@ array_t *symtab = NULL;
 
 bool symtab_init(void)
 {
-	symtab = array_create(sizeof(symtab_entry_t), 8, NULL);
-	if (!symtab)
-		return (false);
+	static int need_init = 1;
+	if (need_init) {
+		symtab = array_create(sizeof(symtab_entry_t), 8, NULL);
+		if (!symtab)
+			return (false);
+		
+		need_init = 0;
+	}
 	return (true);
 }
 

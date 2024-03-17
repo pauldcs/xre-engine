@@ -14,15 +14,22 @@ void __attribute__((noreturn)) usage(void)
 {
 	(void)fprintf(stderr,
 		      "XRE Interpreter v%s\n"
-		      "usage: %s [-resdh] [-x [CODE]] [INFILES] ...\n\n"
+		      "usage: %s [-resdhv] [-x [CODE]] [INFILES] ...\n\n"
 		      "options:\n"
 		      "    -x   [CODE]   Execute code from command line\n"
 		      "    -r            Print command results\n"
 		      "    -e            Show good error messages\n"
 		      "    -d            Enable ast debug mode\n"
+		      "    -v            Show current version\n"
 		      "    -h            Show this help message\n\n",
 
 		      __xre_state__.version, __xre_state__.title);
+	exit(0);
+}
+
+void __attribute__((noreturn)) version(void)
+{
+	(void)fprintf(stderr, "%s-%s\n", __xre_state__.title, __xre_state__.version);
 	exit(0);
 }
 
@@ -137,15 +144,15 @@ static int xre_getopts_next(t_xre_getopts *opts)
 	return (ret);
 }
 
-static bool uint32_parse(const char *expr, uint32_t *dest)
-{
-	const char *ret = str_to_uint32(expr, dest);
-	if (ret == NULL || *ret != 0) {
-		fprintf(stderr, "%s: Is not an integer", expr);
-		return (false);
-	}
-	return (true);
-}
+// static bool uint32_parse(const char *expr, uint32_t *dest)
+// {
+// 	const char *ret = str_to_uint32(expr, dest);
+// 	if (ret == NULL || *ret != 0) {
+// 		fprintf(stderr, "%s: Is not an integer", expr);
+// 		return (false);
+// 	}
+// 	return (true);
+// }
 
 static bool string_parse(const char *expr, char **dest)
 {
@@ -167,7 +174,7 @@ t_xre_args *xre_args_parse(int ac, char *av[])
 		return (NULL);
 
 	bzero(args, sizeof(t_xre_args));
-	xre_getopts_init(&xopts, ac, (const char **)av, "drhex:");
+	xre_getopts_init(&xopts, ac, (const char **)av, "drhvex:");
 
 	while ((c = xre_getopts_next(&xopts)) != (char)-1) {
 		switch (c) {
@@ -180,9 +187,6 @@ t_xre_args *xre_args_parse(int ac, char *av[])
 		case 'r':
 			args->flags |= SHOW_EXPR_RESULT;
 			break;
-		case 'v':
-			if (!uint32_parse(xopts.arg, &args->argument_a))
-				return (free(args), NULL);
 
 			break;
 		case 'x':
@@ -205,6 +209,9 @@ t_xre_args *xre_args_parse(int ac, char *av[])
 				filename_stack_push(xopts.arg);
 
 			break;
+		case 'v':
+			version();
+		
 		case 'h':
 		case '?':
 			usage();

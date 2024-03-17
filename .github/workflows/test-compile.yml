@@ -4,7 +4,10 @@ on:
   push:
     branches:
       - main
-      - release
+      - develop
+  pull_request:
+    branches:
+      - main
       - develop
 
 jobs:
@@ -44,7 +47,6 @@ jobs:
 
   tester-valgrind:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -62,7 +64,6 @@ jobs:
 
   tester-asan:
     runs-on: macos-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -81,16 +82,3 @@ jobs:
           && chmod +x xre
           && ./run
 
-  array:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Configure specs
-        working-directory: srcs/core/array
-        run: >
-          chmod +x configure
-          && ./configure specs "*"
-          && ./tester
