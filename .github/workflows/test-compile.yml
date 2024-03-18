@@ -25,7 +25,7 @@ jobs:
         run: ./__scripts__/install.sh
 
       - name: Try xre
-        run: xre -h
+        run: xre -v
 
   syntax:
     runs-on: ubuntu-latest
@@ -34,15 +34,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install dependencies
+      - name: Install sparse
         run: sudo apt-get install sparse
+
+      - name: Install clang-format
+        run: sudo apt-get install clang-format
+
+      - name: Run clang-format
+        run: >
+          clang-format \
+            --dry-run  \
+            --Werror   \
+            $(find . -name "*.c" -not -path "*/unit-tests/*")
 
       - name: Run sparse
         run: >
-          sparse      \
-            -Wno-decl \
+          sparse           \
+            -Wno-decl      \
             -Wsparse-error \
-            -I ./incs \
+            -I ./incs      \
             $(find . -name "*.c" -not -path "*/unit-tests/*")
 
   tester-valgrind:
@@ -81,4 +91,3 @@ jobs:
           && mv ../../xre .
           && chmod +x xre
           && ./run
-
