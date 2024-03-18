@@ -23,7 +23,7 @@ error_class_e error_type_to_class(error_type_e type)
 	case XRE_UNKNOWN_COMMAND_ERROR:
 	case XRE_UNBOUND_LOCAL_ERROR:
 		return XRE_NAME_ERROR_C;
-	
+
 	case XRE_MAX_ITERATIONS_ERROR:
 		return XRE_TERMINATION_ERROR_C;
 

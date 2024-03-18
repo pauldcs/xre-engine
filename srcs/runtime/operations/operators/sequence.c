@@ -34,9 +34,7 @@ bool sequence_op(xre_frame_t *frame)
 	}
 
 	array_t *array = array_create(sizeof(xre_frame_t), 8, NULL);
-	if (!array
-		|| !push_frame(array, left)
-		|| !push_frame(array, right)) {
+	if (!array || !push_frame(array, left) || !push_frame(array, right)) {
 		__return_error(frame, XRE_OUT_OF_MEMORY_ERROR);
 	}
 

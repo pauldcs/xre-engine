@@ -13,7 +13,7 @@ bool symtab_init(void)
 		symtab = array_create(sizeof(symtab_entry_t), 8, NULL);
 		if (!symtab)
 			return (false);
-		
+
 		need_init = 0;
 	}
 	return (true);

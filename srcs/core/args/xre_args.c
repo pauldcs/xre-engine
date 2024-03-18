@@ -29,7 +29,8 @@ void __attribute__((noreturn)) usage(void)
 
 void __attribute__((noreturn)) version(void)
 {
-	(void)fprintf(stderr, "%s-%s\n", __xre_state__.title, __xre_state__.version);
+	(void)fprintf(stderr, "%s-%s\n", __xre_state__.title,
+		      __xre_state__.version);
 	exit(0);
 }
 
@@ -211,7 +212,7 @@ t_xre_args *xre_args_parse(int ac, char *av[])
 			break;
 		case 'v':
 			version();
-		
+
 		case 'h':
 		case '?':
 			usage();
