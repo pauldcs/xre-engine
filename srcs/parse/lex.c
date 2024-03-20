@@ -6,7 +6,7 @@
 #include <string.h>
 #include <sys/types.h>
 
-error_notification_t lexer_error_g;
+err_notif_t lexer_error_g;
 
 xre_token_t _token;
 size_t _line;
@@ -393,7 +393,7 @@ not_a_constant_value:
 	return (true);
 
 lexer_error:
-	lexer_error_g.src = &_token;
+	lexer_error_g.orig = &_token;
 	xre_error(&lexer_error_g);
 
 	return (false);

@@ -8,7 +8,7 @@
 #define PREV_TOKEN_KIND ((xre_token_t *)array_at(tokens, idx - 2))->_kind
 #define PREV_TOKEN_TYPE ((xre_token_t *)array_at(tokens, idx - 2))->_type
 
-error_notification_t syntax_error_g;
+err_notif_t syntax_error_g;
 
 bool xre_expr_syntax(array_t *tokens)
 {
@@ -141,7 +141,7 @@ bool xre_expr_syntax(array_t *tokens)
 	return (true);
 
 syntax_error:
-	syntax_error_g.src = token;
+	syntax_error_g.orig = token;
 	xre_error(&syntax_error_g);
 
 prison:

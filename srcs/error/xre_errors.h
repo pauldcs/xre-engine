@@ -45,15 +45,15 @@ typedef enum {
 } error_type_e;
 
 typedef struct {
-  const xre_token_t *src;
+  xre_token_t   *orig;
   error_class_e class;
-  error_type_e type;
-} error_notification_t;
+  error_type_e  type;
+} err_notif_t;
 
 error_class_e error_type_to_class(error_type_e type);
 const char *error_class_str(error_class_e class);
 const char *error_type_str(error_type_e type);
-void xre_error(error_notification_t *notification);
+void xre_error(err_notif_t *notification);
 
 #define __return_error(frame, error_type) return (set_error(frame, error_type));
 /* #define __return_error(frame, error_type) do { \

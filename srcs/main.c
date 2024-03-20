@@ -82,7 +82,7 @@ club:
 		goto prison;
 	}
 
-	if (!call_runtime(ast)) {
+	if (!xre_runtime(ast)) {
 		ast_free(ast);
 		goto prison;
 	}
@@ -127,7 +127,7 @@ int main(int ac, char *av[])
 					goto prison;
 				}
 
-				if (!call_runtime(ast)) {
+				if (!xre_runtime(ast)) {
 					ast_free(ast);
 					goto prison;
 				}

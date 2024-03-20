@@ -15,7 +15,7 @@ bool xre_process_block(const char *block)
 
 	xre_ast_t *ast = xre_ast_compose(block);
 	if (ast) {
-		(void)call_runtime(ast);
+		(void)xre_runtime(ast);
 
 		ast_free(ast);
 		return (true);

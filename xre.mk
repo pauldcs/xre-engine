@@ -71,21 +71,47 @@ SRCS := \
 	readline/rl_editor_mode.c \
 	readline/rl_buffer.c \
 \
-	runtime/xre_runtime.c \
-	runtime/frame_tree.c \
-	runtime/symbols.c \
-	runtime/state.c \
+	runtime-v2/xre_runtime.c \
+	runtime-v2/tree.c \
 \
-	runtime/operations/operators/arithmetic.c \
-	runtime/operations/operators/assignment.c \
-	runtime/operations/operators/logical.c \
-	runtime/operations/operators/bitwise.c \
-	runtime/operations/operators/loop.c \
-	runtime/operations/operators/not.c \
-	runtime/operations/operators/relational.c \
-	runtime/operations/operators/sequence.c \
-	runtime/operations/operators/member.c \
-	runtime/operations/operators/print.c \
-	runtime/operations/operands/identifier.c \
-	runtime/operations/operands/basic.c 
+	runtime-v2/operations/relational/eq.c \
+	runtime-v2/operations/relational/gt.c \
+	runtime-v2/operations/relational/le.c \
+	runtime-v2/operations/relational/ge.c \
+	runtime-v2/operations/relational/lt.c \
+	runtime-v2/operations/relational/relational.c \
+	runtime-v2/operations/relational/ne.c \
+	runtime-v2/operations/relational/not.c \
+\
+	runtime-v2/operations/value/value.c \
+\
+	runtime-v2/operations/assignment/mod_assign.c \
+	runtime-v2/operations/assignment/mul_assign.c \
+	runtime-v2/operations/assignment/assign.c \
+	runtime-v2/operations/assignment/assignment.c \
+	runtime-v2/operations/assignment/sub_assign.c \
+	runtime-v2/operations/assignment/div_assign.c \
+	runtime-v2/operations/assignment/add_assign.c \
+	runtime-v2/operations/assignment/pow_assign.c \
+\
+	runtime-v2/operations/logical/or.c \
+	runtime-v2/operations/logical/loop.c \
+	runtime-v2/operations/logical/logical.c \
+	runtime-v2/operations/logical/and.c \
+	runtime-v2/operations/logical/do.c \
+	runtime-v2/operations/logical/else.c \
+\
+	runtime-v2/operations/arithmetic/mul.c \
+	runtime-v2/operations/arithmetic/rshift.c \
+	runtime-v2/operations/arithmetic/mod.c \
+	runtime-v2/operations/arithmetic/lshift.c \
+	runtime-v2/operations/arithmetic/arithmetic.c \
+	runtime-v2/operations/arithmetic/div.c \
+	runtime-v2/operations/arithmetic/bw_xor.c \
+	runtime-v2/operations/arithmetic/pow.c \
+	runtime-v2/operations/arithmetic/bw_and.c \
+	runtime-v2/operations/arithmetic/add.c \
+	runtime-v2/operations/arithmetic/sub.c \
+	runtime-v2/operations/arithmetic/bw_or.c \
+
 	
