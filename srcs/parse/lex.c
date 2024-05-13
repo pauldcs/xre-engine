@@ -187,7 +187,7 @@ not_a_constant_value:
 
 				break;
 			case '.':
-				_token._kind = __AT__;
+				_token._kind = __MEMBER__;
 				tf = 1;
 
 				break;

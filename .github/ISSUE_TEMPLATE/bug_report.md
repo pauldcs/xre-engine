@@ -1,7 +1,6 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-
 ---
 
 ## Environment
@@ -9,7 +8,7 @@ about: Create a report to help us improve
 ```sh
 # copypaste this script into your shell and replace it with the output
 date
-r2 -v
+xre -v
 uname -ms
 ```
 

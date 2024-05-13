@@ -8,10 +8,6 @@ bool do_identifier(xre_frame_t *frame)
 {
 	__return_val_if_fail__(frame, NULL);
 
-	if (!strcmp(frame->identifier, "exit")) {
-		__return_error(frame, XRE_EXIT_CALLED_ERROR);
-	}
-
 	symtab_entry_t *item = symtab_get(frame->identifier);
 	if (!item) {
 		__return_error(frame, XRE_UNBOUND_LOCAL_ERROR);

@@ -75,7 +75,7 @@ static int get_expr_precedence(xre_expr_kind_t kind)
 		return (-2);
 
 	case __INJECT__:
-	case __AT__:
+	case __MEMBER__:
 		return (-3);
 
 	case __MUL__:

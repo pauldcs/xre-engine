@@ -24,7 +24,6 @@ error_class_e error_type_to_class(error_type_e type)
 	case XRE_UNBOUND_LOCAL_ERROR:
 		return XRE_NAME_ERROR_C;
 
-	case XRE_EXIT_CALLED_ERROR:
 	case XRE_MAX_ITERATIONS_ERROR:
 		return XRE_TERMINATION_ERROR_C;
 
@@ -83,8 +82,6 @@ const char *error_type_str(error_type_e type)
 	switch (type) {
 	case XRE_ALREADY_ANNOTATED_ERROR:
 		return "already annotated";
-	case XRE_EXIT_CALLED_ERROR:
-		return "exit called";
 	case XRE_UNDEFINED_BEHAVIOR_ERROR:
 		return "undefined behavior happened";
 	case XRE_OUT_OF_MEMORY_ERROR:

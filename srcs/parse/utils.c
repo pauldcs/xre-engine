@@ -153,8 +153,8 @@ const char *expr_kind_to_string(xre_expr_kind_t kind)
 		return "sequence point";
 	case __SEPARATOR__:
 		return "separator";
-	case __AT__:
-		return "at";
+	case __MEMBER__:
+		return "member";
 	case __PRINT__:
 		return "print";
 	case __INJECT__:
@@ -214,7 +214,7 @@ xre_expr_type_t expr_type_by_kind(xre_expr_kind_t kind)
 	case __LOOP__:
 	case __DO__:
 	case __ELSE__:
-	case __AT__:
+	case __MEMBER__:
 	case __AND__:
 	case __OR__:
 
