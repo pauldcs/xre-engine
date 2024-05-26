@@ -1,54 +1,14 @@
-include xre.mk
+NAME := xre-dev
+SHELL := /bin/bash
 
-SRCS_OBJS := $(patsubst %.c,$(OBJS_DIR)/%.o,$(SRCS))
+.DEFAULT_GOAL := up
 
-$(OBJS_DIR)/%.o:$(SRCS_DIR)/%.c
-	@mkdir -vp $(dir $@)
-	$(CC) \
-		$(CFLAGS) \
-		-MMD \
-		-MP \
-		-o $@ \
-		-c $< \
-		-I $(INCS_DIR)
+up down:
+	docker compose $@ 
 
-all: $(NAME)
+shell:
+	docker compose exec $(NAME) $(SHELL)
 
--include  $(SRCS_OBJS:.o=.d)
+re: down up
 
-$(NAME): $(SRCS_OBJS)
-	$(MAKE) -C $(LIBARRAY_DIR)
-	$(CC) \
-		$^ \
-		$(CFLAGS) \
-		-o $(NAME) \
-		-I $(INCS_DIR) \
-		-L $(LIBARRAY_DIR) \
-		-larray \
-		-ltermcap 
-
-g: CFLAGS += $(CFLAGS_DBG)
-g: all
-
-format:
-	find . \
-		-name "*.c" \
-		-exec \
-			clang-format \
-			--verbose \
-			-style=file -i {} \;
-
-clean:
-	$(MAKE) clean -C $(LIBARRAY_DIR)
-	rm -rf *.dSYM
-	rm -rf .cache
-	rm -rf .vscode
-	rm -rf $(OBJS_DIR)
-
-fclean: clean
-	$(MAKE) fclean -C $(LIBARRAY_DIR)
-	rm -f $(NAME)
-
-re: fclean all
-
-.PHONY	: all clean g fclean format re 
+.PHONY: up down re shell

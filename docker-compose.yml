@@ -1,0 +1,19 @@
+version: '3.9'
+
+services:
+  xre-dev:
+    hostname: xre-dev
+    tty: true
+    privileged: true
+    cap_add:
+      - ALL
+    working_dir: /root
+    build:
+      context: ./dev
+      dockerfile: Dockerfile
+    volumes:
+      - ./engine:/root/engine
+    ports:
+      - '0.0.0.0:7000:3000'
+    expose:
+      - 7000

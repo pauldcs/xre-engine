@@ -1,0 +1,3 @@
+cd ../../engine && make
+cd -
+./tester.sh -p xre -v -m path 
