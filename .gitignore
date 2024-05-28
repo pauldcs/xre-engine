@@ -1,6 +1,9 @@
 compile_commands.json
 xre
-.objs
+*.o
+*.a
+*.objs
 xre.dSYM
 __tools__/tester/outfiles
 .vscode
+.cache
