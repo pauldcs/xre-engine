@@ -7,3 +7,4 @@ xre.dSYM
 __tools__/tester/outfiles
 .vscode
 .cache
+*.DS_Store
