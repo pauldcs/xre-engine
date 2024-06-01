@@ -3,10 +3,17 @@
 #include "xre_assert.h"
 #include "xre_log.h"
 #include <stdbool.h>
+#include <string.h>
 
 XRE_OPERATOR_API(oper_string)
 {
-	XRE_LOGGER(debug, "oper_string");
-	return (set_error_type(XRE_NOT_IMPLEMENTED_ERROR), set_error_orig(self),
-		false);
+	__return_val_if_fail__(self, false);
+
+	if (!stack_push(object_create_slice((unsigned char *)self->string,
+					    strlen(self->string)))) {
+		return (set_error_type(XRE_STACK_OVERFLOW_ERROR),
+			set_error_orig(self), false);
+	}
+
+	return (true);
 }

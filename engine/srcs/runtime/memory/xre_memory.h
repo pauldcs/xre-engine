@@ -22,7 +22,7 @@ void stack_fini(void);
 bool stack_push(object_t *object);
 const object_t *stack_top(void);
 void stack_pop(object_t *ptr);
-void stack_pop_expand(object_t *ptr);
+void stack_pop_discard(void);
 void stack_debug(void);
 
 int symtab_create_entry(const char *sym);

@@ -1,5 +1,6 @@
 #include "xre_memory.h"
 #include "xre_operations.h"
+#include "xre_utils.h"
 #include "xre_log.h"
 #include "array.h"
 #include "xre_xdp.h"
@@ -50,64 +51,69 @@ void stack_pop(object_t *ptr)
 	array_pop(g_stack, ptr);
 }
 
-// void flags_to_string(int32_t flags) {
-//   bool first = true;
-//   if (flags & FLAG_REGISTER) {
-//     (void)fprintf(stderr, "FLAG_REGISTER");
-//     first = false;
-//   }
-//   if (flags & FLAG_ALLOC) {
-//     if (first) {
-//       first = false;
-//     } else {
-//       (void)fprintf(stderr, " | ");
-//     }
-//     (void)fprintf(stderr, "FLAG_ALLOC");
-//   }
-//   if (flags & FLAG_SEQUENCE) {
-//     if (first) {
-//       first = false;
-//     } else {
-//       (void)fprintf(stderr, " | ");
-//     }
-//     (void)fprintf(stderr, "FLAG_SEQUENCE");
-//   }
-//   if (flags & FLAG_REF) {
-//     if (first) {
-//       first = false;
-//     } else {
-//       (void)fprintf(stderr, " | ");
-//     }
-//     (void)fprintf(stderr, "FLAG_REF");
-//   }
-// }
+void stack_pop_discard(void)
+{
+	g_stack_ptr--;
+	array_pop(g_stack, NULL);
+}
+
+void flags_to_string(int32_t flags)
+{
+	bool first = true;
+	if (flags & FLAG_REGISTER) {
+		(void)fprintf(stderr, "FLAG_REGISTER");
+		first = false;
+	}
+
+	if (flags & FLAG_ALLOC) {
+		if (first) {
+			first = false;
+		} else {
+			(void)fprintf(stderr, " | ");
+		}
+		(void)fprintf(stderr, "FLAG_ALLOC");
+	}
+
+	if (flags & FLAG_SEQUENCE) {
+		if (first) {
+			first = false;
+		} else {
+			(void)fprintf(stderr, " | ");
+		}
+		(void)fprintf(stderr, "FLAG_SEQUENCE");
+	}
+
+	if (flags & FLAG_SYMBOL) {
+		if (first) {
+			first = false;
+		} else {
+			(void)fprintf(stderr, " | ");
+		}
+		(void)fprintf(stderr, "FLAG_SYMBOL");
+	}
+	(void)fprintf(stderr, "\n");
+}
 
 void stack_debug(void)
 {
-	// (void)fprintf(stderr,
-	//   "stack:\n"
-	//   "  size: %d\n"
-	//   "   ptr: %ld\n\n",
-	//   STACK_SIZE,
-	//   g_stack_ptr
-	// );
+	(void)fprintf(stderr,
+		      "stack:\n"
+		      "  size: %d\n"
+		      "   ptr: %ld\n\n",
+		      STACK_SIZE, g_stack_ptr);
 
-	// size_t i = 0;
-	// for (; i < g_max_ptr; i++) {
-	//   const object_t *obj = (object_t *)array_at(g_stack, i);
-	//   //(void)fprintf(stderr,
-	//   //  " - in_use  %s\n"
-	//   //  " - flags   ",
-	//   //  i < g_stack_ptr ? "yes" : "no"
-	//   //);
-	//   //flags_to_string(obj->flags);
-	//   (void)fprintf(stderr, "%ld", (int64_t)obj->data.ptr);
-	//   // xre_xdp_dump(
-	//   //   ((uint8_t *)g_stack->_ptr) + (i * sizeof(object_t)),
-	//   //   sizeof(object_t),
-	//   //   i * sizeof(object_t)
-	//   // );
-	//   (void)fprintf(stderr, "\n");
-	// }
-	// (void)fprintf(stderr, "\n");
+	size_t i = 0;
+	for (; i < g_stack_ptr; i++) {
+		const object_t *obj = (object_t *)array_at(g_stack, i);
+		(void)fprintf(stderr,
+			      " - in_use  %s\n"
+			      " - flags   ",
+			      i < g_stack_ptr ? "yes" : "no");
+		flags_to_string(obj->flags);
+		xre_xdp_dump(((uint8_t *)g_stack->_ptr) +
+				     (i * sizeof(object_t)),
+			     sizeof(object_t), i * sizeof(object_t));
+		(void)fprintf(stderr, "\n");
+	}
+	(void)fprintf(stderr, "\n");
 }

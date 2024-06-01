@@ -24,7 +24,7 @@ static void print_symbol(void *ptr)
 
 static void print_slice(void *ptr)
 {
-	(void)fprintf(stderr, "slice@%p\n", ptr);
+	(void)fprintf(stderr, "%s\n", (char *)ptr);
 }
 
 object_t *object_create_register(int64_t data)
@@ -56,13 +56,13 @@ object_t *object_create_slice(unsigned char *ptr, size_t size)
 				   .dealloc = free,
 				   .test = NULL };
 
-	object.data.ptr = malloc(size);
+	object.data.ptr = malloc(size + 1);
 	if (!object.data.ptr) {
 		return (NULL);
 	}
 
 	object.data.size = size;
-	(void)memcpy(object.data.ptr, ptr, size);
+	(void)strcpy(object.data.ptr, (char *)ptr);
 	return (&object);
 }
 

@@ -44,5 +44,6 @@ bool xre_runtime(xre_ast_t *ast)
 			false);
 	}
 
+	//stack_debug();
 	return (stmt_tree_destroy(self), symtab_fini(), stack_fini(), true);
 }

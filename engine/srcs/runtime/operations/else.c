@@ -16,6 +16,8 @@ XRE_OPERATOR_API(oper_else)
 		return (true);
 	}
 
+	stack_pop_discard();
+
 	if (!BR_EVAL((RIGHT_BRANCH))) {
 		return (false);
 	}
