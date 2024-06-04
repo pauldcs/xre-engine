@@ -21,5 +21,8 @@ loop:
 		return (false);
 	}
 
+	stack_pop_discard();
+	stack_pop_discard();
+
 	goto loop;
 }

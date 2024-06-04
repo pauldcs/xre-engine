@@ -22,27 +22,32 @@ bool xre_runtime(xre_ast_t *ast)
 	__return_val_if_fail__(ast, false);
 
 	if (!symtab_init()) {
-		return ((void)fprintf(stderr, "Out of memory\n"), false);
+		(void)fprintf(stderr, "Out of memory\n");
+		return (false);
 	}
 
 	ast_stmt_t *self = stmt_tree_create(ast);
 	if (!self) {
-		return ((void)fprintf(stderr, "Out of memory\n"), symtab_fini(),
-			false);
+		(void)fprintf(stderr, "Out of memory\n");
+		stmt_tree_destroy(self);
+		return (false);
 	}
 
 	if (!stack_init()) {
-		return ((void)fprintf(stderr, "Out of memory\n"),
-			stmt_tree_destroy(self), symtab_fini(), false);
+		(void)fprintf(stderr, "Out of memory\n");
+		stmt_tree_destroy(self);
+		return (false);
 	}
 
 	__statements__ = self;
 
 	if (!self->eval(self)) {
 		xre_error(&_error);
-		return (symtab_fini(), stmt_tree_destroy(self), stack_fini(),
-			false);
+		stmt_tree_destroy(self);
+		return (false);
 	}
 
-	return (stmt_tree_destroy(self), symtab_fini(), stack_fini(), true);
+	//stack_debug();
+	stmt_tree_destroy(self);
+	return (true);
 }

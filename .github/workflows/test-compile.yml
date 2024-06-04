@@ -57,39 +57,25 @@ jobs:
             -I ./incs      \
             $(find . -name "*.c" -not -path "*/unit-tests/*")
 
-  # tester-valgrind:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v2
+  tester:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
 
-  #     - name: Build xre (debug)
-  #       run: make
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-  #     - name: Run tester.sh
-  #       working-directory: __tools__/tester
-  #       run: >
-  #         chmod +x run
-  #         && mv ../../xre .
-  #         && chmod +x xre
-  #         && ./run
+      - name: Install timeout
+        if: matrix.os == 'macos-latest'
+        run: brew install coreutils
 
-  # tester-asan:
-  #   runs-on: macos-latest
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v2
-
-  #     - name: Install timeout
-  #       run: brew install coreutils
-
-  #     - name: Build xre (debug)
-  #       run: make g
-
-  #     - name: Run tester.sh
-  #       working-directory: __tools__/tester
-  #       run: >
-  #         chmod +x run
-  #         && mv ../../xre .
-  #         && chmod +x xre
-  #         && ./run
+      - name: Run tester.sh
+        working-directory: tools/tester
+        run: >
+          chmod +x run
+          && (cd ../../engine && make fclean && make g)
+          && mv ../../engine/xre .
+          && chmod +x xre
+          && ./run

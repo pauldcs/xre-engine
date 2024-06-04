@@ -1,3 +1,4 @@
+#include "runtime/memory/xre_memory.h"
 #include "xre_alloc.h"
 #include "xre_args.h"
 #include "xre_assert.h"
@@ -13,7 +14,7 @@
 
 t_xre_state __xre_state__ = {
 	.title = "xre",
-	.version = "0.7.0",
+	.version = "0.7.3",
 };
 
 static bool init_source_file(t_xre_args *args, const char *path)
@@ -115,7 +116,8 @@ int main(int ac, char *av[])
 					goto prison;
 				}
 			} else {
-				fprintf(stderr,
+				(void)fprintf(
+					stderr,
 					"%s: Failed to import input file\n",
 					__xre_state__.title);
 				goto prison;
@@ -132,6 +134,8 @@ int main(int ac, char *av[])
 					goto prison;
 				}
 
+				symtab_fini();
+				stack_fini();
 				ast_free(ast);
 				free(args);
 				return (true);
