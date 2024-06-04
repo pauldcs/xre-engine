@@ -83,7 +83,7 @@ SRCS := \
 	runtime/operations/ne.c \
 	runtime/operations/not.c \
 	runtime/operations/value.c \
-	runtime/operations/string.c \
+	runtime/operations/slice.c \
 	runtime/operations/assign.c \
 	runtime/operations/or.c \
 	runtime/operations/loop.c \

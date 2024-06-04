@@ -70,7 +70,7 @@ bool is_true_object(object_t *object)
 {
 	__return_val_if_fail__(object, false);
 
-	if (object->flags & FLAG_REGISTER && !!((int64_t)object->data.ptr)) {
+	if ((int64_t)object->data.ptr) {
 		return (true);
 	}
 

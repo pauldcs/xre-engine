@@ -51,6 +51,10 @@ object_t *symtab_get_entry(int index)
 
 bool symtab_init(void)
 {
+	if (g_symtab) {
+		return (true);
+	}
+
 	g_symtab = array_create(sizeof(object_t), STACK_SIZE, NULL);
 	if (!g_symtab) {
 		return (false);
@@ -69,6 +73,9 @@ bool symtab_init(void)
 
 void symtab_fini(void)
 {
+	if (!g_symtab ||!g_symcache) {
+		return;
+	}
 	array_kill(g_symtab);
 	array_kill(g_symcache);
 

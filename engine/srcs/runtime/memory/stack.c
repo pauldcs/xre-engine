@@ -14,6 +14,10 @@ size_t g_max_ptr = 0;
 
 bool stack_init(void)
 {
+	if (g_stack) {
+		return (true);
+	}
+
 	g_stack_ptr = 0;
 	g_stack = array_create(sizeof(object_t), STACK_SIZE, NULL);
 
