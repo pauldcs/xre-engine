@@ -73,7 +73,7 @@ bool symtab_init(void)
 
 void symtab_fini(void)
 {
-	if (!g_symtab ||!g_symcache) {
+	if (!g_symtab || !g_symcache) {
 		return;
 	}
 	array_kill(g_symtab);

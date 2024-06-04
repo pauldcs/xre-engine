@@ -71,14 +71,11 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: brew install coreutils
 
-      - name: Build xre (debug)
-        working-directory: engine
-        run: make g
-
       - name: Run tester.sh
         working-directory: tools/tester
         run: >
           chmod +x run
-          && mv ../../xre .
+          && (cd ../../engine && make fclean && make g)
+          && mv ../../engine/xre .
           && chmod +x xre
           && ./run

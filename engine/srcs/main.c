@@ -116,7 +116,8 @@ int main(int ac, char *av[])
 					goto prison;
 				}
 			} else {
-				(void)fprintf(stderr,
+				(void)fprintf(
+					stderr,
 					"%s: Failed to import input file\n",
 					__xre_state__.title);
 				goto prison;
