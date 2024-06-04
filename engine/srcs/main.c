@@ -97,12 +97,6 @@ prison:
 	return (false);
 }
 
-__attribute__((destructor)) void deinit(void)
-{
-	symtab_fini();
-	stack_fini();
-}
-
 int main(int ac, char *av[])
 {
 	t_xre_args *args;
@@ -139,6 +133,8 @@ int main(int ac, char *av[])
 					goto prison;
 				}
 
+				symtab_fini();
+				stack_fini();
 				ast_free(ast);
 				free(args);
 				return (true);
