@@ -53,6 +53,7 @@ SRCS := \
 	parse/parse.c \
 	parse/utils.c \
 	parse/compose.c \
+	parse/precedence.c \
 \
 	error/xre_errors.c \
 	error/xre_print_error.c \

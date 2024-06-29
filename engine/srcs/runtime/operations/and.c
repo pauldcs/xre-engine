@@ -12,7 +12,7 @@ XRE_OPERATOR_API(oper_and)
 		return (false);
 	}
 
-	if (!ECHO_DOLLAR_QUESTION) {
+	if (!IS_ERROR_RETURN) {
 		return (true);
 	}
 

@@ -13,7 +13,7 @@ loop:
 		return (false);
 	}
 
-	if (!ECHO_DOLLAR_QUESTION) {
+	if (!IS_ERROR_RETURN) {
 		return (true);
 	}
 

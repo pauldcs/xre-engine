@@ -85,6 +85,8 @@ bool xre_expr_lex(const char *expr, array_t *tokens);
 bool xre_expr_syntax(array_t *tokens);
 xre_ast_t *xre_expr_parse(array_t *tokens);
 
+int get_expr_precedence(xre_expr_kind_t kind);
+
 /*---      UTILS      ---*/
 xre_expr_type_t expr_type_by_kind(xre_expr_kind_t kind);
 const char *expr_kind_to_string(xre_expr_kind_t kind);

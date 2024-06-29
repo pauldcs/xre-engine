@@ -59,6 +59,6 @@ XRE_OPERATOR_API(oper_print);
 #define LEFT_BRANCH (&__statements__[self->br.left])
 #define RIGHT_BRANCH (&__statements__[self->br.right])
 
-#define ECHO_DOLLAR_QUESTION is_true_object((object_t *)stack_top())
+#define IS_ERROR_RETURN is_true_object((object_t *)stack_top())
 
 #endif /* __XRE_OPERATIONS_H__ */
