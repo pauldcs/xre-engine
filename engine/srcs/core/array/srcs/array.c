@@ -425,6 +425,24 @@ BOOL_TYPE(array_append)(ARRAY_TYPE(self), RDONLY_PTR_TYPE(src), SIZE_TYPE(n))
 	return (true);
 }
 
+BOOL_TYPE(array_concat)(ARRAY_TYPE(self), ARRAY_TYPE(other))
+{
+	HR_COMPLAIN_IF(self == NULL);
+	HR_COMPLAIN_IF(other == NULL);
+	HR_COMPLAIN_IF(self->_elt_size != other->_elt_size);
+
+	if (unlikely(!array_adjust(self, array_size(self) + array_size(other)))) {
+		return (false);
+	}
+
+	(void)builtin_memmove(_relative_data(self, _size(self)), other->_ptr,
+			      array_sizeof(other));
+
+	_size(self) += array_size(other);
+
+	return (true);
+}
+
 __attr_pure RDONLY_PTR_TYPE(array_at)(RDONLY_ARRAY_TYPE(self), SIZE_TYPE(p))
 {
 	HR_COMPLAIN_IF(self == NULL);

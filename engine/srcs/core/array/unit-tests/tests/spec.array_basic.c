@@ -256,6 +256,24 @@ static bool __test_008__(void)
 	return (true);
 }
 
+static bool __test_009__(void)
+{
+	array_t *v1 = array_create(sizeof(char), 1, NULL);
+	array_t *v2 = array_create(sizeof(char), 1, NULL);
+	
+	array_append(v1, "0123456789abcdef", 17);
+	array_append(v2, "!!!", 3);
+
+	array_concat(v1, v2);
+
+	assert(array_size(v1) == 20);
+
+	array_kill(v1);
+	array_kill(v2);
+
+	return (true);
+}
+
 TEST_FUNCTION void array_normal_specs(void)
 {
 	__test_start__;
@@ -268,6 +286,7 @@ TEST_FUNCTION void array_normal_specs(void)
 	run_test(&__test_006__, "array_append tests");
 	run_test(&__test_007__, "array_wipe tests");
 	run_test(&__test_008__, "array_inject tests");
+	run_test(&__test_009__, "array_concat tests");
 
 	__test_end__;
 }

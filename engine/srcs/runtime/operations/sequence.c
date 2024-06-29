@@ -6,7 +6,22 @@
 
 XRE_OPERATOR_API(oper_sequence)
 {
-	XRE_LOGGER(debug, "oper_sequence");
-	return (set_error_type(XRE_NOT_IMPLEMENTED_ERROR), set_error_orig(self),
-		false);
+	__return_val_if_fail__(self, false);
+
+	static object_t lv;
+	static object_t rv;
+
+	if (!BR_EVAL((LEFT_BRANCH)) || !BR_EVAL((RIGHT_BRANCH))) {
+		return (false);
+	}
+
+	stack_pop(&rv);
+	stack_pop(&lv);
+
+	if (!stack_push(object_create_sequence(&lv, &rv))) {
+		return (set_error_type(XRE_STACK_OVERFLOW_ERROR),
+			set_error_orig(self), false);
+	}
+
+	return (true);
 }

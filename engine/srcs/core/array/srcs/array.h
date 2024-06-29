@@ -136,6 +136,7 @@ typedef struct {
   do {                                                                         \
     if (expr) {                                                                \
       LOG_ERROR_MSG(expr);                                                     \
+      exit(1);                                                                 \
     };                                                                         \
   } while (0)
 
@@ -335,6 +336,10 @@ BOOL_TYPE(array_inject)
 /* Appends 'n' elements pointed to by 'src' into the array.
  */
 BOOL_TYPE(array_append)(ARRAY_TYPE(self), RDONLY_PTR_TYPE(src), SIZE_TYPE(n));
+
+/* Appends 'n' elements pointed to by 'src' into the array.
+ */
+BOOL_TYPE(array_concat)(ARRAY_TYPE(self), ARRAY_TYPE(other));
 
 /* Creates a new array, filtered down to just the elements from 'self' that
  * pass the test implemented by the callback.
