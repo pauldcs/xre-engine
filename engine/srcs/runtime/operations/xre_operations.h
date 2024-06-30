@@ -6,44 +6,50 @@
 #include "xre_object.h"
 #include <stdbool.h>
 
-# define XRE_OPERATOR_API(name) bool name(ast_stmt_t *self)
+bool pop_object(object_t *ptr, ast_stmt_t *stmts);
+bool evaluate_binops(ast_stmt_t *self, object_t *left_buffer, object_t *right_buffer);
+bool pop_binop_return(ast_stmt_t *self, object_t *left_buffer, object_t *right_buffer);
+bool stack_push_flagged(ast_stmt_t *self, object_t *object, int32_t flags);
+void trigger_error_on(ast_stmt_t *self, error_type_e type);
+
+# define XRE_API_OPERATOR_FUNC(name) bool name(ast_stmt_t *self)
 typedef bool (*fptr_t)(ast_stmt_t *self);
 
-XRE_OPERATOR_API(oper_add);
-XRE_OPERATOR_API(oper_bw_and);
-XRE_OPERATOR_API(oper_bw_or);
-XRE_OPERATOR_API(oper_bw_xor);
-XRE_OPERATOR_API(oper_div);
-XRE_OPERATOR_API(oper_lshift);
-XRE_OPERATOR_API(oper_rshift);
-XRE_OPERATOR_API(oper_mod);
-XRE_OPERATOR_API(oper_mul);
-XRE_OPERATOR_API(oper_pow);
-XRE_OPERATOR_API(oper_sub);
-XRE_OPERATOR_API(oper_assign);
-XRE_OPERATOR_API(oper_and);
-XRE_OPERATOR_API(oper_do);
-XRE_OPERATOR_API(oper_else);
-XRE_OPERATOR_API(oper_loop);
-XRE_OPERATOR_API(oper_or);
-XRE_OPERATOR_API(oper_eq);
-XRE_OPERATOR_API(oper_ge);
-XRE_OPERATOR_API(oper_gt);
-XRE_OPERATOR_API(oper_le);
-XRE_OPERATOR_API(oper_lt);
-XRE_OPERATOR_API(oper_ne);
-XRE_OPERATOR_API(oper_not);
-XRE_OPERATOR_API(oper_string);
-XRE_OPERATOR_API(oper_value);
-XRE_OPERATOR_API(oper_symbol);
-XRE_OPERATOR_API(oper_symbol_addr);
-XRE_OPERATOR_API(oper_annotate);
-XRE_OPERATOR_API(oper_separator);
-XRE_OPERATOR_API(oper_sequence);
-XRE_OPERATOR_API(oper_scope_resolution);
-XRE_OPERATOR_API(oper_inject);
-XRE_OPERATOR_API(oper_scope_annotate);
-XRE_OPERATOR_API(oper_print);
+XRE_API_OPERATOR_FUNC(oper_add);
+XRE_API_OPERATOR_FUNC(oper_bw_and);
+XRE_API_OPERATOR_FUNC(oper_bw_or);
+XRE_API_OPERATOR_FUNC(oper_bw_xor);
+XRE_API_OPERATOR_FUNC(oper_div);
+XRE_API_OPERATOR_FUNC(oper_lshift);
+XRE_API_OPERATOR_FUNC(oper_rshift);
+XRE_API_OPERATOR_FUNC(oper_mod);
+XRE_API_OPERATOR_FUNC(oper_mul);
+XRE_API_OPERATOR_FUNC(oper_pow);
+XRE_API_OPERATOR_FUNC(oper_sub);
+XRE_API_OPERATOR_FUNC(oper_assign);
+XRE_API_OPERATOR_FUNC(oper_and);
+XRE_API_OPERATOR_FUNC(oper_do);
+XRE_API_OPERATOR_FUNC(oper_else);
+XRE_API_OPERATOR_FUNC(oper_loop);
+XRE_API_OPERATOR_FUNC(oper_or);
+XRE_API_OPERATOR_FUNC(oper_eq);
+XRE_API_OPERATOR_FUNC(oper_ge);
+XRE_API_OPERATOR_FUNC(oper_gt);
+XRE_API_OPERATOR_FUNC(oper_le);
+XRE_API_OPERATOR_FUNC(oper_lt);
+XRE_API_OPERATOR_FUNC(oper_ne);
+XRE_API_OPERATOR_FUNC(oper_not);
+XRE_API_OPERATOR_FUNC(oper_string);
+XRE_API_OPERATOR_FUNC(oper_value);
+XRE_API_OPERATOR_FUNC(oper_symbol);
+XRE_API_OPERATOR_FUNC(oper_symbol_addr);
+XRE_API_OPERATOR_FUNC(oper_annotate);
+XRE_API_OPERATOR_FUNC(oper_separator);
+XRE_API_OPERATOR_FUNC(oper_sequence);
+XRE_API_OPERATOR_FUNC(oper_scope_resolution);
+XRE_API_OPERATOR_FUNC(oper_inject);
+XRE_API_OPERATOR_FUNC(oper_scope_annotate);
+XRE_API_OPERATOR_FUNC(oper_print);
 
 #define TYPE_CHECK_NEXT(self, flag) \
     ((stack_top()->flags & flag)                \

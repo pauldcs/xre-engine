@@ -20,6 +20,7 @@ error_class_e error_type_to_class(error_type_e type)
 	case XRE_TYPE_MISSMATCH_ERROR:
 	case XRE_INVALID_TYPE_FOR_OPERAND_ERROR:
 	case XRE_INVALID_ASSIGMENT_ERROR:
+	case XRE_UNREADABLE_ERROR:
 		return XRE_TYPE_ERROR_C;
 
 	case XRE_UNKNOWN_ANNOTATION_ERROR:
@@ -95,6 +96,8 @@ const char *error_type_str(error_type_e type)
 		return "max iterations reached";
 	case XRE_MODE_WRITE_ON_STRICT_ERROR:
 		return "attempt to write on a protected variable";
+	case XRE_UNREADABLE_ERROR:
+		return "read protected value";
 	case XRE_WRITE_ON_READONLY_ERROR:
 		return "attempt to write on a readonly variable";
 	case XRE_INVALID_ANNOTATION_ERROR:
