@@ -17,7 +17,7 @@ all: $(NAME)
 -include  $(SRCS_OBJS:.o=.d)
 
 $(NAME): $(SRCS_OBJS)
-	$(MAKE) -C $(LIBARRAY_DIR)
+	$(MAKE) g -C $(LIBARRAY_DIR)
 	$(CC) \
 		$^ \
 		$(CFLAGS) \
@@ -39,7 +39,7 @@ format:
 			-style=file -i {} \;
 
 clean:
-	$(MAKE) fclean -C $(LIBARRAY_DIR)
+	$(MAKE) clean -C $(LIBARRAY_DIR)
 	rm -rf *.dSYM
 	rm -rf .cache
 	rm -rf .vscode
