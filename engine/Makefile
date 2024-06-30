@@ -39,7 +39,7 @@ format:
 			-style=file -i {} \;
 
 clean:
-	$(MAKE) clean -C $(LIBARRAY_DIR)
+	$(MAKE) fclean -C $(LIBARRAY_DIR)
 	rm -rf *.dSYM
 	rm -rf .cache
 	rm -rf .vscode
