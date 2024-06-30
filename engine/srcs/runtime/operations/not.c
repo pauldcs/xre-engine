@@ -4,22 +4,17 @@
 #include "xre_log.h"
 #include <stdbool.h>
 
-XRE_OPERATOR_API(oper_not)
+XRE_API_OPERATOR_FUNC(oper_not)
 {
 	__return_val_if_fail__(self, false);
 
-	static object_t lv;
+	static object_t v;
 
-	if (!BR_EVAL((LEFT_BRANCH))) {
+	if (!BR_EVAL((LEFT_BRANCH)) || !pop_object(&v, LEFT_BRANCH)) {
 		return (false);
 	}
 
-	stack_pop(&lv);
-
-	if (!stack_push(object_create_register(!is_true_object(&lv)))) {
-		return (set_error_type(XRE_STACK_OVERFLOW_ERROR),
-			set_error_orig(self), false);
-	}
-
-	return (true);
+	return (stack_push_flagged(self,
+				   object_create_register(!is_true_object(&v)),
+				   FLAG_READABLE | FLAG_MUTABLE));
 }

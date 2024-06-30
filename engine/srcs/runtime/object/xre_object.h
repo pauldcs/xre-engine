@@ -15,9 +15,13 @@ typedef bool (*testfunc_ptr)(void *);
 #define FLAG_REGISTER FLAG(REGISTER, 2) // fits in a register
 #define FLAG_SEQUENCE FLAG(SEQUENCE, 3) // the beginning of a sequence
 #define FLAG_SYMBOL   FLAG(SYMBOL, 4) // is a reference to another object
+#define FLAG_MUTABLE   FLAG(MUTABLE, 5) // is mutable object
+#define FLAG_READABLE   FLAG(READABLE, 6) // is readable object
 
 #define VALUE_OF(type, obj_ptr)  ((type)(obj_ptr)->data.ptr)
 
+
+#define CREATE_DEFAULT_REGISTER 
 /*    A representation of a value during runtime.
  */
 typedef struct {
@@ -36,6 +40,6 @@ object_t *object_create_slice(unsigned char *ptr, size_t size);
 object_t *object_create_symbol(int64_t offset);
 object_t *object_create_sequence(object_t *lval, object_t *rval);
 
-bool is_true_object(object_t *object);
+bool is_true_object(const object_t *object);
 
-#endif /* __XRE_OBJECT_H__ */
+#endif /* __XRE_OBJECT_H__ */ 

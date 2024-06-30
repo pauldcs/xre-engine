@@ -12,20 +12,20 @@ static void print_number(void *ptr)
 {
 	int64_t num = (int64_t)ptr;
 #if defined(__linux__)
-	(void)fprintf(stderr, "%ld\n", num);
+	(void)fprintf(stderr, "%ld", num);
 #else
-	(void)fprintf(stderr, "%lld\n", num);
+	(void)fprintf(stderr, "%lld", num);
 #endif
 }
 
 static void print_symbol(void *ptr)
 {
-	(void)fprintf(stderr, "symbol@%p\n", ptr);
+	(void)fprintf(stderr, "symbol@%p", ptr);
 }
 
 static void print_slice(void *ptr)
 {
-	(void)fprintf(stderr, "%s\n", (char *)ptr);
+	(void)fprintf(stderr, "%s", (char *)ptr);
 }
 
 static void print_sequence(void *ptr)
@@ -37,10 +37,9 @@ static void print_sequence(void *ptr)
 		object_t *obj = array_access(array, i);
 		if (obj)
 			obj->repr(obj->data.ptr);
-		else 
-			(void)fprintf(stderr, "???\n");
+		else
+			(void)fprintf(stderr, "???");
 	}
-
 }
 
 object_t *object_create_register(int64_t data)
@@ -82,7 +81,8 @@ object_t *object_create_slice(unsigned char *ptr, size_t size)
 	return (&object);
 }
 
-bool unwrap_object(object_t *object, array_t *buffer) {
+bool unwrap_object(object_t *object, array_t *buffer)
+{
 	if (object->flags & FLAG_SEQUENCE) {
 		array_t *other = (array_t *)object->data.ptr;
 		if (!array_concat(buffer, other)) {
@@ -97,7 +97,8 @@ bool unwrap_object(object_t *object, array_t *buffer) {
 	return (true);
 }
 
-static void dealloc_requence(void *ptr) {
+static void dealloc_requence(void *ptr)
+{
 	array_kill((array_t *)ptr);
 }
 
@@ -110,9 +111,8 @@ object_t *object_create_sequence(object_t *lval, object_t *rval)
 
 	array_t *sequence = array_create(sizeof(object_t), 2, NULL);
 
-	if (!unwrap_object(lval, sequence)
-		|| !unwrap_object(rval, sequence)) {
-			array_kill(sequence);
+	if (!unwrap_object(lval, sequence) || !unwrap_object(rval, sequence)) {
+		array_kill(sequence);
 		return (NULL);
 	}
 
@@ -122,7 +122,7 @@ object_t *object_create_sequence(object_t *lval, object_t *rval)
 	return (&object);
 }
 
-bool is_true_object(object_t *object)
+bool is_true_object(const object_t *object)
 {
 	__return_val_if_fail__(object, false);
 

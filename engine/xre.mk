@@ -76,6 +76,8 @@ SRCS := \
 	runtime/xre_runtime.c \
 	runtime/tree.c \
 \
+	runtime/operations/pop_object.c \
+	runtime/operations/operations_common.c \
 	runtime/operations/eq.c \
 	runtime/operations/gt.c \
 	runtime/operations/le.c \

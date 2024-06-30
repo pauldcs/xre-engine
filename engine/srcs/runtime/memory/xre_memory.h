@@ -17,6 +17,10 @@ extern size_t   g_stack_ptr;
 extern array_t *g_symtab;
 extern array_t *g_symcache;
 
+#define STACK_TOP_ENABLE_FLAGS(f) (((object_t *)stack_top())->flags |= (f))
+#define STACK_TOP_CHECK_FLAGS(f) (((object_t *)stack_top())->flags & (f))
+#define STACK_TOP_DISABLE_FLAGS(f) (((object_t *)stack_top())->flags &= ~(f))
+
 bool stack_init(void);
 void stack_fini(void);
 bool stack_push(object_t *object);

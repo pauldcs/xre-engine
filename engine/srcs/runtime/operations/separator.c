@@ -4,7 +4,7 @@
 #include "xre_log.h"
 #include <stdbool.h>
 
-XRE_OPERATOR_API(oper_separator)
+XRE_API_OPERATOR_FUNC(oper_separator)
 {
 	__return_val_if_fail__(self, false);
 
@@ -18,5 +18,6 @@ XRE_OPERATOR_API(oper_separator)
 		return (false);
 	}
 
+	STACK_TOP_DISABLE_FLAGS(FLAG_READABLE);
 	return (true);
 }

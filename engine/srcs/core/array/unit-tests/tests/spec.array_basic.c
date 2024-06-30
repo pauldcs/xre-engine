@@ -260,7 +260,7 @@ static bool __test_009__(void)
 {
 	array_t *v1 = array_create(sizeof(char), 1, NULL);
 	array_t *v2 = array_create(sizeof(char), 1, NULL);
-	
+
 	array_append(v1, "0123456789abcdef", 17);
 	array_append(v2, "!!!", 3);
 

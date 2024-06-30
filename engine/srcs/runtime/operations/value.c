@@ -4,14 +4,10 @@
 #include "xre_log.h"
 #include <stdbool.h>
 
-XRE_OPERATOR_API(oper_value)
+XRE_API_OPERATOR_FUNC(oper_value)
 {
 	__return_val_if_fail__(self, false);
 
-	if (!stack_push(object_create_register(self->value))) {
-		return (set_error_type(XRE_STACK_OVERFLOW_ERROR),
-			set_error_orig(self), false);
-	}
-
-	return (true);
+	return (stack_push_flagged(self, object_create_register(self->value),
+				   FLAG_READABLE | FLAG_MUTABLE));
 }

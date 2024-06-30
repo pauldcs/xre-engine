@@ -4,35 +4,29 @@
 #include "xre_log.h"
 #include <stdbool.h>
 
-XRE_OPERATOR_API(oper_lshift)
+XRE_API_OPERATOR_FUNC(oper_lshift)
 {
 	__return_val_if_fail__(self, false);
 
 	static object_t lv;
 	static object_t rv;
+	static int32_t data;
 
-	if (!BR_EVAL((LEFT_BRANCH)) || !BR_EVAL((RIGHT_BRANCH))) {
+	if (!evaluate_binops(self, &lv, &rv)) {
 		return (false);
 	}
 
-	stack_pop(&rv);
-	stack_pop(&lv);
-
 	if (VALUE_OF(int64_t, &rv) > 64) {
-		return (set_error_type(XRE_EXCEEDS_SHIFT_LIMIT_ERROR),
-			set_error_orig(self), false);
+		return (trigger_error_on(self, XRE_EXCEEDS_SHIFT_LIMIT_ERROR),
+			false);
 	}
 
 	if (VALUE_OF(int64_t, &rv) < 0) {
-		return (set_error_type(XRE_NEGATIVE_SHIFT_ERROR),
-			set_error_orig(self), false);
+		return (trigger_error_on(self, XRE_NEGATIVE_SHIFT_ERROR),
+			false);
 	}
 
-	if (!stack_push(object_create_register(VALUE_OF(int64_t, &lv)
-					       << VALUE_OF(int64_t, &rv)))) {
-		return (set_error_type(XRE_STACK_OVERFLOW_ERROR),
-			set_error_orig(self), false);
-	}
-
-	return (true);
+	data = VALUE_OF(int64_t, &lv) << VALUE_OF(int64_t, &rv);
+	return (stack_push_flagged(self, object_create_register(data),
+				   FLAG_READABLE | FLAG_MUTABLE));
 }

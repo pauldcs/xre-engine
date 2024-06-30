@@ -4,22 +4,25 @@
 #include "xre_log.h"
 #include <stdbool.h>
 
-XRE_OPERATOR_API(oper_print)
+XRE_API_OPERATOR_FUNC(oper_print)
 {
 	__return_val_if_fail__(self, false);
 
-	object_t v;
+	static object_t *top;
+
 	if (!BR_EVAL((LEFT_BRANCH))) {
 		return (false);
 	}
 
-	stack_pop(&v);
-
-	v.repr(v.data.ptr);
-
-	if (!stack_push(object_create_register((int64_t)v.data.ptr))) {
-		return (set_error_type(XRE_STACK_OVERFLOW_ERROR),
-			set_error_orig(self), false);
+	top = (object_t *)stack_top();
+	if (!STACK_TOP_CHECK_FLAGS(FLAG_READABLE)) {
+		return (trigger_error_on(LEFT_BRANCH, XRE_UNREADABLE_ERROR),
+			false);
 	}
+
+	top->repr(top->data.ptr);
+	(void)fprintf(stderr, "\n");
+
+	STACK_TOP_DISABLE_FLAGS(FLAG_READABLE);
 	return (true);
 }

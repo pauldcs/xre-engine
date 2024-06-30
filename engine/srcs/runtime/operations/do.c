@@ -4,23 +4,14 @@
 #include "xre_log.h"
 #include <stdbool.h>
 
-XRE_OPERATOR_API(oper_do)
+XRE_API_OPERATOR_FUNC(oper_do)
 {
 	__return_val_if_fail__(self, false);
 
-	if (!BR_EVAL((LEFT_BRANCH))) {
+	if (!oper_and(self)) {
 		return (false);
 	}
 
-	if (!IS_ERROR_RETURN) {
-		return (true);
-	}
-
-	stack_pop_discard();
-
-	if (!BR_EVAL((RIGHT_BRANCH))) {
-		return (false);
-	}
-
+	STACK_TOP_DISABLE_FLAGS(FLAG_READABLE);
 	return (true);
 }

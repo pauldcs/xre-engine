@@ -5,35 +5,31 @@
 #include <stdbool.h>
 #include <string.h>
 
-XRE_OPERATOR_API(oper_assign)
+XRE_API_OPERATOR_FUNC(oper_assign)
 {
 	__return_val_if_fail__(self, false);
 
 	static object_t lv;
 	static object_t rv;
+	static object_t *object;
 
-	if (!oper_symbol_addr(LEFT_BRANCH)) {
+	if (!oper_symbol_addr(LEFT_BRANCH) || !BR_EVAL((RIGHT_BRANCH)) ||
+	    !pop_binop_return(self, &lv, &rv)) {
 		return (false);
 	}
 
-	if (!BR_EVAL((RIGHT_BRANCH))) {
-		return (false);
+	object = array_access(g_symtab, VALUE_OF(int64_t, &lv));
+	if (!object) {
+		return (trigger_error_on(self, XRE_OUT_OF_BOUNDS_ACCESS_ERROR),
+			false);
 	}
 
-	stack_pop(&rv);
-	stack_pop(&lv);
-
-	object_t *o = array_access(g_symtab, VALUE_OF(int64_t, &lv));
-	if (!o) {
-		return (set_error_type(XRE_OUT_OF_BOUNDS_ACCESS_ERROR),
-			set_error_orig(self), false);
-	}
-	(void)memmove(o, &rv, sizeof(object_t));
-
-	if (!stack_push(&rv)) {
-		return (set_error_type(XRE_STACK_OVERFLOW_ERROR),
-			set_error_orig(self), false);
+	if (object->flags & FLAG_READABLE && !(object->flags & FLAG_MUTABLE)) {
+		return (trigger_error_on(self, XRE_WRITE_ON_READONLY_ERROR),
+			false);
 	}
 
-	return (true);
+	(void)memmove(object, &rv, sizeof(object_t));
+
+	return (stack_push_flagged(self, &rv, 0));
 }
