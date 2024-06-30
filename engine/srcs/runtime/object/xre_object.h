@@ -5,8 +5,6 @@
 # include <stdint.h>
 # include <stdbool.h>
 
-typedef struct object_s object_t;
-
 typedef void (*destructor_ptr)(void *);
 typedef void (*reprfunc_ptr)(void *);
 typedef bool (*testfunc_ptr)(void *);
@@ -17,12 +15,16 @@ typedef bool (*testfunc_ptr)(void *);
 #define FLAG_REGISTER FLAG(REGISTER, 2) // fits in a register
 #define FLAG_SEQUENCE FLAG(SEQUENCE, 3) // the beginning of a sequence
 #define FLAG_SYMBOL   FLAG(SYMBOL, 4) // is a reference to another object
+#define FLAG_MUTABLE   FLAG(MUTABLE, 5) // is mutable object
+#define FLAG_READABLE   FLAG(READABLE, 6) // is readable object
 
 #define VALUE_OF(type, obj_ptr)  ((type)(obj_ptr)->data.ptr)
 
+
+#define CREATE_DEFAULT_REGISTER 
 /*    A representation of a value during runtime.
  */
-struct object_s {
+typedef struct {
   int32_t flags; // flags that indicate the behavior of the object
   struct {
     size_t size; // the size of the buffer
@@ -31,12 +33,13 @@ struct object_s {
   destructor_ptr dealloc; // frees the object
   reprfunc_ptr repr; // used by the print function to display the object
   testfunc_ptr test; // returns true/false based on the truthiness of the value
-};
+} object_t;
 
 object_t *object_create_register(int64_t data);
 object_t *object_create_slice(unsigned char *ptr, size_t size);
 object_t *object_create_symbol(int64_t offset);
+object_t *object_create_sequence(object_t *lval, object_t *rval);
 
-bool is_true_object(object_t *object);
+bool is_true_object(const object_t *object);
 
-#endif /* __XRE_OBJECT_H__ */
+#endif /* __XRE_OBJECT_H__ */ 

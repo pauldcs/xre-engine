@@ -14,7 +14,7 @@
 
 t_xre_state __xre_state__ = {
 	.title = "xre",
-	.version = "0.7.3",
+	.version = "0.7.5",
 };
 
 static bool init_source_file(t_xre_args *args, const char *path)

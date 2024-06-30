@@ -53,12 +53,15 @@ void stack_pop(object_t *ptr)
 {
 	g_stack_ptr--;
 	array_pop(g_stack, ptr);
+	// if (ptr->dealloc) {
+	// 	ptr->dealloc(ptr->data.ptr);
+	// }
 }
 
 void stack_pop_discard(void)
 {
-	g_stack_ptr--;
-	array_pop(g_stack, NULL);
+	object_t ptr;
+	stack_pop(&ptr);
 }
 
 void flags_to_string(int32_t flags)

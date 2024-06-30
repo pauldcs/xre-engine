@@ -376,6 +376,24 @@ NONE_TYPE(array_tipex)
 	(void)builtin_memmove((char *)_data(self) + off, src, n);
 }
 
+ARRAY_TYPE(array_dup)
+(ARRAY_TYPE(self))
+{
+	HR_COMPLAIN_IF(self == NULL);
+	array_t *array =
+		array_create(_typesize(self), _size(self), _freefunc(self));
+	if (!array) {
+		return (NULL);
+	}
+
+	if (!array_concat(array, self)) {
+		array_kill(array);
+		return (NULL);
+	}
+
+	return (array);
+}
+
 BOOL_TYPE(array_inject)
 (ARRAY_TYPE(self), SIZE_TYPE(p), RDONLY_PTR_TYPE(src), SIZE_TYPE(n))
 {
@@ -421,6 +439,25 @@ BOOL_TYPE(array_append)(ARRAY_TYPE(self), RDONLY_PTR_TYPE(src), SIZE_TYPE(n))
 			      _typesize(self) * n);
 
 	_size(self) += n;
+
+	return (true);
+}
+
+BOOL_TYPE(array_concat)(ARRAY_TYPE(self), ARRAY_TYPE(other))
+{
+	HR_COMPLAIN_IF(self == NULL);
+	HR_COMPLAIN_IF(other == NULL);
+	HR_COMPLAIN_IF(self->_elt_size != other->_elt_size);
+
+	if (unlikely(!array_adjust(self,
+				   array_size(self) + array_size(other)))) {
+		return (false);
+	}
+
+	(void)builtin_memmove(_relative_data(self, _size(self)), other->_ptr,
+			      array_sizeof(other));
+
+	_size(self) += array_size(other);
 
 	return (true);
 }

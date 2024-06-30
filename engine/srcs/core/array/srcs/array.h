@@ -136,6 +136,7 @@ typedef struct {
   do {                                                                         \
     if (expr) {                                                                \
       LOG_ERROR_MSG(expr);                                                     \
+      exit(1);                                                                 \
     };                                                                         \
   } while (0)
 
@@ -314,6 +315,11 @@ BOOL_TYPE(array_pushf)(ARRAY_TYPE(self), PTR_TYPE(e));
  */
 NONE_TYPE(array_popf)(ARRAY_TYPE(self), PTR_TYPE(into));
 
+/* Creates a duplicate of 'self'
+ */
+ARRAY_TYPE(array_dup)
+(ARRAY_TYPE(self));
+
 /* Copies 'n' bytes of data pointed to by 'src' directly into the array's
  * buffer, overwriting the data at the specified offset (in bytes).
  */
@@ -335,6 +341,10 @@ BOOL_TYPE(array_inject)
 /* Appends 'n' elements pointed to by 'src' into the array.
  */
 BOOL_TYPE(array_append)(ARRAY_TYPE(self), RDONLY_PTR_TYPE(src), SIZE_TYPE(n));
+
+/* Appends 'n' elements pointed to by 'src' into the array.
+ */
+BOOL_TYPE(array_concat)(ARRAY_TYPE(self), ARRAY_TYPE(other));
 
 /* Creates a new array, filtered down to just the elements from 'self' that
  * pass the test implemented by the callback.

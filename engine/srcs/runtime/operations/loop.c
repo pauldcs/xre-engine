@@ -4,7 +4,7 @@
 #include "xre_log.h"
 #include <stdbool.h>
 
-XRE_OPERATOR_API(oper_loop)
+XRE_API_OPERATOR_FUNC(oper_loop)
 {
 	__return_val_if_fail__(self, false);
 
@@ -13,16 +13,20 @@ loop:
 		return (false);
 	}
 
-	if (!ECHO_DOLLAR_QUESTION) {
-		return (true);
+	if (!is_true_object(stack_top())) {
+		goto beach;
 	}
+
+	stack_pop_discard();
 
 	if (!BR_EVAL((RIGHT_BRANCH))) {
 		return (false);
 	}
 
 	stack_pop_discard();
-	stack_pop_discard();
-
 	goto loop;
+
+beach:
+	STACK_TOP_ENABLE_FLAGS(FLAG_READABLE);
+	return (true);
 }

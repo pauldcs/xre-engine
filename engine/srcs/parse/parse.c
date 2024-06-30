@@ -38,7 +38,7 @@ static void *__pop_b(void)
 	return ((void *)0);
 }
 
-xre_ast_t *__ast_new_node(xre_token_t *token)
+static xre_ast_t *ast_new_node(xre_token_t *token)
 {
 	xre_ast_t *node = malloc(sizeof(xre_ast_t));
 
@@ -60,93 +60,6 @@ xre_ast_t *__ast_new_node(xre_token_t *token)
 	}
 
 	return (node);
-}
-
-static int get_expr_precedence(xre_expr_kind_t kind)
-{
-	switch (kind) {
-	case __SCOPE_RESOLUTION__:
-		return (0);
-
-	case __POW__:
-		return (-1);
-
-	case __ANNOTATE__:
-		return (-2);
-
-	case __INJECT__:
-		return (-3);
-
-	case __MUL__:
-	case __DIV__:
-	case __MOD__:
-		return (-4);
-
-	case __ADD__:
-	case __SUB__:
-		return (-5);
-
-	case __LSHIFT__:
-	case __RSHIFT__:
-		return (-6);
-
-	case __LT__:
-	case __GT__:
-	case __LE__:
-	case __GE__:
-		return (-8);
-
-	case __EQ__:
-	case __NE__:
-		return (-9);
-
-	case __BAND__:
-		return (-10);
-
-	case __BXOR__:
-		return (-11);
-
-	case __BOR__:
-		return (-12);
-
-	case __AND__:
-	case __NOT__:
-	case __PRINT__:
-	case __DO__:
-		return (-13);
-
-	case __OR__:
-	case __ELSE__:
-		return (-14);
-
-	case __ASSIGN__:
-		return (-15);
-
-	case __LOOP__:
-		return (-16);
-
-	case __SEQUENCE__:
-		return (-17);
-
-	case __SEPARATOR__:
-		return (-18);
-
-	case __LPAREN__:
-	case __RPAREN__:
-		return (-1000);
-
-	case __START__:
-	case __END__:
-		return (0);
-
-	case __VAL__:
-	case __STRING_LITERAL__:
-	case __IDENTIFIER__:
-		break;
-	}
-
-	__return_val_if_fail__(false, 0);
-	__builtin_unreachable();
 }
 
 static void __make_value_to_b(void)
@@ -188,13 +101,13 @@ xre_ast_t *xre_expr_parse(array_t *tokens)
 
 		switch (token->_kind) {
 		case __LPAREN__:
-			__push_a(__ast_new_node(token));
+			__push_a(ast_new_node(token));
 
 			break;
 
 		case __NOT__:
 		case __PRINT__:
-			__push_a(__ast_new_node(token));
+			__push_a(ast_new_node(token));
 
 			break;
 
@@ -209,7 +122,7 @@ xre_ast_t *xre_expr_parse(array_t *tokens)
 		case __VAL__:
 		case __STRING_LITERAL__:
 		case __IDENTIFIER__:
-			__push_b(__ast_new_node(token));
+			__push_b(ast_new_node(token));
 
 			break;
 		default:
@@ -218,7 +131,7 @@ xre_ast_t *xre_expr_parse(array_t *tokens)
 				__make_value_to_b();
 			}
 
-			__push_a(__ast_new_node(token));
+			__push_a(ast_new_node(token));
 		}
 	}
 	while (__top_a)
