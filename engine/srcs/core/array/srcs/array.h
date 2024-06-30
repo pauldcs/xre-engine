@@ -315,6 +315,11 @@ BOOL_TYPE(array_pushf)(ARRAY_TYPE(self), PTR_TYPE(e));
  */
 NONE_TYPE(array_popf)(ARRAY_TYPE(self), PTR_TYPE(into));
 
+/* Creates a duplicate of 'self'
+ */
+ARRAY_TYPE(array_dup)
+(ARRAY_TYPE(self));
+
 /* Copies 'n' bytes of data pointed to by 'src' directly into the array's
  * buffer, overwriting the data at the specified offset (in bytes).
  */
