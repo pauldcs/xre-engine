@@ -9,8 +9,11 @@ int get_expr_precedence(xre_expr_kind_t kind)
 	case __END__:
 		return (0);
 
-	case __POW__:
+	case __ANNOTATE__:
 		return (-1);
+
+	case __POW__:
+		return (-2);
 
 	case __INJECT__:
 		return (-3);
@@ -54,7 +57,6 @@ int get_expr_precedence(xre_expr_kind_t kind)
 	case __ELSE__:
 		return (-13);
 
-	case __PRINT__:
 	case __ASSIGN__:
 		return (-14);
 
@@ -64,7 +66,7 @@ int get_expr_precedence(xre_expr_kind_t kind)
 	case __SEQUENCE__:
 		return (-16);
 
-	case __ANNOTATE__:
+	case __PRINT__:
 		return (-17);
 
 	case __SEPARATOR__:
