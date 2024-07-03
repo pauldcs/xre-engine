@@ -106,7 +106,6 @@ xre_ast_t *xre_expr_parse(array_t *tokens)
 			break;
 
 		case __NOT__:
-		case __PRINT__:
 			__push_a(ast_new_node(token));
 
 			break;

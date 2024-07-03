@@ -64,7 +64,6 @@ void ast_free(xre_ast_t *ast)
 		break;
 
 	case __NOT__:
-	case __PRINT__:
 		ast_free(ast->uniop);
 		break;
 
@@ -141,8 +140,6 @@ const char *expr_kind_to_string(xre_expr_kind_t kind)
 		return "sequence point";
 	case __SEPARATOR__:
 		return "separator";
-	case __PRINT__:
-		return "print";
 	case __INJECT__:
 		return "injection";
 	case __ANNOTATE__:
@@ -200,7 +197,6 @@ xre_expr_type_t expr_type_by_kind(xre_expr_kind_t kind)
 		return (EXPR_OP_TYPE_BINOP);
 
 	case __NOT__:
-	case __PRINT__:
 		return (EXPR_OP_TYPE_UNIOP);
 
 	case __START__:

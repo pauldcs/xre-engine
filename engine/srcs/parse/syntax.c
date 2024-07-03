@@ -52,7 +52,6 @@ bool xre_expr_syntax(array_t *tokens)
 			goto syntax_error;
 
 		case __NOT__:
-		case __PRINT__:
 			if (PREV_TOKEN_TYPE &
 				    (EXPR_OP_TYPE_BINOP | EXPR_OP_TYPE_UNIOP) ||
 			    PREV_TOKEN_KIND == __LPAREN__ ||

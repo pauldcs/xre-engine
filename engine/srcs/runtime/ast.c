@@ -29,7 +29,6 @@ static runtime_op_t oper_lookup_table[] = {
 	[__ELSE__] = oper_else,
 	[__AND__] = oper_and,
 	[__OR__] = oper_or,
-	[__PRINT__] = oper_print,
 	[__IDENTIFIER__] = oper_symbol,
 	[__ANNOTATE__] = oper_annotate,
 	[__INJECT__] = oper_inject,
@@ -61,7 +60,6 @@ static size_t get_tree_size(xre_ast_t *ast)
 		return (size);
 
 	case __NOT__:
-	case __PRINT__:
 		return (size + get_tree_size(ast->_binop.left));
 
 	default:
@@ -97,7 +95,6 @@ static int stmt_tree_init(ast_stmt_t *stmt, xre_ast_t *ast, bool reset_index)
 		break;
 
 	case __NOT__:
-	case __PRINT__:
 		current->br.left = stmt_tree_init(stmt, ast->uniop, false);
 		current->br.right = -1;
 		break;

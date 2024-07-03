@@ -32,7 +32,6 @@ typedef enum {
   /*      = */ __ASSIGN__,
   /*      , */ __SEQUENCE__,
   /*      ; */ __SEPARATOR__,
-  /*  print */ __PRINT__,
   /*     <% */ __INJECT__,
   /*      : */ __ANNOTATE__,
   /*   loop */ __LOOP__,
