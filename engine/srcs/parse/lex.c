@@ -152,12 +152,12 @@ not_a_constant_value:
 				tf = 1;
 				break;
 
-			case '(':
+			case '{':
 				_token._kind = __LPAREN__;
 				tf = 1;
 
 				break;
-			case ')':
+			case '}':
 				_token._kind = __RPAREN__;
 				tf = 1;
 
@@ -245,7 +245,7 @@ not_a_constant_value:
 				} else if (*(ptr + 1) == '=') {
 					_token._kind = __LE__;
 					tf = 2;
-				} else if (*(ptr + 1) == '%') {
+				} else if (*(ptr + 1) == '-') {
 					_token._kind = __INJECT__;
 					tf = 2;
 				} else {
@@ -295,12 +295,12 @@ not_a_constant_value:
          ...
          */
 
-				if (!strncmp(ptr, "print", 5)) {
-					_token._kind = __PRINT__;
-					tf = 5;
-				}
+				// if (!strncmp(ptr, "print", 5)) {
+				// 	_token._kind = __PRINT__;
+				// 	tf = 5;
+				// }
 
-				else if (!strncmp(ptr, "do", 2)) {
+				if (!strncmp(ptr, "do", 2)) {
 					_token._kind = __DO__;
 					tf = 2;
 				}
