@@ -81,7 +81,7 @@ object_t *object_create_slice(unsigned char *ptr, size_t size)
 	return (&object);
 }
 
-bool unwrap_object(object_t *object, array_t *buffer)
+bool unwrap_sequence_object(object_t *object, array_t *buffer)
 {
 	if (object->flags & FLAG_SEQUENCE) {
 		array_t *other = (array_t *)object->data.ptr;
@@ -111,7 +111,7 @@ object_t *object_create_sequence(object_t *lval, object_t *rval)
 
 	array_t *sequence = array_create(sizeof(object_t), 2, NULL);
 
-	if (!unwrap_object(lval, sequence) || !unwrap_object(rval, sequence)) {
+	if (!unwrap_sequence_object(lval, sequence) || !unwrap_sequence_object(rval, sequence)) {
 		array_kill(sequence);
 		return (NULL);
 	}
