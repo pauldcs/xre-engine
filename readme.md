@@ -1,24 +1,25 @@
 # xre-engine - Expression Evaluation Engine
 
 ```
-# a program to find prime numbers from 0 -> 20
-input:
-i = 0;
-n = 20;
+# finding prime numbers in range 0, 20
 
-(i = i + 1) <= n loop (
+i = 0;
+
+{i = i + 1} <= 20 loop {
   f = 0;
   j = 1;
 
-  j < n loop (
-    ! i % j
-      do ( f = f + 1 );
-    j = j + 1
-  );
+  j < 20 loop {
+    !{i % j} do {
+      f = f + 1
+    };
 
-  f == 2
-    do print i
-)
+    j = j + 1
+  };
+
+  f == 2 do
+    .print i
+}
 
 output:
 2

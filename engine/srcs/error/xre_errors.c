@@ -26,6 +26,7 @@ error_class_e error_type_to_class(error_type_e type)
 	case XRE_UNKNOWN_ANNOTATION_ERROR:
 	case XRE_UNKNOWN_COMMAND_ERROR:
 	case XRE_UNBOUND_LOCAL_ERROR:
+	case XRE_UNDEFINED_BUILTIN_ERROR:
 		return XRE_NAME_ERROR_C;
 
 	case XRE_MAX_ITERATIONS_ERROR:
@@ -116,6 +117,8 @@ const char *error_type_str(error_type_e type)
 		return "operator unsupported for this type";
 	case XRE_UNBOUND_LOCAL_ERROR:
 		return "unbound local variable";
+	case XRE_UNDEFINED_BUILTIN_ERROR:
+		return "undefined builtin";
 	case XRE_OUT_OF_BOUNDS_ACCESS_ERROR:
 		return "out of bounds access";
 	case XRE_NOT_IMPLEMENTED_ERROR:

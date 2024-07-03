@@ -53,6 +53,13 @@ object_t *object_create_register(int64_t data)
 	return (&object);
 }
 
+object_t *object_create_undefined(void)
+{
+	static object_t object = { .flags = FLAG_MUTABLE };
+	object.data.ptr = NULL;
+	return (&object);
+}
+
 object_t *object_create_symbol(int64_t offset)
 {
 	static object_t object = { .flags = FLAG_SYMBOL,

@@ -1,6 +1,7 @@
 #include "xre_assert.h"
 #include "xre_runtime.h"
 #include "xre_operations.h"
+#include "xre_builtin.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -60,6 +61,7 @@ static size_t get_tree_size(xre_ast_t *ast)
 		return (size);
 
 	case __NOT__:
+	case __BUILTIN_CALL__:
 		return (size + get_tree_size(ast->_binop.left));
 
 	default:
@@ -79,7 +81,11 @@ static int stmt_tree_init(ast_stmt_t *stmt, xre_ast_t *ast, bool reset_index)
 	int initial_index = index++;
 
 	current->orig = (xre_token_t *)&ast->token;
-	current->eval = oper_lookup_table[ast->kind];
+	if (ast->kind == __BUILTIN_CALL__) {
+		current->eval = get_builtin_ptr(ast->token._ptr + 1, ast->token._len -1);
+	} else {
+		current->eval = oper_lookup_table[ast->kind];
+	}
 
 	switch (ast->kind) {
 	case __VAL__:
@@ -95,6 +101,7 @@ static int stmt_tree_init(ast_stmt_t *stmt, xre_ast_t *ast, bool reset_index)
 		break;
 
 	case __NOT__:
+	case __BUILTIN_CALL__:
 		current->br.left = stmt_tree_init(stmt, ast->uniop, false);
 		current->br.right = -1;
 		break;

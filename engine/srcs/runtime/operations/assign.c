@@ -24,7 +24,7 @@ XRE_API_OPERATOR_FUNC(oper_assign)
 			false);
 	}
 
-	if (object->flags & FLAG_READABLE && !(object->flags & FLAG_MUTABLE)) {
+	if (!(object->flags & FLAG_MUTABLE)) {
 		return (trigger_error_on(self, XRE_WRITE_ON_READONLY_ERROR),
 			false);
 	}

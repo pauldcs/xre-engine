@@ -34,10 +34,8 @@ int symtab_create_entry(const char *sym)
 
 	cache_entry_t e = { .id = id, .offset = array_size(g_symtab) };
 
-	object_t obj;
-	(void)memset(&obj, 0, sizeof(object_t));
-
-	if (!array_push(g_symtab, &obj) || !array_push(g_symcache, &e)) {
+	if (!array_push(g_symtab, object_create_undefined())
+		|| !array_push(g_symcache, &e)) {
 		return (-1);
 	}
 

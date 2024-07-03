@@ -15,17 +15,17 @@ void xre_error(err_notif_t *notification)
 
 	const xre_token_t *token = notification->orig;
 
-	// if (!(__xre_args__.flags & SHOW_ERRORS)) {
-	// 	i += cpyf(&err_buff[i], 4096 - i, "error: ");
-	// 	i += cpyf(&err_buff[i], 4096 - i,
-	// 		  "%s: ", error_class_str(notification->class));
-	// 	i += cpyf(&err_buff[i], token->_line_len, "%s",
-	// 		  token->_line_ptr);
-	// 	i += cpyf(&err_buff[i], 4096 - i, ": %s\n",
-	// 		  error_type_str(notification->type));
-	// 	(void)write(STDERR_FILENO, err_buff, i);
-	// 	return;
-	// }
+	if (!(__xre_args__.flags & SHOW_ERRORS)) {
+		i += cpyf(&err_buff[i], 4096 - i, "error: ");
+		i += cpyf(&err_buff[i], 4096 - i,
+			  "%s: ", error_class_str(notification->class));
+		i += cpyf(&err_buff[i], token->_line_len, "%s",
+			  token->_line_ptr);
+		i += cpyf(&err_buff[i], 4096 - i, ": %s\n",
+			  error_type_str(notification->type));
+		(void)write(STDERR_FILENO, err_buff, i);
+		return;
+	}
 	// (void)fputstr(__fdout__,
 	//   "\"xre_error\": {\n"
 	//   "  \"line\": %d\n"

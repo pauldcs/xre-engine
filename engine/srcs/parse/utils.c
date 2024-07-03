@@ -64,6 +64,7 @@ void ast_free(xre_ast_t *ast)
 		break;
 
 	case __NOT__:
+	case __BUILTIN_CALL__:
 		ast_free(ast->uniop);
 		break;
 
@@ -92,6 +93,8 @@ const char *expr_kind_to_string(xre_expr_kind_t kind)
 		return "identifier";
 	case __NOT__:
 		return "not";
+	case __BUILTIN_CALL__:
+		return "builtin call";
 	case __ADD__:
 		return "addition";
 	case __SUB__:
@@ -197,6 +200,7 @@ xre_expr_type_t expr_type_by_kind(xre_expr_kind_t kind)
 		return (EXPR_OP_TYPE_BINOP);
 
 	case __NOT__:
+	case __BUILTIN_CALL__:
 		return (EXPR_OP_TYPE_UNIOP);
 
 	case __START__:

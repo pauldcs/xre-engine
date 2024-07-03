@@ -6,6 +6,7 @@
 
 typedef enum {
   /* <word> */ __IDENTIFIER__,
+  /* .<word> */ __BUILTIN_CALL__,
   /*   <n>  */ __VAL__,
   /*  "str" */ __STRING_LITERAL__,
   /*      ( */ __LPAREN__,

@@ -105,7 +105,6 @@ SRCS := \
 	runtime/operations/pow.c \
 	runtime/operations/bw_and.c \
 	runtime/operations/add.c \
-	runtime/operations/print.c \
 	runtime/operations/sub.c \
 	runtime/operations/bw_or.c \
 	runtime/operations/symbol.c \
@@ -113,6 +112,11 @@ SRCS := \
 	runtime/memory/stack.c \
 	runtime/memory/symtab.c \
 \
-	runtime/object/object.c
+	runtime/object/object.c \
+\
+	runtime/builtins/xre_builtin.c \
+	runtime/builtins/std/os/print.c \
+	runtime/builtins/std/os/debug.c \
+
 
 	

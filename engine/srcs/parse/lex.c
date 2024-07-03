@@ -1,5 +1,6 @@
 #include "xre_assert.h"
 #include "xre_errors.h"
+#include "xre_builtin.h"
 #include "xre_parse.h"
 #include "xre_utils.h"
 #include "array.h"
@@ -291,14 +292,10 @@ not_a_constant_value:
 				break;
 			default:
 
-				/* handle comments here
-         ...
+				/* handle comments
+         TODO
          */
 
-				// if (!strncmp(ptr, "print", 5)) {
-				// 	_token._kind = __PRINT__;
-				// 	tf = 5;
-				// }
 
 				if (!strncmp(ptr, "do", 2)) {
 					_token._kind = __DO__;
@@ -322,6 +319,15 @@ not_a_constant_value:
 					while (*tmp && isalnum(*(tmp + 1))) {
 						tf++;
 						tmp++;
+					}
+					if (*ptr == '.' && *(ptr + 1) && isalnum(*(ptr + 1))) {
+						if (!is_defined_builtin(ptr + 1, tf - 1)) {
+							lexer_error_g.class = error_type_to_class(XRE_UNDEFINED_BUILTIN_ERROR);
+							lexer_error_g.type = XRE_UNDEFINED_BUILTIN_ERROR;
+
+							goto lexer_error;
+						}
+						_token._kind = __BUILTIN_CALL__;
 					}
 				}
 			}

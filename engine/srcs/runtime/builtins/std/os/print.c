@@ -1,11 +1,10 @@
+#include "xre_builtin.h"
 #include "xre_operations.h"
 #include "xre_memory.h"
 #include "xre_assert.h"
-#include "xre_log.h"
 #include <stdbool.h>
 
-XRE_API_OPERATOR_FUNC(oper_print)
-{
+XRE_BUILTIN_FUNCTION(builtin_print) {
 	__return_val_if_fail__(self, false);
 
 	static object_t *top;
@@ -23,6 +22,5 @@ XRE_API_OPERATOR_FUNC(oper_print)
 	top->repr(top->data.ptr);
 	(void)fprintf(stderr, "\n");
 
-	STACK_TOP_DISABLE_FLAGS(FLAG_READABLE);
-	return (true);
+  return (true);
 }

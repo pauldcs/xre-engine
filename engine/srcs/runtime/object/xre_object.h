@@ -39,6 +39,7 @@ object_t *object_create_register(int64_t data);
 object_t *object_create_slice(unsigned char *ptr, size_t size);
 object_t *object_create_symbol(int64_t offset);
 object_t *object_create_sequence(object_t *lval, object_t *rval);
+object_t *object_create_undefined(void);
 
 bool is_true_object(const object_t *object);
 

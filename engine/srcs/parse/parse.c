@@ -59,6 +59,10 @@ static xre_ast_t *ast_new_node(xre_token_t *token)
 		node->string = strndup(token->_ptr, token->_len);
 	}
 
+	if (node->kind == __BUILTIN_CALL__) {
+		node->string = strndup(token->_ptr, token->_len);
+	}
+
 	return (node);
 }
 
@@ -106,6 +110,7 @@ xre_ast_t *xre_expr_parse(array_t *tokens)
 			break;
 
 		case __NOT__:
+		case __BUILTIN_CALL__:
 			__push_a(ast_new_node(token));
 
 			break;
