@@ -12,7 +12,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         exit 1
     fi
     echo "Building program..."
-    if ! make "$BIN"; then
+    if ! make release "$BIN"; then
         echo "Error: failed to build program"
         exit 1
     fi
@@ -29,7 +29,7 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
         exit 1
     fi
     echo "Building program..."
-    if ! make "$BIN"; then
+    if ! make release "$BIN"; then
         echo "Error: failed to build program"
         exit 1
     fi

@@ -7,25 +7,22 @@ INCS_DIR      := incs
 LIBARRAY_DIR   := srcs/core/array
 LIBARRAY_NAME  := libarray.a
 
-CFLAGS   := \
-	-Wall     \
-	-Wextra   \
-	-Werror   \
-	-pedantic 
-# -O3 \
-# -D XRE_DISABLE_CHECKS=1 \
-# -D XRE_DISABLE_ASSERTS=1
+CFLAGS_RELEASE   := \
+	-O3                     \
+	-D XRE_DISABLE_CHECKS=1 \
+	-D XRE_DISABLE_ASSERTS=1
 
-# export ASAN_OPTIONS="log_path=sanitizer.log"
-# export ASAN_OPTIONS="detect_leaks=1"
-
-CFLAGS_DBG              := \
-	-O0                      \
-	-g3                      \
-	-fsanitize=address       \
-	-fsanitize=undefined     \
-	-fno-omit-frame-pointer  \
-	-fstack-protector-strong \
+CFLAGS := \
+	-O0                       \
+	-g3                       \
+	-Wall                     \
+	-Wextra                   \
+	-Werror                   \
+	-pedantic                 \
+	-fsanitize=address        \
+	-fsanitize=undefined      \
+	-fno-omit-frame-pointer   \
+	-fstack-protector-strong  \
 	-fno-optimize-sibling-calls 
 
 SRCS := \
@@ -74,7 +71,7 @@ SRCS := \
 	readline/rl_buffer.c \
 \
 	runtime/xre_runtime.c \
-	runtime/tree.c \
+	runtime/ast.c \
 \
 	runtime/operations/pop_object.c \
 	runtime/operations/operations_common.c \

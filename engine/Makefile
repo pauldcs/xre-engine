@@ -17,7 +17,7 @@ all: $(NAME)
 -include  $(SRCS_OBJS:.o=.d)
 
 $(NAME): $(SRCS_OBJS)
-	$(MAKE) g -C $(LIBARRAY_DIR)
+	$(MAKE) -C $(LIBARRAY_DIR)
 	$(CC) \
 		$^ \
 		$(CFLAGS) \
@@ -27,8 +27,10 @@ $(NAME): $(SRCS_OBJS)
 		-larray \
 		-ltermcap 
 
-g: CFLAGS += $(CFLAGS_DBG)
-g: all
+debug: all
+
+release: CFLAGS = $(CFLAGS_RELEASE)
+release: all
 
 format:
 	find . \
@@ -51,4 +53,4 @@ fclean: clean
 
 re: fclean all
 
-.PHONY	: all clean g fclean format re 
+.PHONY	: all clean debug release fclean format re 
