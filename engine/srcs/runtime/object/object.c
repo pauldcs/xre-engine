@@ -50,6 +50,7 @@ object_t *object_create_register(int64_t data)
 				   .test = NULL };
 
 	object.data.ptr = (void *)data;
+	object.data.size = sizeof(int64_t);
 	return (&object);
 }
 
@@ -57,6 +58,7 @@ object_t *object_create_undefined(void)
 {
 	static object_t object = { .flags = FLAG_MUTABLE };
 	object.data.ptr = NULL;
+	object.data.size = 0;
 	return (&object);
 }
 
@@ -68,6 +70,7 @@ object_t *object_create_symbol(int64_t offset)
 				   .test = NULL };
 
 	object.data.ptr = (void *)offset;
+	object.data.size = sizeof(int64_t);
 	return (&object);
 }
 

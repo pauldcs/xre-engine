@@ -14,7 +14,7 @@ typedef struct {
     builtin_func_ptr func;
 } builtin_func_t;
 
-extern builtin_func_t builtin_func_lookup[];
+extern builtin_func_t builtin_func_lookup[3];
 
 bool is_defined_builtin(const char *ptr, size_t size);
 builtin_func_ptr get_builtin_ptr(const char *ptr, size_t size);
@@ -22,6 +22,7 @@ builtin_func_ptr get_builtin_ptr(const char *ptr, size_t size);
 # define XRE_BUILTIN_FUNCTION(name) bool name(ast_stmt_t *self)
 
 XRE_BUILTIN_FUNCTION(builtin_print);
-XRE_BUILTIN_FUNCTION(builtin_debug);
+XRE_BUILTIN_FUNCTION(builtin_typeof);
+XRE_BUILTIN_FUNCTION(builtin_sizeof);
 
 #endif /* __XRE_BUILIN_H__ */

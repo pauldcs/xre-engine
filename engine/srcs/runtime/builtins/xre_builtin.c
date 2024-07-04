@@ -2,35 +2,35 @@
 #include <stdbool.h>
 #include <string.h>
 #include <sys/types.h>
+#include <unistd.h>
 
-builtin_func_t builtin_func_lookup[] = {
-    {"print", builtin_print},
-    {"debug", builtin_debug}
-};
-
-static ssize_t get_builtin_offset(const char *ptr, size_t size) {
+static bool get_builtin_offset(const char *ptr, size_t size, size_t *offset) {
   size_t lookup_size = sizeof(builtin_func_lookup) / sizeof (builtin_func_t);
-  
-  for (size_t i = 0; i < lookup_size; i++) {
+  size_t i = 0;
+
+  while (i < lookup_size) {
     const char *name = builtin_func_lookup[i].name;
-    if (strlen(name) == size) {
-      if (!memcmp(name, ptr, size)) {
-        return ((ssize_t)i);
-      }
+    if (strlen(name) == size && !memcmp(name, ptr, size)) {
+      *offset = i;
+      return (true);
     }
+    i++;
   }
-  return (-1);
+  
+  return (false);
 }
 
 bool is_defined_builtin(const char *ptr, size_t size) {
-  return (get_builtin_offset(ptr, size) != -1);
+  size_t offset;
+  return (get_builtin_offset(ptr, size, &offset));
 }
 
 builtin_func_ptr get_builtin_ptr(const char *ptr, size_t size) {
-  ssize_t builtin_offset = get_builtin_offset(ptr, size);
-  if (builtin_offset == -1) {
-    return (NULL);
+  size_t offset;
+  
+  if (!get_builtin_offset(ptr, size, &offset)) {
+    return (false);
   }
   
-  return (builtin_func_lookup[builtin_offset].func);
+  return (builtin_func_lookup[offset].func);
 }

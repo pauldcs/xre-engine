@@ -29,6 +29,9 @@ $(NAME): $(SRCS_OBJS)
 
 debug: all
 
+asan: CFLAGS += $(CFLAGS_ASAN)
+asan: all
+
 release: CFLAGS = $(CFLAGS_RELEASE)
 release: all
 

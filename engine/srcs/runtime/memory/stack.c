@@ -68,7 +68,7 @@ void flags_to_string(int32_t flags)
 {
 	bool first = true;
 	if (flags & FLAG_REGISTER) {
-		(void)fprintf(stderr, "FLAG_REGISTER");
+		(void)fprintf(stderr, "register");
 		first = false;
 	}
 
@@ -78,7 +78,7 @@ void flags_to_string(int32_t flags)
 		} else {
 			(void)fprintf(stderr, " | ");
 		}
-		(void)fprintf(stderr, "FLAG_ALLOC");
+		(void)fprintf(stderr, "alloc");
 	}
 
 	if (flags & FLAG_SEQUENCE) {
@@ -87,7 +87,7 @@ void flags_to_string(int32_t flags)
 		} else {
 			(void)fprintf(stderr, " | ");
 		}
-		(void)fprintf(stderr, "FLAG_SEQUENCE");
+		(void)fprintf(stderr, "sequence");
 	}
 
 	if (flags & FLAG_SYMBOL) {
@@ -96,7 +96,7 @@ void flags_to_string(int32_t flags)
 		} else {
 			(void)fprintf(stderr, " | ");
 		}
-		(void)fprintf(stderr, "FLAG_SYMBOL");
+		(void)fprintf(stderr, "symbol");
 	}
 	(void)fprintf(stderr, "\n");
 }
@@ -106,7 +106,7 @@ void stack_debug(void)
 	(void)fprintf(stderr,
 		      "stack:\n"
 		      "  size: %d\n"
-		      "   ptr: %ld\n\n",
+		      "   ptr: %ld\n",
 		      STACK_SIZE, g_stack_ptr);
 
 	size_t i = 0;
@@ -117,10 +117,9 @@ void stack_debug(void)
 			      " - flags   ",
 			      i < g_stack_ptr ? "yes" : "no");
 		flags_to_string(obj->flags);
-		xre_xdp_dump(((uint8_t *)g_stack->_ptr) +
-				     (i * sizeof(object_t)),
-			     sizeof(object_t), i * sizeof(object_t));
+		// xre_xdp_dump(((uint8_t *)g_stack->_ptr) +
+		// 		     (i * sizeof(object_t)),
+		// 	     sizeof(object_t), i * sizeof(object_t));
 		(void)fprintf(stderr, "\n");
 	}
-	(void)fprintf(stderr, "\n");
 }

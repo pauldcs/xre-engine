@@ -4,7 +4,7 @@
 #include "xre_assert.h"
 #include <stdbool.h>
 
-XRE_BUILTIN_FUNCTION(builtin_debug) {
+XRE_BUILTIN_FUNCTION(builtin_typeof) {
 	__return_val_if_fail__(self, false);
 
 	static object_t *top;
@@ -14,14 +14,7 @@ XRE_BUILTIN_FUNCTION(builtin_debug) {
 	}
 
 	top = (object_t *)stack_top();
-	if (!STACK_TOP_CHECK_FLAGS(FLAG_READABLE)) {
-		return (trigger_error_on(LEFT_BRANCH, XRE_UNREADABLE_ERROR),
-			false);
-	}
+  flags_to_string(top->flags);
 
-	top->repr(top->data.ptr);
-	(void)fprintf(stderr, " debug\n");
-
-	STACK_TOP_DISABLE_FLAGS(FLAG_READABLE);
   return (true);
 }

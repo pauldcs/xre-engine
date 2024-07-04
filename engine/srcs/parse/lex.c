@@ -320,13 +320,7 @@ not_a_constant_value:
 						tf++;
 						tmp++;
 					}
-					if (*ptr == '.' && *(ptr + 1) && isalnum(*(ptr + 1))) {
-						if (!is_defined_builtin(ptr + 1, tf - 1)) {
-							lexer_error_g.class = error_type_to_class(XRE_UNDEFINED_BUILTIN_ERROR);
-							lexer_error_g.type = XRE_UNDEFINED_BUILTIN_ERROR;
-
-							goto lexer_error;
-						}
+					if (is_defined_builtin(ptr, tf)) {
 						_token._kind = __BUILTIN_CALL__;
 					}
 				}

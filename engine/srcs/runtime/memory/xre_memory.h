@@ -28,6 +28,7 @@ const object_t *stack_top(void);
 void stack_pop(object_t *ptr);
 void stack_pop_discard(void);
 void stack_debug(void);
+void flags_to_string(int32_t flags);
 
 int symtab_create_entry(const char *sym);
 object_t *symtab_get_entry(int index);

@@ -82,7 +82,7 @@ static int stmt_tree_init(ast_stmt_t *stmt, xre_ast_t *ast, bool reset_index)
 
 	current->orig = (xre_token_t *)&ast->token;
 	if (ast->kind == __BUILTIN_CALL__) {
-		current->eval = get_builtin_ptr(ast->token._ptr + 1, ast->token._len -1);
+		current->eval = get_builtin_ptr(ast->token._ptr, ast->token._len);
 	} else {
 		current->eval = oper_lookup_table[ast->kind];
 	}

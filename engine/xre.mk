@@ -18,7 +18,9 @@ CFLAGS := \
 	-Wall                     \
 	-Wextra                   \
 	-Werror                   \
-	-pedantic                 \
+	-pedantic                 
+
+CFLAGS_ASAN := \
 	-fsanitize=address        \
 	-fsanitize=undefined      \
 	-fno-omit-frame-pointer   \
@@ -115,8 +117,10 @@ SRCS := \
 	runtime/object/object.c \
 \
 	runtime/builtins/xre_builtin.c \
+	runtime/builtins/declarations.c \
 	runtime/builtins/std/os/print.c \
-	runtime/builtins/std/os/debug.c \
+	runtime/builtins/std/os/sizeof.c \
+	runtime/builtins/std/os/typeof.c 
 
 
 	

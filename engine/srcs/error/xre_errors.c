@@ -43,6 +43,7 @@ error_class_e error_type_to_class(error_type_e type)
 		return XRE_ARITHMETIC_ERROR_C;
 
 	case XRE_UNEXPECTED_OPERATOR_ERROR:
+	case XRE_ARGUMENTS_ERROR:
 	case XRE_UNEXPECTED_OPERAND_ERROR:
 	case XRE_UNMATCHED_PARENTHESIS_ERROR:
 	case XRE_UNTERMINATED_STRING_ERROR:
@@ -99,6 +100,8 @@ const char *error_type_str(error_type_e type)
 		return "attempt to write on a protected variable";
 	case XRE_UNREADABLE_ERROR:
 		return "read protected value";
+	case XRE_ARGUMENTS_ERROR:
+		return "invalid arguments";
 	case XRE_WRITE_ON_READONLY_ERROR:
 		return "attempt to write on a readonly variable";
 	case XRE_INVALID_ANNOTATION_ERROR:
