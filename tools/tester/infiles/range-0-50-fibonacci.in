@@ -4,7 +4,7 @@ i = 0;
 
 {i = i + 1} <= 50
   loop {
-    .print {i, ": ", n2}
+    print {i, ": ", n2}
     ; n2 = n1 + n2
     ; n1 = n2 - n1
   }

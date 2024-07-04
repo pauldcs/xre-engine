@@ -13,5 +13,5 @@ i = 0;
   };
 
   f == 2 do
-    .print i
+    print i
 }
