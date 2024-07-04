@@ -121,7 +121,8 @@ object_t *object_create_sequence(object_t *lval, object_t *rval)
 
 	array_t *sequence = array_create(sizeof(object_t), 2, NULL);
 
-	if (!unwrap_sequence_object(lval, sequence) || !unwrap_sequence_object(rval, sequence)) {
+	if (!unwrap_sequence_object(lval, sequence) ||
+	    !unwrap_sequence_object(rval, sequence)) {
 		array_kill(sequence);
 		return (NULL);
 	}

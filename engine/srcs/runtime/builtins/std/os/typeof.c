@@ -4,7 +4,8 @@
 #include "xre_assert.h"
 #include <stdbool.h>
 
-XRE_BUILTIN_FUNCTION(builtin_typeof) {
+XRE_BUILTIN_FUNCTION(builtin_typeof)
+{
 	__return_val_if_fail__(self, false);
 
 	static object_t *top;
@@ -14,7 +15,7 @@ XRE_BUILTIN_FUNCTION(builtin_typeof) {
 	}
 
 	top = (object_t *)stack_top();
-  flags_to_string(top->flags);
+	flags_to_string(top->flags);
 
-  return (true);
+	return (true);
 }

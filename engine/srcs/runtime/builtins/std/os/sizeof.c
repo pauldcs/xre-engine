@@ -4,7 +4,8 @@
 #include "xre_assert.h"
 #include <stdbool.h>
 
-XRE_BUILTIN_FUNCTION(builtin_sizeof) {
+XRE_BUILTIN_FUNCTION(builtin_sizeof)
+{
 	__return_val_if_fail__(self, false);
 
 	static object_t *top;
@@ -14,7 +15,7 @@ XRE_BUILTIN_FUNCTION(builtin_sizeof) {
 	}
 
 	top = (object_t *)stack_top();
-  fprintf(stderr, "%zu\n", top->data.size);
+	fprintf(stderr, "%zu\n", top->data.size);
 
-  return (true);
+	return (true);
 }

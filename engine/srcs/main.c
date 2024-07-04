@@ -138,7 +138,7 @@ int main(int ac, char *av[])
 				stack_fini();
 				ast_free(ast);
 				free(args);
-			
+
 				return (true);
 
 			} else {

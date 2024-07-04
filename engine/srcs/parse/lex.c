@@ -296,7 +296,6 @@ not_a_constant_value:
          TODO
          */
 
-
 				if (!strncmp(ptr, "do", 2)) {
 					_token._kind = __DO__;
 					tf = 2;
