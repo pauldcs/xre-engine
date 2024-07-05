@@ -13,18 +13,15 @@ void trigger_error_on(ast_stmt_t *self, error_type_e type)
 bool pop_binop_return(ast_stmt_t *self, object_t *left_buffer,
 		      object_t *right_buffer)
 {
-	return (pop_object(right_buffer, RIGHT_BRANCH) &&
-		pop_object(left_buffer, LEFT_BRANCH));
+	return (pop_object(right_buffer, __right_branch) &&
+		pop_object(left_buffer, __left_branch));
 }
 
 bool evaluate_binops(ast_stmt_t *self, object_t *left_buffer,
 		     object_t *right_buffer)
 {
-	if (!BR_EVAL((LEFT_BRANCH)) || !BR_EVAL((RIGHT_BRANCH))) {
-		return (false);
-	}
-
-	if (!pop_binop_return(self, left_buffer, right_buffer)) {
+	if (!__br_eval(__left_branch) || !__br_eval(__right_branch) ||
+	    !pop_binop_return(self, left_buffer, right_buffer)) {
 		return (false);
 	}
 
@@ -34,9 +31,11 @@ bool evaluate_binops(ast_stmt_t *self, object_t *left_buffer,
 bool stack_push_flagged(ast_stmt_t *self, object_t *object, int32_t flags)
 {
 	object->flags |= flags;
+	object->depth = self->orig->_depth;
+
 	if (!stack_push(object)) {
-		trigger_error_on(self, XRE_STACK_OVERFLOW_ERROR);
-		return (false);
+		return (trigger_error_on(self, XRE_STACK_OVERFLOW_ERROR),
+			false);
 	}
 	return (true);
 }

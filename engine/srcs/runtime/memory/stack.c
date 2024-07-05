@@ -60,8 +60,8 @@ void stack_pop(object_t *ptr)
 
 void stack_pop_discard(void)
 {
-	object_t ptr;
-	stack_pop(&ptr);
+	g_stack_ptr--;
+	array_pop(g_stack, NULL);
 }
 
 void flags_to_string(int32_t flags)

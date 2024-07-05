@@ -33,13 +33,18 @@ static void print_sequence(void *ptr)
 	array_t *array = (array_t *)ptr;
 	size_t seq_size = array_size(array);
 
+	(void)fprintf(stderr, "{");
 	for (size_t i = 0; i < seq_size; i++) {
 		object_t *obj = array_access(array, i);
 		if (obj)
 			obj->repr(obj->data.ptr);
 		else
 			(void)fprintf(stderr, "???");
+		if (i != seq_size - 1) {
+			(void)fprintf(stderr, ", ");
+		}
 	}
+	(void)fprintf(stderr, "}");
 }
 
 object_t *object_create_register(int64_t data)
@@ -121,10 +126,39 @@ object_t *object_create_sequence(object_t *lval, object_t *rval)
 
 	array_t *sequence = array_create(sizeof(object_t), 2, NULL);
 
-	if (!unwrap_sequence_object(lval, sequence) ||
-	    !unwrap_sequence_object(rval, sequence)) {
+	if (lval->depth > rval->depth) {
+		if (!array_append(sequence, lval, 1) ||
+		    !unwrap_sequence_object(rval, sequence)) {
+			array_kill(sequence);
+			return (NULL);
+		}
+	} else {
+		if (!unwrap_sequence_object(lval, sequence) ||
+		    !array_append(sequence, rval, 1)) {
+			array_kill(sequence);
+			return (NULL);
+		}
+	}
+
+	object.data.ptr = sequence;
+	object.data.size = array_sizeof(sequence);
+
+	return (&object);
+}
+
+object_t *object_create_wrapped_sequence(object_t *lval, object_t *rval)
+{
+	static object_t object = { .flags = FLAG_ALLOC | FLAG_SEQUENCE,
+				   .repr = print_sequence,
+				   .dealloc = dealloc_requence,
+				   .test = NULL };
+
+	array_t *sequence = array_create(sizeof(object_t), 2, NULL);
+
+	if (!array_append(sequence, lval, 1) ||
+	    !array_append(sequence, rval, 1)) {
 		array_kill(sequence);
-		return (NULL);
+		return (false);
 	}
 
 	object.data.ptr = sequence;

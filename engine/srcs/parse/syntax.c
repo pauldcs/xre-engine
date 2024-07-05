@@ -23,6 +23,8 @@ bool xre_expr_syntax(array_t *tokens)
 
 	while (size--) {
 		token = (xre_token_t *)array_at(tokens, idx++);
+		token->_depth = open;
+
 		if (!token)
 			goto prison;
 

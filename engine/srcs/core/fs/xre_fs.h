@@ -10,12 +10,12 @@
 #include <time.h>
 
 typedef struct s_xre_fs_file {
-  const char *name;
-  const char *path;
-  void *ptr;
-  off_t size;
-  uint64_t sof;
-  uint64_t eof;
+	const char *name;
+	const char *path;
+	void *ptr;
+	off_t size;
+	uint64_t sof;
+	uint64_t eof;
 } t_xre_fs_file;
 
 bool xre_file_exists(const char *fn);
