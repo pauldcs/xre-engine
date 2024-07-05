@@ -11,7 +11,6 @@ int get_expr_precedence(xre_expr_kind_t kind)
 
 	case __ANNOTATE__:
 	case __NOT__:
-	case __BUILTIN_CALL__:
 		return (-1);
 
 	case __POW__:
@@ -66,6 +65,9 @@ int get_expr_precedence(xre_expr_kind_t kind)
 
 	case __SEQUENCE__:
 		return (-16);
+
+	case __BUILTIN_CALL__:
+		return (-17);
 
 	case __SEPARATOR__:
 		return (-18);

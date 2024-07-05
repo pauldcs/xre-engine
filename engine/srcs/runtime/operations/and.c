@@ -8,7 +8,7 @@ XRE_API_OPERATOR_FUNC(oper_and)
 {
 	__return_val_if_fail__(self, false);
 
-	if (!BR_EVAL((LEFT_BRANCH))) {
+	if (!__br_eval(__left_branch)) {
 		return (false);
 	}
 
@@ -18,7 +18,7 @@ XRE_API_OPERATOR_FUNC(oper_and)
 
 	stack_pop_discard();
 
-	if (!BR_EVAL((RIGHT_BRANCH))) {
+	if (!__br_eval(__right_branch)) {
 		return (false);
 	}
 

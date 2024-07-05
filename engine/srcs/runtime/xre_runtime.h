@@ -1,9 +1,9 @@
 #ifndef __XRE_RUNTIME_H__
-# define __XRE_RUNTIME_H__
+#define __XRE_RUNTIME_H__
 
-# include "xre_errors.h"
-# include "xre_parse.h"
-# include <stdbool.h>
+#include "xre_errors.h"
+#include "xre_parse.h"
+#include <stdbool.h>
 
 /*    All the different types of possible statements.
  */
@@ -82,31 +82,31 @@
 // #define SPECIALS_END   39
 // #define SPECIAL_GROUP_MASK GROUP_MASK(SPECIAL)
 
-
 /*    The parsed AST is tranformed into this 'ast_stmt_t'
  *    which is essencially the same except that the tree is
  *    in an array.
  */
-# define BR_EVAL(obj_ptr) obj_ptr->eval(obj_ptr)
+#define __br_eval(obj_ptr) obj_ptr->eval(obj_ptr)
 
 typedef struct stmt_tree_s ast_stmt_t;
 typedef int stmt_t;
 
 typedef bool (*runtime_op_t)(ast_stmt_t *);
 
-extern ast_stmt_t *__statements__;
+extern ast_stmt_t *__global_current_stmts_ptr__;
 
 struct stmt_tree_s {
-  runtime_op_t eval;
-  xre_token_t *orig; // the code fragment from which this statement is parsed from
-  union {
-    int64_t value; // the value that the token represents
-    char *string; // the string that the token represents
-    struct { 
-      stmt_t left; // index of the left child branch
-      stmt_t right; // index of the right child branch
-    } br; // the operator that the token represents
-  };
+	runtime_op_t eval;
+	xre_token_t *
+		orig; // the code fragment from which this statement is parsed from
+	union {
+		int64_t value; // the value that the token represents
+		char *string; // the string that the token represents
+		struct {
+			stmt_t left; // index of the left child branch
+			stmt_t right; // index of the right child branch
+		} br; // the operator that the token represents
+	};
 };
 
 /*    Execute the ast
@@ -115,12 +115,11 @@ bool xre_runtime(xre_ast_t *ast);
 
 /*    Allocated a new ast_stmt_t from a xre_ast_t
  */
-ast_stmt_t *stmt_tree_create(xre_ast_t *ast);
+bool stmt_tree_create(xre_ast_t *ast, ast_stmt_t **buffer);
 
 /*    Deallocate the whole ast_stmt_t
  */
 void stmt_tree_destroy(ast_stmt_t *stmts);
-
 
 /*    Global variable that holds the last set error.
  */

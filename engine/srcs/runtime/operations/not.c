@@ -10,7 +10,7 @@ XRE_API_OPERATOR_FUNC(oper_not)
 
 	static object_t v;
 
-	if (!BR_EVAL((LEFT_BRANCH)) || !pop_object(&v, LEFT_BRANCH)) {
+	if (!__br_eval(__left_branch) || !pop_object(&v, __left_branch)) {
 		return (false);
 	}
 

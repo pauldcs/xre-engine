@@ -5,8 +5,8 @@
 #include <stdbool.h>
 
 #if defined(__GNUC__) && __GNUC__ >= 4
-#define xre_memcpy(dst, src, size)                                             \
-  __builtin_memcpy((void *)dst, (void *)src, size)
+#define xre_memcpy(dst, src, size) \
+	__builtin_memcpy((void *)dst, (void *)src, size)
 #define xre_memset(b, c, len) __builtin_memset((void *)b, c, len)
 #define xre_memmove(b, c, len) __builtin_memmove((void *)b, c, len)
 #define xre_strlen(str) __builtin_strlen(str)
@@ -20,10 +20,10 @@
 #endif
 
 typedef struct {
-  const char *title;
-  const char *version;
-  bool exit_called;
-  bool interrupted;
+	const char *title;
+	const char *version;
+	bool exit_called;
+	bool interrupted;
 } t_xre_state;
 
 extern t_xre_state __xre_state__;

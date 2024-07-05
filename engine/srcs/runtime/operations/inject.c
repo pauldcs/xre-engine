@@ -7,6 +7,5 @@
 XRE_API_OPERATOR_FUNC(oper_inject)
 {
 	XRE_LOGGER(debug, "oper_inject");
-	return (set_error_type(XRE_NOT_IMPLEMENTED_ERROR), set_error_orig(self),
-		false);
+	return (trigger_error_on(self, XRE_NOT_IMPLEMENTED_ERROR), false);
 }

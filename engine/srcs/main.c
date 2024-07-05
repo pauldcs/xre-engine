@@ -14,7 +14,7 @@
 
 t_xre_state __xre_state__ = {
 	.title = "xre",
-	.version = "0.7.7",
+	.version = "0.7.8",
 };
 
 static bool init_source_file(t_xre_args *args, const char *path)
@@ -136,6 +136,7 @@ int main(int ac, char *av[])
 
 				symtab_fini();
 				stack_fini();
+
 				ast_free(ast);
 				free(args);
 

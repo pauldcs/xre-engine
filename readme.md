@@ -34,7 +34,7 @@ output:
 
 ## Installation
 
-install xre is via Git using the install script:
+install xre via Git using the install script:
 
 ```bash
 $ git clone https://github.com/pauldcs/xre-engine

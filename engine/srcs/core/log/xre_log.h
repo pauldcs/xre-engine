@@ -16,22 +16,23 @@
 #define MACRO_WEAK_SYM __attribute__((weak))
 #endif
 
-#define XRE_LOGGER(lvl, fmtstr, ...)                                           \
-  xre_logger(lvl, __FILE__, MACRO_LOG_FUNC, __LINE__, fmtstr, ##__VA_ARGS__);
+#define XRE_LOGGER(lvl, fmtstr, ...)                                \
+	xre_logger(lvl, __FILE__, MACRO_LOG_FUNC, __LINE__, fmtstr, \
+		   ##__VA_ARGS__);
 
 typedef enum e_log_level {
-  verbose,
-  info,
-  debug,
-  warning,
-  error,
-  fatal
+	verbose,
+	info,
+	debug,
+	warning,
+	error,
+	fatal
 } t_log_level;
 
 extern t_log_level __log_level__;
 
 void xre_logger(t_log_level level, const char *filename, const char *func,
-                uint32_t lineno, const char *format, ...);
+		uint32_t lineno, const char *format, ...);
 void xre_report_error(const char *format, ...);
 
 #endif /* __XRE_LOGGER_H__ */

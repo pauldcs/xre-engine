@@ -29,69 +29,96 @@
 #define NONE_TYPE(__x) void __x
 
 typedef struct {
-  int8_t _v;
+	int8_t _v;
 } x_st8_t;
 
 typedef struct {
-  int16_t _v;
+	int16_t _v;
 } x_st16_t;
 
 typedef struct {
-  int32_t _v;
+	int32_t _v;
 } x_st32_t;
 
 typedef struct {
-  int64_t _v;
+	int64_t _v;
 } x_st64_t;
 
 typedef struct {
-  uint8_t _v;
+	uint8_t _v;
 } x_ut8_t;
 
 typedef struct {
-  uint16_t _v;
+	uint16_t _v;
 } x_ut16_t;
 
 typedef struct {
-  uint32_t _v;
+	uint32_t _v;
 } x_ut32_t;
 
 typedef struct {
-  uint64_t _v;
+	uint64_t _v;
 } x_ut64_t;
 
 typedef struct {
-  const char *_ptr;
-  size_t _size;
+	const char *_ptr;
+	size_t _size;
 } x_str_t;
 
 typedef struct {
-  int32_t _val;
-  int32_t _point;
+	int32_t _val;
+	int32_t _point;
 } x_fixed_t;
 
-#define __PTRIZE_ST8__(x)                                                      \
-  &(x_st8_t) { ._v = x }
-#define __PTRIZE_ST16__(x)                                                     \
-  &(x_st16_t) { ._v = x }
-#define __PTRIZE_ST32__(x)                                                     \
-  &(x_st32_t) { ._v = x }
-#define __PTRIZE_ST64__(x)                                                     \
-  &(x_st64_t) { ._v = x }
-#define __PTRIZE_UT8__(x)                                                      \
-  &(x_ut8_t) { ._v = x }
-#define __PTRIZE_UT16__(x)                                                     \
-  &(x_ut16_t) { ._v = x }
-#define __PTRIZE_UT32__(x)                                                     \
-  &(x_ut32_t) { ._v = x }
-#define __PTRIZE_UT64__(x)                                                     \
-  &(x_ut64_t) { ._v = x }
-#define __PTRIZE_STR__(s)                                                      \
-  &(x_str_t) { ._ptr = s, ._size = strlen(s) }
+#define __PTRIZE_ST8__(x) \
+	&(x_st8_t)        \
+	{                 \
+		._v = x   \
+	}
+#define __PTRIZE_ST16__(x) \
+	&(x_st16_t)        \
+	{                  \
+		._v = x    \
+	}
+#define __PTRIZE_ST32__(x) \
+	&(x_st32_t)        \
+	{                  \
+		._v = x    \
+	}
+#define __PTRIZE_ST64__(x) \
+	&(x_st64_t)        \
+	{                  \
+		._v = x    \
+	}
+#define __PTRIZE_UT8__(x) \
+	&(x_ut8_t)        \
+	{                 \
+		._v = x   \
+	}
+#define __PTRIZE_UT16__(x) \
+	&(x_ut16_t)        \
+	{                  \
+		._v = x    \
+	}
+#define __PTRIZE_UT32__(x) \
+	&(x_ut32_t)        \
+	{                  \
+		._v = x    \
+	}
+#define __PTRIZE_UT64__(x) \
+	&(x_ut64_t)        \
+	{                  \
+		._v = x    \
+	}
+#define __PTRIZE_STR__(s)                     \
+	&(x_str_t)                            \
+	{                                     \
+		._ptr = s, ._size = strlen(s) \
+	}
 
 #ifdef __has_builtin
-#if __has_builtin(__builtin_memset) && __has_builtin(__builtin_memcpy) &&      \
-    __has_builtin(__builtin_memmove)
+#if __has_builtin(__builtin_memset) && __has_builtin(__builtin_memcpy) && \
+	__has_builtin(__builtin_memmove)
 #define BUILTIN_MEM_FUNCTIONS_AVAILABLE
 #endif
 #if __has_builtin(__builtin_expect)
@@ -126,19 +153,20 @@ typedef struct {
 #define LOG_ERROR_MSG(expr)
 #else
 #define LOG_ERROR_MSG(expr)                                                    \
-  do {                                                                         \
-    (void)fprintf(stderr,                                                      \
-                  "error: HARDENED_RUNTIME file '%s', line: %d: (%s)\n",       \
-                  __FILE__, __LINE__, #expr);                                  \
-  } while (0)
+	do {                                                                   \
+		(void)fprintf(                                                 \
+			stderr,                                                \
+			"error: HARDENED_RUNTIME file '%s', line: %d: (%s)\n", \
+			__FILE__, __LINE__, #expr);                            \
+	} while (0)
 #endif /* defined(DISABLE_HARDENED_RUNTIME_LOGGING) */
-#define HR_COMPLAIN_IF(expr)                                                   \
-  do {                                                                         \
-    if (expr) {                                                                \
-      LOG_ERROR_MSG(expr);                                                     \
-      exit(1);                                                                 \
-    };                                                                         \
-  } while (0)
+#define HR_COMPLAIN_IF(expr)                 \
+	do {                                 \
+		if (expr) {                  \
+			LOG_ERROR_MSG(expr); \
+			exit(1);             \
+		};                           \
+	} while (0)
 
 #endif /* defined (DISABLE_HARDENED_RUNTIME) */
 
@@ -165,25 +193,25 @@ typedef struct {
 #define ABS(a) ((size_t)(((a) < 0) ? -(a) : (a)))
 
 typedef struct {
-  void *(*_memory_alloc)(size_t);
-  void *(*_memory_realloc)(void *, size_t);
-  void (*_memory_free)(void *);
+	void *(*_memory_alloc)(size_t);
+	void *(*_memory_realloc)(void *, size_t);
+	void (*_memory_free)(void *);
 } array_allocator_t;
 
 extern array_allocator_t __array_allocator__;
 
 typedef struct {
-  void *_ptr;       /* A pointer to the start of the buffer */
-  size_t _nmemb;    /* The number of elements in the buffer */
-  size_t _cap;      /* The size of the reserved memory block (in bytes) */
-  size_t _elt_size; /* The size of one element (in bytes) */
+	void *_ptr; /* A pointer to the start of the buffer */
+	size_t _nmemb; /* The number of elements in the buffer */
+	size_t _cap; /* The size of the reserved memory block (in bytes) */
+	size_t _elt_size; /* The size of one element (in bytes) */
 
-  bool _is_own_buffer; /* is the array the actual owner of it's buffer */
-  bool _settled; /* Once settled, any attempts to reallocate the buffer are
+	bool _is_own_buffer; /* is the array the actual owner of it's buffer */
+	bool _settled; /* Once settled, any attempts to reallocate the buffer are
                   * blocked so new pointers to the data are guaranteed to
                   * stay valid until the array is freed, or unsettled. */
 
-  void (*_free)(void *); /* the element destructor function */
+	void (*_free)(void *); /* the element destructor function */
 
 } array_t;
 
@@ -195,8 +223,8 @@ typedef struct {
 #define _freefunc(array) array->_free
 #define _is_owner(array) array->_is_own_buffer
 
-#define _relative_data(array, pos)                                             \
-  ((char *)(array)->_ptr + (array)->_elt_size * (pos))
+#define _relative_data(array, pos) \
+	((char *)(array)->_ptr + (array)->_elt_size * (pos))
 /* Creates an array and adjusts its starting capacity to be at least
  * enough to hold 'n' elements.
  */
@@ -359,38 +387,38 @@ BOOL_TYPE(array_foreach)(ARRAY_TYPE(self), bool (*callback)(PTR_TYPE(elem)));
 /* Returns the first element in 'self' that satisfies the callback.
  * If no values satisfy the testing function, NULL is returned. */
 __attr_pure PTR_TYPE(array_find)(ARRAY_TYPE(self),
-                                 bool (*callback)(RDONLY_PTR_TYPE(elem)));
+				 bool (*callback)(RDONLY_PTR_TYPE(elem)));
 
 /* Behaves the same as 'find' except it returns an index (that can be used with
  * 'at'), or -1 if no element was found.
  */
 __attr_pure
-    SSIZE_TYPE(array_find_index)(ARRAY_TYPE(self),
-                                 bool (*callback)(RDONLY_PTR_TYPE(elem)));
+	SSIZE_TYPE(array_find_index)(ARRAY_TYPE(self),
+				     bool (*callback)(RDONLY_PTR_TYPE(elem)));
 
 /* Behaves the same as 'find' expect it starts the search from the end.
  */
 __attr_pure PTR_TYPE(array_rfind)(ARRAY_TYPE(self),
-                                  bool (*callback)(RDONLY_PTR_TYPE(elem)));
+				  bool (*callback)(RDONLY_PTR_TYPE(elem)));
 
 /* Behaves the same as 'find' except it starts the search from the end and
  * returns an index (that can be used with 'at'), or -1 if no element was found.
  */
 __attr_pure
-    PTR_TYPE(array_rfind_index)(ARRAY_TYPE(self),
-                                bool (*callback)(RDONLY_PTR_TYPE(elem)));
+	PTR_TYPE(array_rfind_index)(ARRAY_TYPE(self),
+				    bool (*callback)(RDONLY_PTR_TYPE(elem)));
 
 /* Returns a pointer to the element at the specified position.
  */
 __attr_pure PTR_TYPE(array_access)(RDONLY_ARRAY_TYPE(self), SIZE_TYPE(p));
 __attr_pure PTR_TYPE(array_unsafe_access)(RDONLY_ARRAY_TYPE(self),
-                                          SIZE_TYPE(p));
+					  SIZE_TYPE(p));
 
 /* Identical to 'access', only this returns a const pointer.
  */
 __attr_pure RDONLY_PTR_TYPE(array_at)(RDONLY_ARRAY_TYPE(self), SIZE_TYPE(p));
 __attr_pure RDONLY_PTR_TYPE(array_unsafe_at)(RDONLY_ARRAY_TYPE(self),
-                                             SIZE_TYPE(pos));
+					     SIZE_TYPE(pos));
 
 /* Appends 'n' elements from capacity. The application must have initialized
  * the storage backing these elements otherwise the behavior is undefined.

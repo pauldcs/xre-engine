@@ -27,8 +27,6 @@ $(NAME): $(SRCS_OBJS)
 		-larray \
 		-ltermcap 
 
-debug: all
-
 asan: CFLAGS += $(CFLAGS_ASAN)
 asan: all
 
@@ -36,12 +34,23 @@ release: CFLAGS = $(CFLAGS_RELEASE)
 release: all
 
 format:
-	find . \
-		-name "*.c" \
+	find . \( -name "*.c" -o -name "*.h" \) \
+		-type f \
 		-exec \
 			clang-format \
 			--verbose \
 			-style=file -i {} \;
+
+sparse:
+	find . -name "*.c" \
+		-not -path "*/unit-tests/*" \
+		-type f \
+		-exec \
+			sparse           \
+				-Wno-decl      \
+				-Wsparse-error \
+				-I $(INCS_DIR)  \
+				-style=file -i {} \; 
 
 clean:
 	$(MAKE) clean -C $(LIBARRAY_DIR)
@@ -56,4 +65,11 @@ fclean: clean
 
 re: fclean all
 
-.PHONY	: all clean debug release fclean format re 
+.PHONY	: \
+	all     \
+	clean   \
+	release \
+	sparse  \
+	fclean  \
+	format  \
+	re 

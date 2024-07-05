@@ -7,12 +7,14 @@
 #include <stdbool.h>
 
 bool pop_object(object_t *ptr, ast_stmt_t *stmts);
-bool evaluate_binops(ast_stmt_t *self, object_t *left_buffer, object_t *right_buffer);
-bool pop_binop_return(ast_stmt_t *self, object_t *left_buffer, object_t *right_buffer);
+bool evaluate_binops(ast_stmt_t *self, object_t *left_buffer,
+		     object_t *right_buffer);
+bool pop_binop_return(ast_stmt_t *self, object_t *left_buffer,
+		      object_t *right_buffer);
 bool stack_push_flagged(ast_stmt_t *self, object_t *object, int32_t flags);
 void trigger_error_on(ast_stmt_t *self, error_type_e type);
 
-# define XRE_API_OPERATOR_FUNC(name) bool name(ast_stmt_t *self)
+#define XRE_API_OPERATOR_FUNC(name) bool name(ast_stmt_t *self)
 typedef bool (*fptr_t)(ast_stmt_t *self);
 
 XRE_API_OPERATOR_FUNC(oper_add);
@@ -51,19 +53,16 @@ XRE_API_OPERATOR_FUNC(oper_inject);
 XRE_API_OPERATOR_FUNC(oper_scope_annotate);
 XRE_API_OPERATOR_FUNC(oper_print);
 
-#define TYPE_CHECK_NEXT(self, flag) \
-    ((stack_top()->flags & flag)                \
-				? true                                      \
-				: (                                         \
-					set_error_type(XRE_TYPE_MISSMATCH_ERROR), \
-					set_error_orig(self),                     \
-					false                                     \
-				))     
+#define TYPE_CHECK_NEXT(self, flag)                         \
+	((stack_top()->flags & flag) ?                      \
+		 true :                                     \
+		 (set_error_type(XRE_TYPE_MISSMATCH_ERROR), \
+		  set_error_orig(self), false))
 
 #define TYPE_CHECK(object, flag) (object->flags & flag)
 
-#define LEFT_BRANCH (&__statements__[self->br.left])
-#define RIGHT_BRANCH (&__statements__[self->br.right])
+#define __left_branch (&__global_current_stmts_ptr__[self->br.left])
+#define __right_branch (&__global_current_stmts_ptr__[self->br.right])
 
 #define IS_ERROR_RETURN is_true_object((object_t *)stack_top())
 

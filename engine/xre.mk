@@ -1,24 +1,23 @@
-NAME          := xre
-CC            := clang
-SRCS_DIR      := srcs
-OBJS_DIR      := .objs
-INCS_DIR      := incs
-
+NAME           := xre
+CC             := clang
+SRCS_DIR       := srcs
+OBJS_DIR       := .objs
+INCS_DIR       := incs
 LIBARRAY_DIR   := srcs/core/array
 LIBARRAY_NAME  := libarray.a
 
-CFLAGS_RELEASE   := \
+CFLAGS_RELEASE := \
 	-O3                     \
 	-D XRE_DISABLE_CHECKS=1 \
 	-D XRE_DISABLE_ASSERTS=1
 
 CFLAGS := \
-	-O0                       \
-	-g3                       \
-	-Wall                     \
-	-Wextra                   \
-	-Werror                   \
-	-pedantic                 
+	-O0     \
+	-g3     \
+	-Wall   \
+	-Wextra \
+	-Werror \
+	-pedantic
 
 CFLAGS_ASAN := \
 	-fsanitize=address        \

@@ -39,15 +39,15 @@ static runtime_op_t oper_lookup_table[] = {
 	[__SEPARATOR__] = oper_separator,
 };
 
-static ast_stmt_t *alloc_zeroed_stmt_tree(size_t size)
+static bool alloc_zeroed_stmt_tree(size_t size, ast_stmt_t **buffer)
 {
 	size_t alloc_size = sizeof(ast_stmt_t) * size;
-	ast_stmt_t *tree = malloc(alloc_size);
-	if (tree) {
-		(void)memset(tree, 0x00, alloc_size);
+	*buffer = malloc(alloc_size);
+	if (!*buffer) {
+		return (false);
 	}
-
-	return (tree);
+	(void)memset(*buffer, 0x00, alloc_size);
+	return (true);
 }
 
 static size_t get_tree_size(xre_ast_t *ast)
@@ -118,16 +118,15 @@ static int stmt_tree_init(ast_stmt_t *stmt, xre_ast_t *ast, bool reset_index)
 	return (initial_index);
 }
 
-ast_stmt_t *stmt_tree_create(xre_ast_t *ast)
+bool stmt_tree_create(xre_ast_t *ast, ast_stmt_t **buffer)
 {
-	ast_stmt_t *tree =
-		alloc_zeroed_stmt_tree(get_tree_size(ast) * sizeof(ast_stmt_t));
-
-	if (tree) {
-		(void)stmt_tree_init(tree, ast, true);
+	if (!alloc_zeroed_stmt_tree(get_tree_size(ast) * sizeof(ast_stmt_t),
+				    buffer)) {
+		return (false);
 	}
 
-	return (tree);
+	(void)stmt_tree_init(*buffer, ast, true);
+	return (true);
 }
 
 void stmt_tree_destroy(ast_stmt_t *tree)

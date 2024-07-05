@@ -21,11 +21,11 @@
 #define IOBUF_MAX 4096
 
 typedef struct s_iobuf {
-  void *data;
-  size_t cap;
-  size_t len;
-  size_t disc;
-  size_t width;
+	void *data;
+	size_t cap;
+	size_t len;
+	size_t disc;
+	size_t width;
 } t_iobuf;
 
 /**

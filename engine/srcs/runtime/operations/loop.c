@@ -9,7 +9,7 @@ XRE_API_OPERATOR_FUNC(oper_loop)
 	__return_val_if_fail__(self, false);
 
 loop:
-	if (!BR_EVAL((LEFT_BRANCH))) {
+	if (!__br_eval(__left_branch)) {
 		return (false);
 	}
 
@@ -19,7 +19,7 @@ loop:
 
 	stack_pop_discard();
 
-	if (!BR_EVAL((RIGHT_BRANCH))) {
+	if (!__br_eval(__right_branch)) {
 		return (false);
 	}
 
@@ -27,6 +27,6 @@ loop:
 	goto loop;
 
 beach:
-	STACK_TOP_ENABLE_FLAGS(FLAG_READABLE);
+	__stack_top_enable_flags(FLAG_READABLE);
 	return (true);
 }

@@ -12,6 +12,6 @@ XRE_API_OPERATOR_FUNC(oper_else)
 		return (false);
 	}
 
-	STACK_TOP_DISABLE_FLAGS(FLAG_READABLE);
+	__stack_top_disable_flags(FLAG_READABLE);
 	return (true);
 }

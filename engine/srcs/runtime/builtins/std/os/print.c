@@ -10,14 +10,14 @@ XRE_BUILTIN_FUNCTION(builtin_print)
 
 	static object_t *top;
 
-	if (!BR_EVAL((LEFT_BRANCH))) {
+	if (!__br_eval(__left_branch)) {
 		return (false);
 	}
 
 	top = (object_t *)stack_top();
 
 	if (!STACK_TOP_CHECK_FLAGS(FLAG_READABLE)) {
-		return (trigger_error_on(LEFT_BRANCH, XRE_UNREADABLE_ERROR),
+		return (trigger_error_on(__left_branch, XRE_UNREADABLE_ERROR),
 			false);
 	}
 

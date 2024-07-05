@@ -10,7 +10,7 @@ XRE_BUILTIN_FUNCTION(builtin_sizeof)
 
 	static object_t *top;
 
-	if (!BR_EVAL((LEFT_BRANCH))) {
+	if (!__br_eval(__left_branch)) {
 		return (false);
 	}
 

@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 err_notif_t _error;
-ast_stmt_t *__statements__ = NULL;
+ast_stmt_t *__global_current_stmts_ptr__ = NULL;
 
 void set_error_type(error_type_e type)
 {
@@ -21,33 +21,27 @@ bool xre_runtime(xre_ast_t *ast)
 {
 	__return_val_if_fail__(ast, false);
 
-	if (!symtab_init()) {
-		(void)fprintf(stderr, "Out of memory\n");
-		return (false);
-	}
+	ast_stmt_t *self = NULL;
 
-	ast_stmt_t *self = stmt_tree_create(ast);
-	if (!self) {
-		(void)fprintf(stderr, "Out of memory\n");
-		stmt_tree_destroy(self);
-		return (false);
+	if (!symtab_init() || !stmt_tree_create(ast, &self)) {
+		goto out_of_memory;
 	}
 
 	if (!stack_init()) {
-		(void)fprintf(stderr, "Out of memory\n");
 		stmt_tree_destroy(self);
-		return (false);
+		goto out_of_memory;
 	}
 
-	__statements__ = self;
+	__global_current_stmts_ptr__ = self;
 
 	if (!self->eval(self)) {
-		xre_error(&_error);
-		stmt_tree_destroy(self);
-		return (false);
+		return (xre_error(&_error), stmt_tree_destroy(self), false);
 	}
 
 	//stack_debug();
-	stmt_tree_destroy(self);
-	return (true);
+	return (stmt_tree_destroy(self), true);
+
+out_of_memory:
+	(void)fprintf(stderr, "Out of memory\n");
+	return (false);
 }

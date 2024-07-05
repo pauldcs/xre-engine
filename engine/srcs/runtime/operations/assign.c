@@ -13,12 +13,12 @@ XRE_API_OPERATOR_FUNC(oper_assign)
 	static object_t rv;
 	static object_t *object;
 
-	if (!oper_symbol_addr(LEFT_BRANCH) || !BR_EVAL((RIGHT_BRANCH)) ||
+	if (!oper_symbol_addr(__left_branch) || !__br_eval(__right_branch) ||
 	    !pop_binop_return(self, &lv, &rv)) {
 		return (false);
 	}
 
-	object = array_access(g_symtab, VALUE_OF(int64_t, &lv));
+	object = array_access(g_symtab, __as_int64_t(&lv));
 	if (!object) {
 		return (trigger_error_on(self, XRE_OUT_OF_BOUNDS_ACCESS_ERROR),
 			false);

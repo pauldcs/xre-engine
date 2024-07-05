@@ -16,34 +16,40 @@
 
 #ifdef __GNUC__
 
-#define __assert__(expr)                                                       \
-  do {                                                                         \
-    if (!(expr))                                                               \
-      XRE_LOGGER(warning, "file '%s', line: %d\nassertion failed: (%s)\n",     \
-                 __FILE__, __LINE__ #expr);                                    \
-  } while (0)
+#define __assert__(expr)                                                         \
+	do {                                                                     \
+		if (!(expr))                                                     \
+			XRE_LOGGER(                                              \
+				warning,                                         \
+				"file '%s', line: %d\nassertion failed: (%s)\n", \
+				__FILE__, __LINE__ #expr);                       \
+	} while (0)
 
-#define __assert_not_reached__()                                               \
-  do {                                                                         \
-    XRE_LOGGER(warning, "file '%s', line: %d\nshould not be reached\n",        \
-               __FILE__, __LINE__);                                            \
-  } while (0)
+#define __assert_not_reached__()                                           \
+	do {                                                               \
+		XRE_LOGGER(warning,                                        \
+			   "file '%s', line: %d\nshould not be reached\n", \
+			   __FILE__, __LINE__);                            \
+	} while (0)
 
 #else /* !__GNUC__ */
 
-#define __assert__(expr)                                                       \
-  do {                                                                         \
-    if (!(expr))                                                               \
-      XRE_LOGGER(warning,                                                      \
-                 "file '%s', line: %d\n(%s): assertion failed: (%s)\n",        \
-                 __FILE__, __LINE__, #expr);                                   \
-  } while (0)
+#define __assert__(expr)                                                               \
+	do {                                                                           \
+		if (!(expr))                                                           \
+			XRE_LOGGER(                                                    \
+				warning,                                               \
+				"file '%s', line: %d\n(%s): assertion failed: (%s)\n", \
+				__FILE__, __LINE__, #expr);                            \
+	} while (0)
 
-#define __assert_not_reached__()                                               \
-  do {                                                                         \
-    XRE_LOGGER(warning, "file '%s', line: %d\n(%s): should not be reached\n",  \
-               __FILE__, __LINE__);                                            \
-  } while (0)
+#define __assert_not_reached__()                                              \
+	do {                                                                  \
+		XRE_LOGGER(                                                   \
+			warning,                                              \
+			"file '%s', line: %d\n(%s): should not be reached\n", \
+			__FILE__, __LINE__);                                  \
+	} while (0)
 
 #endif /* __GNUC__ */
 
@@ -58,45 +64,51 @@
 
 #ifdef __GNUC__
 
-#define __return_if_fail__(expr)                                               \
-  do {                                                                         \
-    if (!(expr)) {                                                             \
-      XRE_LOGGER(warning, "file '%s', line: %d\nassertion failed: (%s)\n",     \
-                 __FILE__, __LINE__, #expr);                                   \
-      return;                                                                  \
-    };                                                                         \
-  } while (0)
+#define __return_if_fail__(expr)                                                 \
+	do {                                                                     \
+		if (!(expr)) {                                                   \
+			XRE_LOGGER(                                              \
+				warning,                                         \
+				"file '%s', line: %d\nassertion failed: (%s)\n", \
+				__FILE__, __LINE__, #expr);                      \
+			return;                                                  \
+		};                                                               \
+	} while (0)
 
-#define __return_val_if_fail__(expr, val)                                      \
-  do {                                                                         \
-    if (!(expr)) {                                                             \
-      XRE_LOGGER(warning, "file '%s', line: %d\nassertion failed: (%s)\n",     \
-                 __FILE__, __LINE__, #expr);                                   \
-      return val;                                                              \
-    };                                                                         \
-  } while (0)
+#define __return_val_if_fail__(expr, val)                                        \
+	do {                                                                     \
+		if (!(expr)) {                                                   \
+			XRE_LOGGER(                                              \
+				warning,                                         \
+				"file '%s', line: %d\nassertion failed: (%s)\n", \
+				__FILE__, __LINE__, #expr);                      \
+			return val;                                              \
+		};                                                               \
+	} while (0)
 
 #else /* !__GNUC__ */
 
-#define __return_if_fail__(expr)                                               \
-  do {                                                                         \
-    if (!(expr)) {                                                             \
-      XRE_LOGGER(warning,                                                      \
-                 "file '%s', line: %d\n(%s): assertion failed: (%s)\n",        \
-                 __FILE__, __LINE__, #expr);                                   \
-      return;                                                                  \
-    };                                                                         \
-  } while (0)
+#define __return_if_fail__(expr)                                                       \
+	do {                                                                           \
+		if (!(expr)) {                                                         \
+			XRE_LOGGER(                                                    \
+				warning,                                               \
+				"file '%s', line: %d\n(%s): assertion failed: (%s)\n", \
+				__FILE__, __LINE__, #expr);                            \
+			return;                                                        \
+		};                                                                     \
+	} while (0)
 
-#define __return_val_if_fail__(expr, val)                                      \
-  do {                                                                         \
-    if (!(expr)) {                                                             \
-      XRE_LOGGER(warning,                                                      \
-                 "file '%s', line: %d\n(%s): assertion failed: (%s)\n",        \
-                 __FILE__, __LINE__, #expr);                                   \
-      return val;                                                              \
-    };                                                                         \
-  } while (0)
+#define __return_val_if_fail__(expr, val)                                              \
+	do {                                                                           \
+		if (!(expr)) {                                                         \
+			XRE_LOGGER(                                                    \
+				warning,                                               \
+				"file '%s', line: %d\n(%s): assertion failed: (%s)\n", \
+				__FILE__, __LINE__, #expr);                            \
+			return val;                                                    \
+		};                                                                     \
+	} while (0)
 
 #endif
 #endif

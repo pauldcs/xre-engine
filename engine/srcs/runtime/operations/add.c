@@ -17,7 +17,7 @@ XRE_API_OPERATOR_FUNC(oper_add)
 		return (false);
 	}
 
-	data = VALUE_OF(int64_t, &lbuf) + VALUE_OF(int64_t, &rbuf);
+	data = __as_int64_t(&lbuf) + __as_int64_t(&rbuf);
 	return (stack_push_flagged(self, object_create_register(data),
 				   FLAG_READABLE | FLAG_MUTABLE));
 }
