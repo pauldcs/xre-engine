@@ -2,6 +2,7 @@
 #include "xre_assert.h"
 #include "xre_errors.h"
 #include "xre_parse.h"
+#include "xre_builtin.h"
 #include <assert.h>
 #include <string.h>
 #include <sys/types.h>
@@ -60,7 +61,7 @@ static xre_ast_t *ast_new_node(xre_token_t *token)
 	}
 
 	if (node->kind == __BUILTIN_CALL__) {
-		node->string = strndup(token->_ptr, token->_len);
+		node->string = get_builtin_name_ptr(token->_ptr, token->_len);
 	}
 
 	return (node);

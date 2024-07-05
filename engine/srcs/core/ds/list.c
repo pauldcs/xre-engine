@@ -1,6 +1,7 @@
 #include "list.h"
 #include "xre_assert.h"
 #include <stdbool.h>
+#include <string.h>
 
 bool list_init(list_t **self)
 {

@@ -38,3 +38,14 @@ builtin_func_ptr get_builtin_ptr(const char *ptr, size_t size)
 
 	return (builtin_func_lookup[offset].func);
 }
+
+const char *get_builtin_name_ptr(const char *ptr, size_t size)
+{
+	size_t offset;
+
+	if (!get_builtin_offset(ptr, size, &offset)) {
+		return (NULL);
+	}
+
+	return (builtin_func_lookup[offset].name);
+}

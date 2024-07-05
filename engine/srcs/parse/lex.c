@@ -315,7 +315,8 @@ not_a_constant_value:
 					_token._kind = __IDENTIFIER__;
 					tmp = ptr;
 					tf++;
-					while (*tmp && isalnum(*(tmp + 1))) {
+					while (*tmp && (isalnum(*(tmp + 1)) ||
+							*(tmp + 1) == '_')) {
 						tf++;
 						tmp++;
 					}

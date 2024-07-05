@@ -16,7 +16,7 @@ XRE_BUILTIN_FUNCTION(builtin_print)
 
 	top = (object_t *)stack_top();
 
-	if (!STACK_TOP_CHECK_FLAGS(FLAG_READABLE)) {
+	if (!__stack_top_check_flags(FLAG_READABLE)) {
 		return (trigger_error_on(__left_branch, XRE_UNREADABLE_ERROR),
 			false);
 	}

@@ -67,6 +67,16 @@ bool xre_expr_syntax(array_t *tokens)
 
 			goto syntax_error;
 
+		case __ASSIGN__:
+			if (PREV_TOKEN_KIND == __IDENTIFIER__)
+				continue;
+
+			syntax_error_g.class = error_type_to_class(
+				XRE_INVALID_ASSIGMENT_ERROR);
+			syntax_error_g.type = XRE_INVALID_ASSIGMENT_ERROR;
+
+			goto syntax_error;
+
 		case __RPAREN__:
 			if (open == 0) {
 				syntax_error_g.class = error_type_to_class(
@@ -109,7 +119,6 @@ bool xre_expr_syntax(array_t *tokens)
 		case __ANNOTATE__:
 		case __SCOPE_RESOLUTION__:
 		case __END__:
-		case __ASSIGN__:
 
 			if (PREV_TOKEN_TYPE & EXPR_TYPE_VALUE ||
 			    PREV_TOKEN_KIND == __RPAREN__)

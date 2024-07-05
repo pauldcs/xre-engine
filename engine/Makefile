@@ -29,6 +29,8 @@ $(NAME): $(SRCS_OBJS)
 
 asan: CFLAGS += $(CFLAGS_ASAN)
 asan: all
+	$(MAKE) fclean -C $(LIBARRAY_DIR)
+	$(MAKE) asan -C $(LIBARRAY_DIR)
 
 release: CFLAGS = $(CFLAGS_RELEASE)
 release: all

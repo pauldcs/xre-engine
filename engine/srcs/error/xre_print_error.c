@@ -16,7 +16,7 @@ void xre_error(err_notif_t *notification)
 	const xre_token_t *token = notification->orig;
 
 	if (!(__xre_args__.flags & SHOW_ERRORS)) {
-		i += cpyf(&err_buff[i], 4096 - i, "error: ");
+		i += cpyf(&err_buff[i], 4096 - i, "Exception: ");
 		i += cpyf(&err_buff[i], 4096 - i,
 			  "%s: ", error_class_str(notification->class));
 		i += cpyf(&err_buff[i], token->_line_len, "%s",
@@ -43,7 +43,8 @@ void xre_error(err_notif_t *notification)
 
 	(void)memset(err_buff, 0x00, sizeof(err_buff));
 
-	i += cpyf(err_buff, 4096, "[%s]", error_class_str(notification->class));
+	i += cpyf(err_buff, 4096, "Exception [%s]",
+		  error_class_str(notification->class));
 
 	i += cpyf(&err_buff[i], 4096 - i, "\n at %s line: %d, column: %d.\n  |",
 		  expr_kind_to_string(token->_kind), token->_line,

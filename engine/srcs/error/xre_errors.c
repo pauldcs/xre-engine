@@ -17,7 +17,7 @@ error_class_e error_type_to_class(error_type_e type)
 		return XRE_MEMORY_ERROR_C;
 
 	case XRE_INVALID_ANNOTATION_ERROR:
-	case XRE_TYPE_MISSMATCH_ERROR:
+	case XRE_UNEXPECTED_TYPE_ERROR:
 	case XRE_INVALID_TYPE_FOR_OPERAND_ERROR:
 	case XRE_INVALID_ASSIGMENT_ERROR:
 	case XRE_UNREADABLE_ERROR:
@@ -108,8 +108,8 @@ const char *error_type_str(error_type_e type)
 		return "attempt to annotate a variable with an invalid type";
 	case XRE_UNKNOWN_ANNOTATION_ERROR:
 		return "unknown annotation";
-	case XRE_TYPE_MISSMATCH_ERROR:
-		return "missmatching types";
+	case XRE_UNEXPECTED_TYPE_ERROR:
+		return "unexpected type";
 	case XRE_UNKNOWN_COMMAND_ERROR:
 		return "unknown command";
 	case XRE_NEGATIVE_SHIFT_ERROR:

@@ -18,15 +18,8 @@ XRE_API_OPERATOR_FUNC(oper_assign)
 		return (false);
 	}
 
-	object = array_access(g_symtab, __as_int64_t(&lv));
-	if (!object) {
-		return (trigger_error_on(self, XRE_OUT_OF_BOUNDS_ACCESS_ERROR),
-			false);
-	}
-
-	if (!(object->flags & FLAG_MUTABLE)) {
-		return (trigger_error_on(self, XRE_WRITE_ON_READONLY_ERROR),
-			false);
+	if (!expand_symbol_write(self, __as_int64_t(&lv), &object)) {
+		return (false);
 	}
 
 	(void)memmove(object, &rv, sizeof(object_t));

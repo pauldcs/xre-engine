@@ -117,6 +117,7 @@ SRCS := \
 \
 	runtime/builtins/xre_builtin.c \
 	runtime/builtins/declarations.c \
+	runtime/builtins/std/array/array_size.c \
 	runtime/builtins/std/os/print.c \
 	runtime/builtins/std/os/sizeof.c \
 	runtime/builtins/std/os/typeof.c 

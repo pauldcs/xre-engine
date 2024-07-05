@@ -15,7 +15,7 @@ XRE_BUILTIN_FUNCTION(builtin_typeof)
 	}
 
 	top = (object_t *)stack_top();
-	flags_to_string(top->flags);
+	object_flags_repr(top->flags);
 
 	return (true);
 }

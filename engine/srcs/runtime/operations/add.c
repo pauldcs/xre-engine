@@ -11,13 +11,19 @@ XRE_API_OPERATOR_FUNC(oper_add)
 
 	static object_t lbuf;
 	static object_t rbuf;
-	static int32_t data;
 
 	if (!evaluate_binops(self, &lbuf, &rbuf)) {
 		return (false);
 	}
 
-	data = __as_int64_t(&lbuf) + __as_int64_t(&rbuf);
-	return (stack_push_flagged(self, object_create_register(data),
+	static int64_t a;
+	static int64_t b;
+
+	if (!unwrap_register_object(self, &lbuf, &a) ||
+	    !unwrap_register_object(self, &rbuf, &b)) {
+		return (false);
+	}
+
+	return (stack_push_flagged(self, object_create_register(a + b),
 				   FLAG_READABLE | FLAG_MUTABLE));
 }

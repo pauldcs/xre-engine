@@ -57,9 +57,6 @@ int get_expr_precedence(xre_expr_kind_t kind)
 	case __ELSE__:
 		return (-13);
 
-	case __ASSIGN__:
-		return (-14);
-
 	case __LOOP__:
 		return (-15);
 
@@ -69,8 +66,11 @@ int get_expr_precedence(xre_expr_kind_t kind)
 	case __BUILTIN_CALL__:
 		return (-17);
 
-	case __SEPARATOR__:
+	case __ASSIGN__:
 		return (-18);
+
+	case __SEPARATOR__:
+		return (-19);
 
 	case __LPAREN__:
 	case __RPAREN__:

@@ -1,6 +1,7 @@
 #include "xre_alloc.h"
 #include <fcntl.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <sys/stat.h>
 
 /* Read FILENAME into a locally-allocated buffer and return the buffer.

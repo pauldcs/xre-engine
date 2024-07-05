@@ -1,1 +1,1 @@
-../srcs/error/xre_errors.h
+../srcs/core/error/xre_errors.h

@@ -17,6 +17,7 @@ typedef bool (*testfunc_ptr)(void *);
 #define FLAG_SYMBOL FLAG(SYMBOL, 4) // is a reference to another object
 #define FLAG_MUTABLE FLAG(MUTABLE, 5) // is mutable object
 #define FLAG_READABLE FLAG(READABLE, 6) // is readable object
+#define FLAG_REFERENCE FLAG(REFERENCE, 7) // is reference object
 
 #define __as_int64_t(obj_ptr) ((int64_t)(obj_ptr)->data.ptr)
 
@@ -36,11 +37,12 @@ typedef struct {
 		test; // returns true/false based on the truthiness of the value
 } object_t;
 
+void object_flags_repr(int32_t flags);
+
 object_t *object_create_register(int64_t data);
 object_t *object_create_slice(unsigned char *ptr, size_t size);
 object_t *object_create_symbol(int64_t offset);
 object_t *object_create_sequence(object_t *lval, object_t *rval);
-object_t *object_create_wrapped_sequence(object_t *lval, object_t *rval);
 object_t *object_create_undefined(void);
 
 bool is_true_object(const object_t *object);

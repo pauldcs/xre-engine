@@ -20,6 +20,7 @@ static void inner(xre_ast_t *ast, size_t depth)
 	size_t i;
 
 	i = 0;
+	printf("[%zu] ", ast->token._depth);
 	while (i++ < depth)
 		write(1, "   ", 3);
 
@@ -38,7 +39,7 @@ static void inner(xre_ast_t *ast, size_t depth)
 	} else if (ast->kind == __IDENTIFIER__) {
 		printf("id: '%s'\n", ast->string);
 	} else {
-		printf("[%s]\n", expr_kind_to_string(ast->kind));
+		printf("<%s>\n", expr_kind_to_string(ast->kind));
 	}
 
 	if (ast->token._type & (EXPR_OP_TYPE_BINOP))
@@ -63,8 +64,12 @@ void ast_free(xre_ast_t *ast)
 		free((void *)ast->string);
 		break;
 
-	case __NOT__:
 	case __BUILTIN_CALL__:
+		//free((void *)ast->string);
+		ast_free(ast->uniop);
+		break;
+
+	case __NOT__:
 		ast_free(ast->uniop);
 		break;
 
@@ -88,13 +93,13 @@ const char *expr_kind_to_string(xre_expr_kind_t kind)
 	case __VAL__:
 		return "value";
 	case __STRING_LITERAL__:
-		return "string literal";
+		return "string_literal";
 	case __IDENTIFIER__:
 		return "identifier";
 	case __NOT__:
 		return "not";
 	case __BUILTIN_CALL__:
-		return "builtin call";
+		return "builtin_call";
 	case __ADD__:
 		return "addition";
 	case __SUB__:
@@ -106,41 +111,41 @@ const char *expr_kind_to_string(xre_expr_kind_t kind)
 	case __MOD__:
 		return "modulus";
 	case __LSHIFT__:
-		return "left shift";
+		return "left_shift";
 	case __RSHIFT__:
-		return "right shift";
+		return "right_shift";
 	case __ASSIGN__:
 		return "assign";
 	case __LT__:
-		return "less than";
+		return "less_than";
 	case __GT__:
-		return "greater than";
+		return "greater_than";
 	case __LE__:
-		return "less or eaqual";
+		return "less_or_eaqual";
 	case __GE__:
-		return "greater than or equal";
+		return "greater_than_or_equal";
 	case __LPAREN__:
-		return "left parenthesis";
+		return "left_parenthesis";
 	case __RPAREN__:
-		return "right parenthesis";
+		return "right_parenthesis";
 	case __POW__:
 		return "power";
 	case __BXOR__:
-		return "bitwise xor";
+		return "bitwise_xor";
 	case __BAND__:
-		return "bitwise and";
+		return "bitwise_and";
 	case __BOR__:
-		return "bitwise or";
+		return "bitwise_or";
 	case __AND__:
-		return "logical and";
+		return "logical_and";
 	case __OR__:
-		return "logical or";
+		return "logical_or";
 	case __EQ__:
 		return "equals";
 	case __NE__:
-		return "not equal";
+		return "not_equal";
 	case __SEQUENCE__:
-		return "sequence point";
+		return "sequence_point";
 	case __SEPARATOR__:
 		return "separator";
 	case __INJECT__:
@@ -154,7 +159,7 @@ const char *expr_kind_to_string(xre_expr_kind_t kind)
 	case __ELSE__:
 		return "else";
 	case __SCOPE_RESOLUTION__:
-		return "scope resolution";
+		return "scope_resolution";
 	}
 
 	__builtin_unreachable();

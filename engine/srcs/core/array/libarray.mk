@@ -13,18 +13,24 @@ TEST_FRAMEWORK_SRCS := \
 	$(TEST_FRAMEWORK_DIR)/srcs/unit_tests.c \
 	$(TEST_FRAMEWORK_DIR)/srcs/asserts.c
 
+CFLAGS_RELEASE := \
+	-O3                     \
+	-D DISABLE_HARDENED_RUNTIME=1
+
 CFLAGS := \
-	-Wall     \
-	-Wextra   \
-	-Werror   \
-	-pedantic 
+	-O0     \
+	-g3     \
+	-Wall   \
+	-Wextra \
+	-Werror \
+	-pedantic
 
-# export ASAN_OPTIONS="log_path=sanitizer.log"
-# export ASAN_OPTIONS="detect_leaks=1"
-
-CFLAGS_DBG := \
-	-g3                      \
-	-O0                      
+CFLAGS_ASAN := \
+	-fsanitize=address        \
+	-fsanitize=undefined      \
+	-fno-omit-frame-pointer   \
+	-fstack-protector-strong  \
+	-fno-optimize-sibling-calls 
 
 SRCS := \
 	array.c 

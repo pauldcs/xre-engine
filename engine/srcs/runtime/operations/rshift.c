@@ -8,29 +8,31 @@ XRE_API_OPERATOR_FUNC(oper_rshift)
 {
 	__return_val_if_fail__(self, false);
 
-	static object_t lv;
-	static object_t rv;
-	static int32_t data;
+	static object_t lbuf;
+	static object_t rbuf;
 
-	if (!evaluate_binops(self, &lv, &rv)) {
+	if (!evaluate_binops(self, &lbuf, &rbuf)) {
 		return (false);
 	}
 
-	if (__as_int64_t(&rv) > 64) {
+	static int64_t a;
+	static int64_t b;
+
+	if (!unwrap_register_object(self, &lbuf, &a) ||
+	    !unwrap_register_object(self, &rbuf, &b)) {
+		return (false);
+	}
+
+	if (b > 64) {
 		return (trigger_error_on(self, XRE_EXCEEDS_SHIFT_LIMIT_ERROR),
 			false);
 	}
 
-	if (__as_int64_t(&rv) < 0) {
+	if (b < 0) {
 		return (trigger_error_on(self, XRE_NEGATIVE_SHIFT_ERROR),
 			false);
 	}
 
-	data = __as_int64_t(&lv) >> __as_int64_t(&rv);
-	if (!stack_push_flagged(self, object_create_register(data),
-				FLAG_READABLE | FLAG_MUTABLE)) {
-		return (false);
-	}
-
-	return (true);
+	return (stack_push_flagged(self, object_create_register(a >> b),
+				   FLAG_READABLE | FLAG_MUTABLE));
 }

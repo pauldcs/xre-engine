@@ -8,6 +8,52 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+void object_flags_repr(int32_t flags)
+{
+	bool first = true;
+	if (flags & FLAG_REGISTER) {
+		(void)fprintf(stderr, "register");
+		first = false;
+	}
+
+	if (flags & FLAG_ALLOC) {
+		if (first) {
+			first = false;
+		} else {
+			(void)fprintf(stderr, " | ");
+		}
+		(void)fprintf(stderr, "alloc");
+	}
+
+	if (flags & FLAG_REFERENCE) {
+		if (first) {
+			first = false;
+		} else {
+			(void)fprintf(stderr, " | ");
+		}
+		(void)fprintf(stderr, "reference");
+	}
+
+	if (flags & FLAG_SEQUENCE) {
+		if (first) {
+			first = false;
+		} else {
+			(void)fprintf(stderr, " | ");
+		}
+		(void)fprintf(stderr, "sequence");
+	}
+
+	if (flags & FLAG_SYMBOL) {
+		if (first) {
+			first = false;
+		} else {
+			(void)fprintf(stderr, " | ");
+		}
+		(void)fprintf(stderr, "symbol");
+	}
+	(void)fprintf(stderr, "\n");
+}
+
 static void print_number(void *ptr)
 {
 	int64_t num = (int64_t)ptr;
@@ -20,20 +66,26 @@ static void print_number(void *ptr)
 
 static void print_symbol(void *ptr)
 {
+	__return_if_fail__(ptr);
+
 	(void)fprintf(stderr, "symbol@%p", ptr);
 }
 
 static void print_slice(void *ptr)
 {
+	__return_if_fail__(ptr);
+
 	(void)fprintf(stderr, "%s", (char *)ptr);
 }
 
 static void print_sequence(void *ptr)
 {
+	__return_if_fail__(ptr);
+
 	array_t *array = (array_t *)ptr;
 	size_t seq_size = array_size(array);
 
-	(void)fprintf(stderr, "{");
+	(void)fprintf(stderr, "[");
 	for (size_t i = 0; i < seq_size; i++) {
 		object_t *obj = array_access(array, i);
 		if (obj)
@@ -44,7 +96,7 @@ static void print_sequence(void *ptr)
 			(void)fprintf(stderr, ", ");
 		}
 	}
-	(void)fprintf(stderr, "}");
+	(void)fprintf(stderr, "]");
 }
 
 object_t *object_create_register(int64_t data)
@@ -69,6 +121,8 @@ object_t *object_create_undefined(void)
 
 object_t *object_create_symbol(int64_t offset)
 {
+	__return_val_if_fail__(offset >= 0, NULL);
+
 	static object_t object = { .flags = FLAG_SYMBOL,
 				   .repr = print_symbol,
 				   .dealloc = NULL,
@@ -81,6 +135,8 @@ object_t *object_create_symbol(int64_t offset)
 
 object_t *object_create_slice(unsigned char *ptr, size_t size)
 {
+	__return_val_if_fail__(ptr, NULL);
+
 	static object_t object = { .flags = FLAG_ALLOC,
 				   .repr = print_slice,
 				   .dealloc = free,
@@ -98,6 +154,9 @@ object_t *object_create_slice(unsigned char *ptr, size_t size)
 
 bool unwrap_sequence_object(object_t *object, array_t *buffer)
 {
+	__return_val_if_fail__(object, false);
+	__return_val_if_fail__(buffer, false);
+
 	if (object->flags & FLAG_SEQUENCE) {
 		array_t *other = (array_t *)object->data.ptr;
 		if (!array_concat(buffer, other)) {
@@ -114,11 +173,16 @@ bool unwrap_sequence_object(object_t *object, array_t *buffer)
 
 static void dealloc_requence(void *ptr)
 {
+	__return_if_fail__(ptr);
+
 	array_kill((array_t *)ptr);
 }
 
 object_t *object_create_sequence(object_t *lval, object_t *rval)
 {
+	__return_val_if_fail__(lval, NULL);
+	__return_val_if_fail__(rval, NULL);
+
 	static object_t object = { .flags = FLAG_ALLOC | FLAG_SEQUENCE,
 				   .repr = print_sequence,
 				   .dealloc = dealloc_requence,
@@ -138,27 +202,6 @@ object_t *object_create_sequence(object_t *lval, object_t *rval)
 			array_kill(sequence);
 			return (NULL);
 		}
-	}
-
-	object.data.ptr = sequence;
-	object.data.size = array_sizeof(sequence);
-
-	return (&object);
-}
-
-object_t *object_create_wrapped_sequence(object_t *lval, object_t *rval)
-{
-	static object_t object = { .flags = FLAG_ALLOC | FLAG_SEQUENCE,
-				   .repr = print_sequence,
-				   .dealloc = dealloc_requence,
-				   .test = NULL };
-
-	array_t *sequence = array_create(sizeof(object_t), 2, NULL);
-
-	if (!array_append(sequence, lval, 1) ||
-	    !array_append(sequence, rval, 1)) {
-		array_kill(sequence);
-		return (false);
 	}
 
 	object.data.ptr = sequence;

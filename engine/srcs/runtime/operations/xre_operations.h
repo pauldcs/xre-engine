@@ -14,6 +14,11 @@ bool pop_binop_return(ast_stmt_t *self, object_t *left_buffer,
 bool stack_push_flagged(ast_stmt_t *self, object_t *object, int32_t flags);
 void trigger_error_on(ast_stmt_t *self, error_type_e type);
 
+bool unwrap_register_object(ast_stmt_t *self, object_t *object, int64_t *data);
+
+bool expand_symbol_read(ast_stmt_t *self, int64_t offset, object_t **object);
+bool expand_symbol_write(ast_stmt_t *self, int64_t offset, object_t **object);
+
 #define XRE_API_OPERATOR_FUNC(name) bool name(ast_stmt_t *self)
 typedef bool (*fptr_t)(ast_stmt_t *self);
 
@@ -53,17 +58,15 @@ XRE_API_OPERATOR_FUNC(oper_inject);
 XRE_API_OPERATOR_FUNC(oper_scope_annotate);
 XRE_API_OPERATOR_FUNC(oper_print);
 
-#define TYPE_CHECK_NEXT(self, flag)                         \
-	((stack_top()->flags & flag) ?                      \
-		 true :                                     \
-		 (set_error_type(XRE_TYPE_MISSMATCH_ERROR), \
+#define TYPE_CHECK_NEXT(self, flag)                          \
+	((stack_top()->flags & flag) ?                       \
+		 true :                                      \
+		 (set_error_type(XRE_UNEXPECTED_TYPE_ERROR), \
 		  set_error_orig(self), false))
 
 #define TYPE_CHECK(object, flag) (object->flags & flag)
 
 #define __left_branch (&__global_current_stmts_ptr__[self->br.left])
 #define __right_branch (&__global_current_stmts_ptr__[self->br.right])
-
-#define IS_ERROR_RETURN is_true_object((object_t *)stack_top())
 
 #endif /* __XRE_OPERATIONS_H__ */
