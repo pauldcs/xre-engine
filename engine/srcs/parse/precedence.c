@@ -1,23 +1,18 @@
 #include "xre_parse.h"
 #include "xre_assert.h"
 
-int get_expr_precedence(xre_expr_kind_t kind)
+int get_precedence_by_kind(xre_expr_kind_t kind)
 {
 	switch (kind) {
-	case __SCOPE_RESOLUTION__:
 	case __START__:
 	case __END__:
 		return (0);
 
-	case __ANNOTATE__:
 	case __NOT__:
 		return (-1);
 
 	case __POW__:
 		return (-2);
-
-	case __INJECT__:
-		return (-3);
 
 	case __MUL__:
 	case __DIV__:

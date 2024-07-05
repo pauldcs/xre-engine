@@ -35,6 +35,8 @@ SRCS := \
 	core/log/xre_log.c \
 	core/stringf/xre_stringf.c \
 \
+	core/utils/str_escape.c \
+	core/utils/str_unescape.c \
 	core/utils/str_to_values.c \
 	core/utils/str_to_int32.c \
 	core/utils/xalloc.c \
@@ -45,6 +47,8 @@ SRCS := \
 	core/utils/str2print.c \
 	core/utils/hash_string.c \
 	core/utils/str_to_int32.c \
+	core/error/xre_errors.c \
+	core/error/xre_print_error.c \
 \
 	parse/lex.c \
 	parse/syntax.c \
@@ -53,29 +57,24 @@ SRCS := \
 	parse/compose.c \
 	parse/precedence.c \
 \
-	error/xre_errors.c \
-	error/xre_print_error.c \
-\
 	repl/xre_repl.c \
 	repl/xre_repl_read.c \
 	repl/xre_repl_signals.c \
 \
-	readline/xre_readline.c \
-	readline/rl_terminal.c \
-	readline/rl_globals.c \
-	readline/rl_utils.c \
-	readline/rl_actions.c \
-	readline/rl_display.c \
-	readline/rl_keys.c \
-	readline/rl_line_mode.c \
-	readline/rl_editor_mode.c \
-	readline/rl_buffer.c \
+	repl/readline/xre_readline.c \
+	repl/readline/rl_terminal.c \
+	repl/readline/rl_globals.c \
+	repl/readline/rl_utils.c \
+	repl/readline/rl_actions.c \
+	repl/readline/rl_display.c \
+	repl/readline/rl_keys.c \
+	repl/readline/rl_line_mode.c \
+	repl/readline/rl_editor_mode.c \
+	repl/readline/rl_buffer.c \
 \
 	runtime/xre_runtime.c \
-	runtime/ast.c \
 \
-	runtime/operations/pop_object.c \
-	runtime/operations/operations_common.c \
+	runtime/operations/common.c \
 	runtime/operations/eq.c \
 	runtime/operations/gt.c \
 	runtime/operations/le.c \
@@ -91,12 +90,9 @@ SRCS := \
 	runtime/operations/and.c \
 	runtime/operations/do.c \
 	runtime/operations/else.c \
-	runtime/operations/inject.c \
-	runtime/operations/scope_resolution.c \
 	runtime/operations/separator.c \
 	runtime/operations/sequence.c \
 	runtime/operations/symbol.c \
-	runtime/operations/annotate.c \
 	runtime/operations/mul.c \
 	runtime/operations/rshift.c \
 	runtime/operations/mod.c \
@@ -112,15 +108,16 @@ SRCS := \
 \
 	runtime/memory/stack.c \
 	runtime/memory/symtab.c \
+	runtime/memory/object.c \
 \
-	runtime/object/object.c \
+	runtime/builtins.c \
+	runtime/builtin/xre_builtin.c \
 \
-	runtime/builtins/xre_builtin.c \
-	runtime/builtins/declarations.c \
-	runtime/builtins/std/array/array_size.c \
-	runtime/builtins/std/os/print.c \
-	runtime/builtins/std/os/sizeof.c \
-	runtime/builtins/std/os/typeof.c 
+	runtime/builtin/std/array/array_size.c \
+\
+	runtime/builtin/std/os/print.c \
+	runtime/builtin/std/os/sizeof.c \
+	runtime/builtin/std/os/typeof.c 
 
 
 	

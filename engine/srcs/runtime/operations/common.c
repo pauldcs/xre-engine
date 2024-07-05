@@ -1,6 +1,5 @@
 #include "xre_operations.h"
 #include "xre_assert.h"
-#include "xre_object.h"
 #include "xre_memory.h"
 #include <stdbool.h>
 
@@ -8,6 +7,17 @@ void trigger_error_on(ast_stmt_t *self, error_type_e type)
 {
 	set_error_type(type);
 	set_error_orig(self);
+}
+
+bool pop_object(object_t *ptr, ast_stmt_t *stmts)
+{
+	stack_pop(ptr);
+
+	if (!(ptr->flags & FLAG_READABLE)) {
+		return (trigger_error_on(stmts, XRE_UNREADABLE_ERROR), false);
+	}
+
+	return (true);
 }
 
 bool pop_binop_return(ast_stmt_t *self, object_t *left_buffer,

@@ -1,6 +1,5 @@
 #include "xre_operations.h"
 #include "xre_assert.h"
-#include "xre_object.h"
 #include "xre_memory.h"
 #include "xre_log.h"
 #include <stdbool.h>

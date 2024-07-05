@@ -174,11 +174,6 @@ not_a_constant_value:
 
 				break;
 
-			case ':':
-				_token._kind = __ANNOTATE__;
-				tf = 1;
-
-				break;
 			case '=':
 				if (*(ptr + 1) == '=') {
 					_token._kind = __EQ__;
@@ -245,9 +240,6 @@ not_a_constant_value:
 					tf = 2;
 				} else if (*(ptr + 1) == '=') {
 					_token._kind = __LE__;
-					tf = 2;
-				} else if (*(ptr + 1) == '-') {
-					_token._kind = __INJECT__;
 					tf = 2;
 				} else {
 					_token._kind = __LT__;

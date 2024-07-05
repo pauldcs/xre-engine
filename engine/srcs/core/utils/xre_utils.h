@@ -17,6 +17,9 @@ char *str2print(char *buf, size_t bufsiz, const char *str);
 int32_t hash_string(const char *key);
 ssize_t xwrite(int fd, const unsigned char *buf, size_t nbytes);
 
+char *str_escape(const uint8_t *buf, int sz);
+int str_unescape(char *buf);
+
 const char *shortname(const char *name);
 
 bool timespec_to_string(const struct timespec st_mtimespec, char *dest,

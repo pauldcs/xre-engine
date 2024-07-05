@@ -148,18 +148,12 @@ const char *expr_kind_to_string(xre_expr_kind_t kind)
 		return "sequence_point";
 	case __SEPARATOR__:
 		return "separator";
-	case __INJECT__:
-		return "injection";
-	case __ANNOTATE__:
-		return "annotation";
 	case __LOOP__:
 		return "loop";
 	case __DO__:
 		return "do";
 	case __ELSE__:
 		return "else";
-	case __SCOPE_RESOLUTION__:
-		return "scope_resolution";
 	}
 
 	__builtin_unreachable();
@@ -191,11 +185,8 @@ xre_expr_type_t expr_type_by_kind(xre_expr_kind_t kind)
 	case __BOR__:
 	case __EQ__:
 	case __NE__:
-	case __ANNOTATE__:
-	case __SCOPE_RESOLUTION__:
 	case __SEPARATOR__:
 	case __SEQUENCE__:
-	case __INJECT__:
 	case __LOOP__:
 	case __DO__:
 	case __ELSE__:

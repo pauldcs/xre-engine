@@ -3,7 +3,8 @@ include xre.mk
 SRCS_OBJS := $(patsubst %.c,$(OBJS_DIR)/%.o,$(SRCS))
 
 $(OBJS_DIR)/%.o:$(SRCS_DIR)/%.c
-	@mkdir -vp $(dir $@)
+	mkdir -vp $(dir $@)
+#	@printf "compiling: %s\n" $<
 	$(CC) \
 		$(CFLAGS) \
 		-MMD \
@@ -66,6 +67,7 @@ fclean: clean
 	rm -f $(NAME)
 
 re: fclean all
+ra: fclean asan
 
 .PHONY	: \
 	all     \
@@ -74,4 +76,5 @@ re: fclean all
 	sparse  \
 	fclean  \
 	format  \
-	re 
+	re      \
+	ra

@@ -3,7 +3,6 @@
 
 #include "xre_runtime.h"
 #include "xre_memory.h"
-#include "xre_object.h"
 #include <stdbool.h>
 
 bool pop_object(object_t *ptr, ast_stmt_t *stmts);

@@ -114,10 +114,7 @@ bool xre_expr_syntax(array_t *tokens)
 		case __BXOR__:
 		case __SEQUENCE__:
 		case __SEPARATOR__:
-		case __INJECT__:
 		case __LOOP__:
-		case __ANNOTATE__:
-		case __SCOPE_RESOLUTION__:
 		case __END__:
 
 			if (PREV_TOKEN_TYPE & EXPR_TYPE_VALUE ||

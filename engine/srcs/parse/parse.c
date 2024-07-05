@@ -3,6 +3,7 @@
 #include "xre_errors.h"
 #include "xre_parse.h"
 #include "xre_builtin.h"
+#include "xre_utils.h"
 #include <assert.h>
 #include <string.h>
 #include <sys/types.h>
@@ -53,7 +54,9 @@ static xre_ast_t *ast_new_node(xre_token_t *token)
 		node->value = token->_value;
 
 	if (node->kind == __STRING_LITERAL__) {
-		node->string = strndup(token->_ptr + 1, token->_len - 2);
+		char *tmp = strndup(token->_ptr + 1, token->_len - 2);
+		node->string = tmp;
+		str_unescape(tmp);
 	}
 
 	if (node->kind == __IDENTIFIER__) {
@@ -131,8 +134,9 @@ xre_ast_t *xre_expr_parse(array_t *tokens)
 
 			break;
 		default:
-			while (__top_a && (get_expr_precedence(TOP_A_KIND) >=
-					   get_expr_precedence(token->_kind))) {
+			while (__top_a &&
+			       (get_precedence_by_kind(TOP_A_KIND) >=
+				get_precedence_by_kind(token->_kind))) {
 				__make_value_to_b();
 			}
 

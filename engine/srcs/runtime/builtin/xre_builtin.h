@@ -3,7 +3,6 @@
 
 #include "xre_runtime.h"
 #include "xre_memory.h"
-#include "xre_object.h"
 #include <stdbool.h>
 
 typedef bool (*builtin_func_ptr)(ast_stmt_t *self);

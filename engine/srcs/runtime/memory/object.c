@@ -1,6 +1,6 @@
-#include "xre_object.h"
 #include "xre_assert.h"
 #include "xre_memory.h"
+#include "xre_utils.h"
 #include "xre_log.h"
 #include "array.h"
 #include <stdlib.h>
@@ -10,48 +10,27 @@
 
 void object_flags_repr(int32_t flags)
 {
-	bool first = true;
+	const char *separator = "";
 	if (flags & FLAG_REGISTER) {
-		(void)fprintf(stderr, "register");
-		first = false;
+		fprintf(stderr, "register");
+		separator = " | ";
 	}
-
 	if (flags & FLAG_ALLOC) {
-		if (first) {
-			first = false;
-		} else {
-			(void)fprintf(stderr, " | ");
-		}
-		(void)fprintf(stderr, "alloc");
+		fprintf(stderr, "%salloc", separator);
+		separator = " | ";
 	}
-
 	if (flags & FLAG_REFERENCE) {
-		if (first) {
-			first = false;
-		} else {
-			(void)fprintf(stderr, " | ");
-		}
-		(void)fprintf(stderr, "reference");
+		fprintf(stderr, "%sreference", separator);
+		separator = " | ";
 	}
-
 	if (flags & FLAG_SEQUENCE) {
-		if (first) {
-			first = false;
-		} else {
-			(void)fprintf(stderr, " | ");
-		}
-		(void)fprintf(stderr, "sequence");
+		fprintf(stderr, "%ssequence", separator);
+		separator = " | ";
 	}
-
 	if (flags & FLAG_SYMBOL) {
-		if (first) {
-			first = false;
-		} else {
-			(void)fprintf(stderr, " | ");
-		}
-		(void)fprintf(stderr, "symbol");
+		fprintf(stderr, "%ssymbol", separator);
 	}
-	(void)fprintf(stderr, "\n");
+	fprintf(stderr, "\n");
 }
 
 static void print_number(void *ptr)
@@ -75,7 +54,9 @@ static void print_slice(void *ptr)
 {
 	__return_if_fail__(ptr);
 
-	(void)fprintf(stderr, "%s", (char *)ptr);
+	char *escaped = str_escape(ptr, strlen(ptr));
+	(void)fprintf(stderr, "%s", (char *)escaped);
+	free(escaped);
 }
 
 static void print_sequence(void *ptr)
@@ -99,11 +80,23 @@ static void print_sequence(void *ptr)
 	(void)fprintf(stderr, "]");
 }
 
+static void dealloc_sequence(void *ptr)
+{
+	__return_if_fail__(ptr);
+
+	array_kill((array_t *)ptr);
+}
+
+static void dealloc_none(void *ptr)
+{
+	(void)ptr;
+}
+
 object_t *object_create_register(int64_t data)
 {
 	static object_t object = { .flags = FLAG_REGISTER,
 				   .repr = print_number,
-				   .dealloc = NULL,
+				   .dealloc = dealloc_none,
 				   .test = NULL };
 
 	object.data.ptr = (void *)data;
@@ -125,7 +118,7 @@ object_t *object_create_symbol(int64_t offset)
 
 	static object_t object = { .flags = FLAG_SYMBOL,
 				   .repr = print_symbol,
-				   .dealloc = NULL,
+				   .dealloc = dealloc_none,
 				   .test = NULL };
 
 	object.data.ptr = (void *)offset;
@@ -168,14 +161,13 @@ bool unwrap_sequence_object(object_t *object, array_t *buffer)
 			return (false);
 		}
 	}
+
 	return (true);
 }
 
-static void dealloc_requence(void *ptr)
+static void object_dealloc(void *ptr)
 {
-	__return_if_fail__(ptr);
-
-	array_kill((array_t *)ptr);
+	((object_t *)ptr)->dealloc(((object_t *)ptr)->data.ptr);
 }
 
 object_t *object_create_sequence(object_t *lval, object_t *rval)
@@ -185,10 +177,10 @@ object_t *object_create_sequence(object_t *lval, object_t *rval)
 
 	static object_t object = { .flags = FLAG_ALLOC | FLAG_SEQUENCE,
 				   .repr = print_sequence,
-				   .dealloc = dealloc_requence,
+				   .dealloc = dealloc_sequence,
 				   .test = NULL };
 
-	array_t *sequence = array_create(sizeof(object_t), 2, NULL);
+	array_t *sequence = array_create(sizeof(object_t), 2, object_dealloc);
 
 	if (lval->depth > rval->depth) {
 		if (!array_append(sequence, lval, 1) ||
