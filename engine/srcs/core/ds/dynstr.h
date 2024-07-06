@@ -1,16 +1,8 @@
 #ifndef __DYNSTR_H__
 #define __DYNSTR_H__
 
-#include <stddef.h>
 #include <stdbool.h>
-
-#ifndef BUILTIN_EXPECT_AVAILABLE
-#define likely(x) (__builtin_expect(!!(x), 1))
-#define unlikely(x) (__builtin_expect(!!(x), 0))
-#else
-#define likely(x) x
-#define unlikely(x) x
-#endif
+#include <stddef.h>
 
 typedef struct {
 	char *_ptr; /* data pointer */
@@ -51,11 +43,13 @@ void dynstr_clear(dynstr_t *self);
  */
 bool dynstr_adjust(dynstr_t *self, size_t n);
 
-/* Removes all characters from the dynamic string within index 
+/* Removes all characters from the dynamic string within index
  * start -> end
  */
 void dynstr_wipe(dynstr_t *self, size_t start, size_t end);
 
 size_t dynstr_cap(dynstr_t *self);
+
+size_t dynstr_len(dynstr_t *self);
 
 #endif /* __DYNSTR_H__ */

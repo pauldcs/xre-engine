@@ -1,12 +1,12 @@
+#include "array.h"
+#include "xre_log.h"
 #include "xre_memory.h"
 #include "xre_operations.h"
 #include "xre_utils.h"
-#include "xre_log.h"
-#include "array.h"
 #include "xre_xdp.h"
-#include <stdio.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
 
 array_t *g_stack = NULL;
 size_t g_stack_ptr = 0;
@@ -19,7 +19,7 @@ bool stack_init(void)
 	}
 
 	g_stack_ptr = 0;
-	g_stack = array_create(sizeof(object_t), STACK_SIZE, NULL);
+	g_stack = array_create(sizeof(object_t), STACK_SIZE, object_drop);
 
 	if (!g_stack) {
 		return (false);
@@ -53,9 +53,6 @@ void stack_pop(object_t *ptr)
 {
 	g_stack_ptr--;
 	array_pop(g_stack, ptr);
-	// if (ptr->dealloc) {
-	// 	ptr->dealloc(ptr->data.ptr);
-	// }
 }
 
 void stack_pop_discard(void)

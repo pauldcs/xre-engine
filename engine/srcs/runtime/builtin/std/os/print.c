@@ -1,7 +1,7 @@
-#include "xre_builtin.h"
-#include "xre_operations.h"
-#include "xre_memory.h"
 #include "xre_assert.h"
+#include "xre_builtin.h"
+#include "xre_memory.h"
+#include "xre_operations.h"
 #include <stdbool.h>
 
 XRE_BUILTIN_FUNCTION(builtin_print)
@@ -16,8 +16,8 @@ XRE_BUILTIN_FUNCTION(builtin_print)
 
 	top = (object_t *)stack_top();
 
-	if (!__stack_top_check_flags(FLAG_READABLE)) {
-		return (trigger_error_on(__left_branch, XRE_UNREADABLE_ERROR),
+	if (!__stack_top_check_attr(ATTR_READABLE)) {
+		return (set_current_error(__left_branch, XRE_UNREADABLE_ERROR),
 			false);
 	}
 

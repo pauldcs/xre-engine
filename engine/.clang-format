@@ -63,7 +63,6 @@ DerivePointerAlignment: false
 DisableFormat: false
 ExperimentalAutoDetectBinPacking: false
 FixNamespaceComments: false
-
 IncludeBlocks: Preserve
 IncludeCategories:
   - Regex: '.*'

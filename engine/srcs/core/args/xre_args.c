@@ -197,10 +197,10 @@ t_xre_args *xre_args_parse(int ac, char *av[])
 			break;
 		case '*':
 			/*
-       *     if it does not match any of the
-       *     options it's a filename unless it
-       *     is '-' or 'stdin'
-       */
+         *     if it does not match any of the
+         *     options it's a filename unless it
+         *     is '-' or 'stdin'
+         */
 			if (__top == FILE_STACK_SIZE)
 				break;
 			if (xopts.arg == NULL || !strcmp(xopts.arg, "-") ||

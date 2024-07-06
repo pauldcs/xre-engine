@@ -1,11 +1,11 @@
-#include "xre_memory.h"
-#include "xre_log.h"
 #include "array.h"
+#include "xre_log.h"
+#include "xre_memory.h"
 #include "xre_utils.h"
 #include "xre_xdp.h"
-#include <stdio.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
 
 typedef struct {
 	int32_t id;

@@ -1,9 +1,9 @@
+#include "array.h"
 #include "xre_assert.h"
-#include "xre_errors.h"
 #include "xre_builtin.h"
+#include "xre_errors.h"
 #include "xre_parse.h"
 #include "xre_utils.h"
-#include "array.h"
 #include <ctype.h>
 #include <string.h>
 #include <sys/types.h>
@@ -43,7 +43,12 @@ static bool accept_token(array_t *tokens, size_t len)
 	__return_val_if_fail__(tokens, false);
 
 	_token._len = len;
-	_token._type = expr_type_by_kind(_token._kind);
+	if (_token._kind == __BUILTIN_CALL__) {
+		_token._type = get_builtin_type(_token._ptr, _token._len);
+	} else {
+		_token._type = expr_type_by_kind(_token._kind);
+	}
+
 	if (!array_push(tokens, &_token))
 		return (false);
 
@@ -214,6 +219,15 @@ not_a_constant_value:
 				}
 
 				break;
+
+			case ':':
+				if (*(ptr + 1) == ':') {
+					_token._kind = __SCOPE_RESOLUTION__;
+					tf = 2;
+					break;
+				}
+				goto __default__;
+
 			case '|':
 				if (*(ptr + 1) == '|') {
 					_token._kind = __OR__;
@@ -283,10 +297,10 @@ not_a_constant_value:
 
 				break;
 			default:
-
+__default__:
 				/* handle comments
-         TODO
-         */
+TODO
+*/
 
 				if (!strncmp(ptr, "do", 2)) {
 					_token._kind = __DO__;
@@ -304,7 +318,7 @@ not_a_constant_value:
 				}
 
 				else {
-					_token._kind = __IDENTIFIER__;
+					_token._kind = __VARIABLE__;
 					tmp = ptr;
 					tf++;
 					while (*tmp && (isalnum(*(tmp + 1)) ||

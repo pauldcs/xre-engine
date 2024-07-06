@@ -1,11 +1,11 @@
-#include "array.h"
+#include "dynstr.h"
 #include "xre_assert.h"
 #include "xre_builtin.h"
 #include "xre_memory.h"
 #include "xre_operations.h"
 #include <stdbool.h>
 
-XRE_BUILTIN_FUNCTION(builtin_array_size)
+XRE_BUILTIN_FUNCTION(builtin_str_size)
 {
 	__return_val_if_fail__(self, false);
 
@@ -23,13 +23,13 @@ XRE_BUILTIN_FUNCTION(builtin_array_size)
 			false);
 	}
 
-	if (!(top.attrs & ATTR_SEQUENCE)) {
+	if (!(top.attrs & ATTR_STRING)) {
 		return (set_current_error(__left_branch,
 					  XRE_UNEXPECTED_TYPE_ERROR),
 			false);
 	}
 
-	data = array_size((array_t *)top.data.ptr);
+	data = dynstr_len((dynstr_t *)top.data.ptr);
 
 	return (stack_push_enable_attrs(self, object_create_register(data),
 					ATTR_READABLE | ATTR_MUTABLE));

@@ -1,7 +1,7 @@
-#include "xre_builtin.h"
-#include "xre_operations.h"
-#include "xre_memory.h"
 #include "xre_assert.h"
+#include "xre_builtin.h"
+#include "xre_memory.h"
+#include "xre_operations.h"
 #include <stdbool.h>
 
 XRE_BUILTIN_FUNCTION(builtin_typeof)
@@ -15,7 +15,7 @@ XRE_BUILTIN_FUNCTION(builtin_typeof)
 	}
 
 	top = (object_t *)stack_top();
-	object_flags_repr(top->flags);
+	object_attrs_repr(top->attrs);
 
 	return (true);
 }

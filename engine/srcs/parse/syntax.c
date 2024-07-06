@@ -39,7 +39,7 @@ bool xre_expr_syntax(array_t *tokens)
 #endif
 		case __VAL__:
 		case __STRING_LITERAL__:
-		case __IDENTIFIER__:
+		case __VARIABLE__:
 
 			if (PREV_TOKEN_TYPE &
 				    (EXPR_OP_TYPE_BINOP | EXPR_OP_TYPE_UNIOP) ||
@@ -68,7 +68,7 @@ bool xre_expr_syntax(array_t *tokens)
 			goto syntax_error;
 
 		case __ASSIGN__:
-			if (PREV_TOKEN_KIND == __IDENTIFIER__)
+			if (PREV_TOKEN_KIND == __VARIABLE__)
 				continue;
 
 			syntax_error_g.class = error_type_to_class(
@@ -115,6 +115,7 @@ bool xre_expr_syntax(array_t *tokens)
 		case __SEQUENCE__:
 		case __SEPARATOR__:
 		case __LOOP__:
+		case __SCOPE_RESOLUTION__:
 		case __END__:
 
 			if (PREV_TOKEN_TYPE & EXPR_TYPE_VALUE ||

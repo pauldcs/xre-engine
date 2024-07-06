@@ -108,8 +108,9 @@ const char hex_dump_ascii[256] = {
 
 // 			if (prev) {
 // 				if (*(uint64_t *)(prev) == *(uint64_t *)(ptr) &&
-// 					*(uint64_t *)(prev + 8) == *(uint64_t *)(ptr +
-// 8)) { 					if (scr_cursor != scr_ptr) {
+// 					*(uint64_t *)(prev + 8) == *(uint64_t
+// *)(ptr + 8)) { 					if (scr_cursor !=
+// scr_ptr) {
 // 						*(scr_cursor++) = '+';
 // 						*(scr_cursor++) = '\n';
 // 						dump_required = true;

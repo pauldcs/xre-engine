@@ -1,6 +1,6 @@
-#include <stdint.h>
 #include <ctype.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <string.h>
 
 #define IS_OCTAL(x) ((x) >= '0' && (x) <= '7')

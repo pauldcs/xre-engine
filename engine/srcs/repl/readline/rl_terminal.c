@@ -45,10 +45,10 @@ void rl_get_terminal_caps(void)
 			tc_strings[i].tc_len =
 				strlen(*(tc_strings[i].tc_value));
 		} /* else {
-      fprintf(stderr,
-        "Failed to get termcap for: '%s'\n", tc_strings[i].tc_var
-      );
-    } */
+fprintf(stderr,
+"Failed to get termcap for: '%s'\n", tc_strings[i].tc_var
+);
+} */
 	}
 
 	PC = _term_pc ? *_term_pc : 0;

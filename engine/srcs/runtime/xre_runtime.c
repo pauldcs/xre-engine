@@ -1,25 +1,14 @@
-#include "xre_memory.h"
-#include "xre_assert.h"
 #include "xre_runtime.h"
-#include "xre_operations.h"
+#include "xre_assert.h"
 #include "xre_builtin.h"
+#include "xre_memory.h"
+#include "xre_operations.h"
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 err_notif_t _error;
 ast_stmt_t *__global_current_stmts_ptr__ = NULL;
-
-void set_error_type(error_type_e type)
-{
-	_error.class = error_type_to_class(type);
-	_error.type = type;
-}
-
-void set_error_orig(ast_stmt_t *origin)
-{
-	_error.orig = origin->orig;
-}
 
 static runtime_op_t oper_lookup_table[] = {
 	[__ASSIGN__] = oper_assign,
@@ -42,11 +31,12 @@ static runtime_op_t oper_lookup_table[] = {
 	[__GE__] = oper_ge,
 	[__NOT__] = oper_not,
 	[__LOOP__] = oper_loop,
+	[__SCOPE_RESOLUTION__] = oper_scope_resolution,
 	[__DO__] = oper_do,
 	[__ELSE__] = oper_else,
 	[__AND__] = oper_and,
 	[__OR__] = oper_or,
-	[__IDENTIFIER__] = oper_symbol,
+	[__VARIABLE__] = oper_symbol_expand,
 	[__VAL__] = oper_value,
 	[__STRING_LITERAL__] = oper_string,
 	[__SEQUENCE__] = oper_sequence,
@@ -71,12 +61,22 @@ static size_t get_tree_size(xre_ast_t *ast)
 	switch (ast->kind) {
 	case __VAL__:
 	case __STRING_LITERAL__:
-	case __IDENTIFIER__:
+	case __VARIABLE__:
 		return (size);
 
 	case __NOT__:
 	case __BUILTIN_CALL__:
-		return (size + get_tree_size(ast->_binop.left));
+		if (ast->type == EXPR_TYPE_VALUE) {
+			return (size);
+		}
+
+		if (ast->type == EXPR_OP_TYPE_UNIOP) {
+			return (size + get_tree_size(ast->_binop.left));
+		}
+
+		if (ast->type == EXPR_OP_TYPE_BINOP) {
+			// fallthrough
+		}
 
 	default:
 		return (size + get_tree_size(ast->_binop.left) +
@@ -111,15 +111,26 @@ static int stmt_tree_init(ast_stmt_t *stmt, xre_ast_t *ast, bool reset_index)
 		current->string = (char *)ast->string;
 		break;
 
-	case __IDENTIFIER__:
+	case __VARIABLE__:
 		current->value = symtab_create_entry((char *)ast->string);
 		break;
 
 	case __NOT__:
 	case __BUILTIN_CALL__:
-		current->br.left = stmt_tree_init(stmt, ast->uniop, false);
-		current->br.right = -1;
-		break;
+		if (ast->type == EXPR_TYPE_VALUE) {
+			break;
+		}
+
+		if (ast->type == EXPR_OP_TYPE_UNIOP) {
+			current->br.left =
+				stmt_tree_init(stmt, ast->uniop, false);
+			current->br.right = -1;
+			break;
+		}
+
+		if (ast->type == EXPR_OP_TYPE_BINOP) {
+			// fallthrough
+		}
 
 	default:
 		current->br.left =
@@ -132,7 +143,7 @@ static int stmt_tree_init(ast_stmt_t *stmt, xre_ast_t *ast, bool reset_index)
 	return (initial_index);
 }
 
-bool stmt_tree_create(xre_ast_t *ast, ast_stmt_t **buffer)
+static bool stmt_tree_create(xre_ast_t *ast, ast_stmt_t **buffer)
 {
 	if (!alloc_zeroed_stmt_tree(get_tree_size(ast) * sizeof(ast_stmt_t),
 				    buffer)) {

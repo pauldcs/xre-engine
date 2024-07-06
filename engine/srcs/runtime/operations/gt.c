@@ -1,7 +1,7 @@
-#include "xre_operations.h"
-#include "xre_memory.h"
 #include "xre_assert.h"
 #include "xre_log.h"
+#include "xre_memory.h"
+#include "xre_operations.h"
 #include <stdbool.h>
 
 XRE_API_OPERATOR_FUNC(oper_gt)
@@ -11,7 +11,7 @@ XRE_API_OPERATOR_FUNC(oper_gt)
 	static object_t lbuf;
 	static object_t rbuf;
 
-	if (!evaluate_binops(self, &lbuf, &rbuf)) {
+	if (!self_evaluate_binop(self, &lbuf, &rbuf)) {
 		return (false);
 	}
 
@@ -23,6 +23,6 @@ XRE_API_OPERATOR_FUNC(oper_gt)
 		return (false);
 	}
 
-	return (stack_push_flagged(self, object_create_register(a > b),
-				   FLAG_READABLE | FLAG_MUTABLE));
+	return (stack_push_enable_attrs(self, object_create_register(a > b),
+					ATTR_READABLE | ATTR_MUTABLE));
 }

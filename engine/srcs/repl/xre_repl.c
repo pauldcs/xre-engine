@@ -54,11 +54,11 @@ bool xre_repl_entrypoint(void)
 
 		free(buffer);
 		/*if (!array_push(hist, &buffer)) {
-      return (array_kill(hist), free(buffer), false);
-    }
-    array_kill(hist);
-    // print_hist(hist);
-    */
+return (array_kill(hist), free(buffer), false);
+}
+array_kill(hist);
+// print_hist(hist);
+*/
 	}
 
 	free(buffer);

@@ -1,7 +1,7 @@
-#include "xre_operations.h"
-#include "xre_memory.h"
 #include "xre_assert.h"
 #include "xre_log.h"
+#include "xre_memory.h"
+#include "xre_operations.h"
 #include <stdbool.h>
 
 XRE_API_OPERATOR_FUNC(oper_mod)
@@ -11,7 +11,7 @@ XRE_API_OPERATOR_FUNC(oper_mod)
 	static object_t lv;
 	static object_t rv;
 
-	if (!evaluate_binops(self, &lv, &rv)) {
+	if (!self_evaluate_binop(self, &lv, &rv)) {
 		return (false);
 	}
 
@@ -24,9 +24,10 @@ XRE_API_OPERATOR_FUNC(oper_mod)
 	}
 
 	if (b == 0) {
-		return (trigger_error_on(self, XRE_ZERO_DIVISION_ERROR), false);
+		return (set_current_error(self, XRE_ZERO_DIVISION_ERROR),
+			false);
 	}
 
-	return (stack_push_flagged(self, object_create_register(a % b),
-				   FLAG_READABLE | FLAG_MUTABLE));
+	return (stack_push_enable_attrs(self, object_create_register(a % b),
+					ATTR_READABLE | ATTR_MUTABLE));
 }

@@ -1,8 +1,8 @@
 #include "array.h"
 #include "xre_assert.h"
+#include "xre_builtin.h"
 #include "xre_errors.h"
 #include "xre_parse.h"
-#include "xre_builtin.h"
 #include "xre_utils.h"
 #include <assert.h>
 #include <string.h>
@@ -59,7 +59,7 @@ static xre_ast_t *ast_new_node(xre_token_t *token)
 		str_unescape(tmp);
 	}
 
-	if (node->kind == __IDENTIFIER__) {
+	if (node->kind == __VARIABLE__) {
 		node->string = strndup(token->_ptr, token->_len);
 	}
 
@@ -129,7 +129,7 @@ xre_ast_t *xre_expr_parse(array_t *tokens)
 			break;
 		case __VAL__:
 		case __STRING_LITERAL__:
-		case __IDENTIFIER__:
+		case __VARIABLE__:
 			__push_b(ast_new_node(token));
 
 			break;

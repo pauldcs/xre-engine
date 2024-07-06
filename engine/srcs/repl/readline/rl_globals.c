@@ -70,18 +70,18 @@ struct _tc_string tc_strings[32] = {
 	{ "@7", &_term_at7, 0 },
 	{ "DC", &_term_DC,
 	  0 }, /* String of commands to delete n characters starting
-   at the cursor. It has the same effect as repeating the `dc' string n times.
-   Any terminal description that has `DC' also has `dc'.*/
+              at the cursor. It has the same effect as repeating the `dc' string
+              n times. Any terminal description that has `DC' also has `dc'.*/
 	{ "IC", &_term_IC,
 	  0 }, /* String of commands to insert n character positions
-   at and after the cursor. It has the same effect as repeating the `ic' string
-   and a space, n times. If `IC' is provided, application programs may use it
-   without first entering insert mode. */
+              at and after the cursor. It has the same effect as repeating the
+              `ic' string and a space, n times. If `IC' is provided, application
+              programs may use it without first entering insert mode. */
 	{ "ce", &_term_clreol,
 	  0 }, /* String of commands to clear from the cursor to
-                                 the end of the current line. */
+                                                the end of the current line. */
 	{ "cl", &_term_clrpag, 0 }, /* String to clear the entire screen and put
-                                 cursor at upper left corner. */
+                           cursor at upper left corner. */
 	{ "cr", &_term_cr,
 	  0 }, /* String to move cursor sideways to left margin. */
 	{ "dc", &_term_dc,
@@ -98,7 +98,7 @@ struct _tc_string tc_strings[32] = {
 	  0 }, /* String of input sent by the "home down" key. */
 	{ "kI", &_term_kI,
 	  0 }, /* String of input sent by the "insert character" or
-                             "enter insert mode" key. */
+                                        "enter insert mode" key. */
 	{ "kd", &_term_kd,
 	  0 }, /* String of input sent by typing the down-arrow key. */
 	{ "ke", &_term_ke,

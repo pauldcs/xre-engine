@@ -36,7 +36,7 @@ static void inner(xre_ast_t *ast, size_t depth)
 #endif
 	} else if (ast->kind == __STRING_LITERAL__) {
 		printf("string: '%s'\n", ast->string);
-	} else if (ast->kind == __IDENTIFIER__) {
+	} else if (ast->kind == __VARIABLE__) {
 		printf("id: '%s'\n", ast->string);
 	} else {
 		printf("<%s>\n", expr_kind_to_string(ast->kind));
@@ -60,12 +60,12 @@ void ast_free(xre_ast_t *ast)
 
 	switch (ast->kind) {
 	case __STRING_LITERAL__:
-	case __IDENTIFIER__:
+	case __VARIABLE__:
 		free((void *)ast->string);
 		break;
 
 	case __BUILTIN_CALL__:
-		//free((void *)ast->string);
+		// free((void *)ast->string);
 		ast_free(ast->uniop);
 		break;
 
@@ -94,8 +94,8 @@ const char *expr_kind_to_string(xre_expr_kind_t kind)
 		return "value";
 	case __STRING_LITERAL__:
 		return "string_literal";
-	case __IDENTIFIER__:
-		return "identifier";
+	case __VARIABLE__:
+		return "variable";
 	case __NOT__:
 		return "not";
 	case __BUILTIN_CALL__:
@@ -150,6 +150,8 @@ const char *expr_kind_to_string(xre_expr_kind_t kind)
 		return "separator";
 	case __LOOP__:
 		return "loop";
+	case __SCOPE_RESOLUTION__:
+		return "scope_resolution";
 	case __DO__:
 		return "do";
 	case __ELSE__:
@@ -164,7 +166,7 @@ xre_expr_type_t expr_type_by_kind(xre_expr_kind_t kind)
 	switch (kind) {
 	case __VAL__:
 	case __STRING_LITERAL__:
-	case __IDENTIFIER__:
+	case __VARIABLE__:
 		return (EXPR_TYPE_VALUE);
 
 	case __ADD__:
@@ -187,6 +189,7 @@ xre_expr_type_t expr_type_by_kind(xre_expr_kind_t kind)
 	case __NE__:
 	case __SEPARATOR__:
 	case __SEQUENCE__:
+	case __SCOPE_RESOLUTION__:
 	case __LOOP__:
 	case __DO__:
 	case __ELSE__:

@@ -1,8 +1,8 @@
+#include "xre_assert.h"
+#include <ctype.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <ctype.h>
 #include <stdlib.h>
-#include "xre_assert.h"
 
 static void str_byte_escape(const char *p, char **dst)
 {

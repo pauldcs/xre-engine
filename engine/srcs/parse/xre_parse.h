@@ -5,8 +5,9 @@
 #include <sys/types.h>
 
 typedef enum {
-	/* <word> */ __IDENTIFIER__,
+	/* <word> */ __VARIABLE__,
 	/* .<word> */ __BUILTIN_CALL__,
+	/*     && */ __SCOPE_RESOLUTION__,
 	/*   <n>  */ __VAL__,
 	/*  "str" */ __STRING_LITERAL__,
 	/*      ( */ __LPAREN__,

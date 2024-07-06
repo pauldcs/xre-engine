@@ -34,9 +34,9 @@ try_read_key:
 			return (false);
 		case 0:
 			/*
-       *    We go back to the try_read_key label here because
-       *    read has a timeout and returns 0 very often
-       */
+         *    We go back to the try_read_key label here because
+         *    read has a timeout and returns 0 very often
+         */
 			goto try_read_key;
 
 		case RL_KEY_START_EDITOR:

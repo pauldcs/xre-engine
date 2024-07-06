@@ -1,7 +1,7 @@
-#include "xre_operations.h"
-#include "xre_memory.h"
 #include "xre_assert.h"
 #include "xre_log.h"
+#include "xre_memory.h"
+#include "xre_operations.h"
 #include <stdbool.h>
 
 XRE_API_OPERATOR_FUNC(oper_loop)
@@ -27,6 +27,6 @@ loop:
 	goto loop;
 
 beach:
-	__stack_top_enable_flags(FLAG_READABLE);
+	__stack_top_enable_attr(ATTR_READABLE);
 	return (true);
 }

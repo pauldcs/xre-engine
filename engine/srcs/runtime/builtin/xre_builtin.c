@@ -49,3 +49,23 @@ const char *get_builtin_name_ptr(const char *ptr, size_t size)
 
 	return (builtin_func_lookup[offset].name);
 }
+
+xre_expr_type_t get_builtin_type(const char *ptr, size_t size)
+{
+	size_t offset;
+
+	if (!get_builtin_offset(ptr, size, &offset)) {
+		return (0);
+	}
+	const builtin_type_e type = builtin_func_lookup[offset].type;
+	switch (type) {
+	case BUILTIN_TYPE_BINOP:
+		return EXPR_OP_TYPE_BINOP;
+	case BUILTIN_TYPE_UNIOP:
+		return EXPR_OP_TYPE_UNIOP;
+	case BUILTIN_TYPE_VALUE:
+	default:
+		return EXPR_TYPE_VALUE;
+	}
+	return (0);
+}

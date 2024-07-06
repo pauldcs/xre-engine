@@ -4,7 +4,7 @@
 #include "xre_operations.h"
 #include <stdbool.h>
 
-XRE_API_OPERATOR_FUNC(oper_bw_xor)
+XRE_API_OPERATOR_FUNC(oper_scope_resolution)
 {
 	__return_val_if_fail__(self, false);
 
@@ -15,14 +15,10 @@ XRE_API_OPERATOR_FUNC(oper_bw_xor)
 		return (false);
 	}
 
-	static int64_t a;
-	static int64_t b;
-
-	if (!unwrap_register_object(self, &lv, &a) ||
-	    !unwrap_register_object(self, &rv, &b)) {
+	if (!stack_push_enable_attrs(self, object_create_sequence(&lv, &rv),
+				     ATTR_READABLE)) {
 		return (false);
 	}
 
-	return (stack_push_enable_attrs(self, object_create_register(a ^ b),
-					ATTR_READABLE | ATTR_MUTABLE));
+	return (true);
 }

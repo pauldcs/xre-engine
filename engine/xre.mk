@@ -34,6 +34,7 @@ SRCS := \
 	core/hex/xre_xdp.c \
 	core/log/xre_log.c \
 	core/stringf/xre_stringf.c \
+	core/ds/dynstr.c \
 \
 	core/utils/str_escape.c \
 	core/utils/str_unescape.c \
@@ -73,8 +74,9 @@ SRCS := \
 	repl/readline/rl_buffer.c \
 \
 	runtime/xre_runtime.c \
+	runtime/common.c \
 \
-	runtime/operations/common.c \
+	runtime/operations/scope_resolution.c \
 	runtime/operations/eq.c \
 	runtime/operations/gt.c \
 	runtime/operations/le.c \
@@ -83,7 +85,7 @@ SRCS := \
 	runtime/operations/ne.c \
 	runtime/operations/not.c \
 	runtime/operations/value.c \
-	runtime/operations/slice.c \
+	runtime/operations/string.c \
 	runtime/operations/assign.c \
 	runtime/operations/or.c \
 	runtime/operations/loop.c \
@@ -108,15 +110,21 @@ SRCS := \
 \
 	runtime/memory/stack.c \
 	runtime/memory/symtab.c \
-	runtime/memory/object.c \
 \
-	runtime/builtins.c \
+	runtime/memory/object/register.c \
+	runtime/memory/object/sequence.c \
+	runtime/memory/object/string.c \
+	runtime/memory/object/symbol.c \
+	runtime/memory/object/undefined.c \
+\
+	runtime/builtin/builtins.c \
 	runtime/builtin/xre_builtin.c \
 \
 	runtime/builtin/std/array/array_size.c \
+	runtime/builtin/std/str/str_size.c \
 \
 	runtime/builtin/std/os/print.c \
-	runtime/builtin/std/os/sizeof.c \
+	runtime/builtin/std/os/yes.c \
 	runtime/builtin/std/os/typeof.c 
 
 

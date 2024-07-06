@@ -1,8 +1,8 @@
 #ifndef __LIST_H__
 #define __LIST_H__
 
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdlib.h>
 
 #ifndef BUILTIN_EXPECT_AVAILABLE

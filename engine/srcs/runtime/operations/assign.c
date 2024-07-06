@@ -1,7 +1,7 @@
-#include "xre_operations.h"
-#include "xre_memory.h"
 #include "xre_assert.h"
 #include "xre_log.h"
+#include "xre_memory.h"
+#include "xre_operations.h"
 #include <stdbool.h>
 #include <string.h>
 
@@ -14,7 +14,7 @@ XRE_API_OPERATOR_FUNC(oper_assign)
 	static object_t *object;
 
 	if (!oper_symbol_addr(__left_branch) || !__br_eval(__right_branch) ||
-	    !pop_binop_return(self, &lv, &rv)) {
+	    !stack_pop_readable_binop(self, &lv, &rv)) {
 		return (false);
 	}
 
@@ -24,5 +24,5 @@ XRE_API_OPERATOR_FUNC(oper_assign)
 
 	(void)memmove(object, &rv, sizeof(object_t));
 
-	return (stack_push_flagged(self, &rv, 0));
+	return (stack_push_enable_attrs(self, &rv, 0));
 }
