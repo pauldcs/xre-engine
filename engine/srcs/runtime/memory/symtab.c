@@ -44,7 +44,7 @@ int symtab_create_entry(const char *sym)
 
 object_t *symtab_get_entry(int index)
 {
-	return array_unsafe_access(g_symtab, index);
+	return (array_unsafe_access(g_symtab, index));
 }
 
 bool symtab_init(void)
@@ -61,8 +61,10 @@ bool symtab_init(void)
 	g_symcache = array_create(sizeof(cache_entry_t), STACK_SIZE, NULL);
 	if (!g_symcache) {
 		array_kill(g_symtab);
+
 		g_symtab = NULL;
 		g_symcache = NULL;
+
 		return (false);
 	}
 
@@ -74,6 +76,7 @@ void symtab_fini(void)
 	if (!g_symtab || !g_symcache) {
 		return;
 	}
+
 	array_kill(g_symtab);
 	array_kill(g_symcache);
 

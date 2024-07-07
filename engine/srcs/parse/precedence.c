@@ -4,11 +4,24 @@
 int get_precedence_by_kind(xre_expr_kind_t kind)
 {
 	switch (kind) {
+	case __BUILTIN_CALL__:
+		switch (expr_type_by_kind(kind)) {
+		case EXPR_OP_TYPE_BINOP:
+			goto conditional;
+
+		case EXPR_OP_TYPE_UNIOP:
+			goto uniop;
+	
+		default:
+			goto prison;
+		}
+
 	case __SCOPE_RESOLUTION__:
 	case __START__:
 	case __END__:
 		return (0);
 
+uniop:
 	case __NOT__:
 		return (-1);
 
@@ -47,6 +60,7 @@ int get_precedence_by_kind(xre_expr_kind_t kind)
 	case __BOR__:
 		return (-12);
 
+conditional:
 	case __AND__:
 	case __DO__:
 	case __OR__:
@@ -58,10 +72,7 @@ int get_precedence_by_kind(xre_expr_kind_t kind)
 
 	case __SEQUENCE__:
 		return (-16);
-
-	case __BUILTIN_CALL__:
-		return (-17);
-
+	
 	case __ASSIGN__:
 		return (-18);
 
@@ -78,6 +89,7 @@ int get_precedence_by_kind(xre_expr_kind_t kind)
 		break;
 	}
 
+prison:
 	__return_val_if_fail__(false, 0);
 	__builtin_unreachable();
 }

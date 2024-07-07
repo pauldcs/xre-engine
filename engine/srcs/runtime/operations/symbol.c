@@ -4,20 +4,25 @@
 #include "xre_operations.h"
 #include <stdbool.h>
 
+/*    Executes when a symbol is called as
+ *    a value.
+ */
 XRE_API_OPERATOR_FUNC(oper_symbol_expand)
 {
 	__return_val_if_fail__(self, false);
 
 	static object_t *object;
 
-	return (expand_symbol_read(self, self->value, &object) &&
-		stack_push_enable_attrs(self, object, ATTR_READABLE));
+	return (unwrap_symbol_read(self, self->value, &object) &&
+		__push_r(self, object));
 }
 
+/*    Executes when a symbol is called for
+ *    assignment.
+ */
 XRE_API_OPERATOR_FUNC(oper_symbol_addr)
 {
 	__return_val_if_fail__(self, false);
 
-	return (stack_push_enable_attrs(self, object_create_symbol(self->value),
-					ATTR_READABLE));
+	return (__push_r(self, object_create_symbol(self->value)));
 }

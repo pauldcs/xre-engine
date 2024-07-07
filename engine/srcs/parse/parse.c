@@ -55,8 +55,8 @@ static xre_ast_t *ast_new_node(xre_token_t *token)
 
 	if (node->kind == __STRING_LITERAL__) {
 		char *tmp = strndup(token->_ptr + 1, token->_len - 2);
+		(void)str_unescape(tmp);
 		node->string = tmp;
-		str_unescape(tmp);
 	}
 
 	if (node->kind == __VARIABLE__) {
@@ -96,8 +96,8 @@ xre_ast_t *xre_expr_parse(array_t *tokens)
 	__top_a = 0;
 	__top_b = 0;
 
-	memset(__stack_a, 0, MICROSTACK_SIZE * sizeof(void *));
-	memset(__stack_b, 0, MICROSTACK_SIZE * sizeof(void *));
+	(void)memset(__stack_a, 0, MICROSTACK_SIZE * sizeof(void *));
+	(void)memset(__stack_b, 0, MICROSTACK_SIZE * sizeof(void *));
 
 	while (true) {
 		token = (xre_token_t *)array_unsafe_at(tokens, ++idx);

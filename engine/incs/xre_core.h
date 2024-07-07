@@ -22,8 +22,6 @@
 typedef struct {
 	const char *title;
 	const char *version;
-	bool exit_called;
-	bool interrupted;
 } t_xre_state;
 
 extern t_xre_state __xre_state__;

@@ -72,33 +72,38 @@ bool is_true_object(const object_t *object)
 
 void object_drop(void *ptr)
 {
-	(void)ptr;
-	//((object_t *)ptr)->drop(((object_t *)ptr)->data.ptr);
+	__return_if_fail__(ptr);
+
+	object_t *object = (object_t *)ptr;
+
+	if (!__object_has_attr(object, ATTR_REFERENCE)) {
+		object->drop(object->data.ptr);
+	}
 }
 
-bool stack_pop_readable(object_t *ptr, ast_stmt_t *stmts)
+bool stack_pop_r(object_t *ptr, ast_stmt_t *stmts)
 {
 	stack_pop(ptr);
 
-	if (!(ptr->attrs & ATTR_READABLE)) {
+	if (!__object_has_attr(ptr, ATTR_READABLE)) {
 		return (set_current_error(stmts, XRE_UNREADABLE_ERROR), false);
 	}
 
 	return (true);
 }
 
-bool stack_pop_readable_binop(ast_stmt_t *self, object_t *left_buffer,
-			      object_t *right_buffer)
+bool stack_pop_r_binop(ast_stmt_t *self, object_t *left_buffer,
+		       object_t *right_buffer)
 {
-	return (stack_pop_readable(right_buffer, __right_branch) &&
-		stack_pop_readable(left_buffer, __left_branch));
+	return (stack_pop_r(right_buffer, __right_branch) &&
+		stack_pop_r(left_buffer, __left_branch));
 }
 
-bool self_evaluate_binop(ast_stmt_t *self, object_t *left_buffer,
-			 object_t *right_buffer)
+bool binop_evaluate_pop_r(ast_stmt_t *self, object_t *left_buffer,
+			  object_t *right_buffer)
 {
 	if (!__br_eval(__left_branch) || !__br_eval(__right_branch) ||
-	    !stack_pop_readable_binop(self, left_buffer, right_buffer)) {
+	    !stack_pop_r_binop(self, left_buffer, right_buffer)) {
 		return (false);
 	}
 

@@ -14,15 +14,15 @@ XRE_API_OPERATOR_FUNC(oper_assign)
 	static object_t *object;
 
 	if (!oper_symbol_addr(__left_branch) || !__br_eval(__right_branch) ||
-	    !stack_pop_readable_binop(self, &lv, &rv)) {
+	    !stack_pop_r_binop(self, &lv, &rv)) {
 		return (false);
 	}
 
-	if (!expand_symbol_write(self, __as_int64_t(&lv), &object)) {
+	if (!unwrap_symbol_write(self, __as_int64_t(&lv), &object)) {
 		return (false);
 	}
 
 	(void)memmove(object, &rv, sizeof(object_t));
 
-	return (stack_push_enable_attrs(self, &rv, 0));
+	return (__push_r(self, &rv));
 }

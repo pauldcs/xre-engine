@@ -164,6 +164,7 @@ bool xre_runtime(xre_ast_t *ast)
 	__return_val_if_fail__(ast, false);
 
 	ast_stmt_t *self = NULL;
+	object_t result = { 0 };
 
 	if (!symtab_init() || !stmt_tree_create(ast, &self)) {
 		goto out_of_memory;
@@ -180,7 +181,8 @@ bool xre_runtime(xre_ast_t *ast)
 		return (xre_error(&_error), stmt_tree_destroy(self), false);
 	}
 
-	return (stack_pop_discard(), stmt_tree_destroy(self), true);
+	return (stack_pop(&result), object_drop(&result),
+		stmt_tree_destroy(self), true);
 
 out_of_memory:
 	(void)fprintf(stderr, "Out of memory\n");

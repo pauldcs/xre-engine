@@ -10,7 +10,7 @@ try_read:
 	case 0:
 		goto try_read;
 	case -1: {
-		XRE_LOGGER(info, "closing xre-engine ...");
+		__xre_logger(info, "closing xre-engine ...");
 		return (false);
 	}
 	default:

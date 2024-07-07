@@ -61,7 +61,7 @@ void xre_error(err_notif_t *notification);
 
 #define __return_error(frame, error_type) return (set_error(frame, error_type));
 /* #define __return_error(frame, error_type) do { \
-        XRE_LOGGER(debug, "trace"); \
+        __xre_logger(debug, "trace"); \
         return (set_error(frame, error_type)); \
     } while (0) */
 #endif /* __XRE_REPL_ERROR_H__ */

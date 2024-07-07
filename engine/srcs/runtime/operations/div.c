@@ -11,7 +11,7 @@ XRE_API_OPERATOR_FUNC(oper_div)
 	static object_t lv;
 	static object_t rv;
 
-	if (!self_evaluate_binop(self, &lv, &rv)) {
+	if (!binop_evaluate_pop_r(self, &lv, &rv)) {
 		return (false);
 	}
 
@@ -28,6 +28,5 @@ XRE_API_OPERATOR_FUNC(oper_div)
 			false);
 	}
 
-	return (stack_push_enable_attrs(self, object_create_register(a / b),
-					ATTR_READABLE | ATTR_MUTABLE));
+	return (__push_rw(self, object_create_register(a / b)));
 }

@@ -13,7 +13,6 @@ typedef enum {
 	BUILTIN_TYPE_UNIOP,
 } builtin_type_e;
 
-// Define the struct type
 typedef struct {
 	const char *name;
 	builtin_type_e type;

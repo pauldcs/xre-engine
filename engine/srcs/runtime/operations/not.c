@@ -10,12 +10,9 @@ XRE_API_OPERATOR_FUNC(oper_not)
 
 	static object_t v;
 
-	if (!__br_eval(__left_branch) ||
-	    !stack_pop_readable(&v, __left_branch)) {
+	if (!__br_eval(__left_branch) || !stack_pop_r(&v, __left_branch)) {
 		return (false);
 	}
 
-	return (stack_push_enable_attrs(
-		self, object_create_register(!is_true_object(&v)),
-		ATTR_READABLE | ATTR_MUTABLE));
+	return (__push_rw(self, object_create_register(!is_true_object(&v))));
 }

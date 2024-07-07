@@ -11,14 +11,9 @@ XRE_API_OPERATOR_FUNC(oper_sequence)
 	static object_t lv;
 	static object_t rv;
 
-	if (!self_evaluate_binop(self, &lv, &rv)) {
+	if (!binop_evaluate_pop_r(self, &lv, &rv)) {
 		return (false);
 	}
 
-	if (!stack_push_enable_attrs(self, object_create_sequence(&lv, &rv),
-				     ATTR_READABLE)) {
-		return (false);
-	}
-
-	return (true);
+	return (__push_r(self, object_create_sequence(&lv, &rv)));
 }

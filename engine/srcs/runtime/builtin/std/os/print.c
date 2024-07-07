@@ -15,13 +15,8 @@ XRE_BUILTIN_FUNCTION(builtin_print)
 	}
 
 	top = (object_t *)stack_top();
-
-	if (!__stack_top_check_attr(ATTR_READABLE)) {
-		return (set_current_error(__left_branch, XRE_UNREADABLE_ERROR),
-			false);
-	}
-
 	top->repr(top->data.ptr);
+
 	(void)fprintf(stderr, "\n");
 
 	return (true);

@@ -6,12 +6,5 @@
 
 XRE_API_OPERATOR_FUNC(oper_else)
 {
-	__return_val_if_fail__(self, false);
-
-	if (!oper_or(self)) {
-		return (false);
-	}
-
-	__stack_top_disable_attr(ATTR_READABLE);
-	return (true);
+	return (oper_or(self));
 }

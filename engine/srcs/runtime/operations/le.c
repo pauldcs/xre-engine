@@ -11,7 +11,7 @@ XRE_API_OPERATOR_FUNC(oper_le)
 	static object_t lbuf;
 	static object_t rbuf;
 
-	if (!self_evaluate_binop(self, &lbuf, &rbuf)) {
+	if (!binop_evaluate_pop_r(self, &lbuf, &rbuf)) {
 		return (false);
 	}
 
@@ -23,6 +23,5 @@ XRE_API_OPERATOR_FUNC(oper_le)
 		return (false);
 	}
 
-	return (stack_push_enable_attrs(self, object_create_register(a <= b),
-					ATTR_READABLE | ATTR_MUTABLE));
+	return (__push_rw(self, object_create_register(a <= b)));
 }

@@ -4,14 +4,10 @@
 #include "xre_operations.h"
 #include <stdbool.h>
 
+/* This does not work as "if" is supposed
+ * to return the condition. 
+ */
 XRE_API_OPERATOR_FUNC(oper_do)
 {
-	__return_val_if_fail__(self, false);
-
-	if (!oper_and(self)) {
-		return (false);
-	}
-
-	__stack_top_disable_attr(ATTR_READABLE);
-	return (true);
+	return (oper_and(self));
 }

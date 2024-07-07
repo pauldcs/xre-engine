@@ -9,13 +9,7 @@ XRE_API_OPERATOR_FUNC(oper_string)
 {
 	__return_val_if_fail__(self, false);
 
-	if (!stack_push_enable_attrs(
-		    self,
-		    object_create_string((unsigned char *)self->string,
-					 strlen(self->string)),
-		    ATTR_READABLE)) {
-		return (false);
-	}
-
-	return (true);
+	return (__push_r(self,
+			 object_create_string((unsigned char *)self->string,
+					      strlen(self->string))));
 }

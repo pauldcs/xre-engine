@@ -12,6 +12,8 @@
 #define STACK_SIZE 2048
 #endif
 
+//#define XRE_ENABLE_OBJECT_LOGGING 0
+
 extern array_t *g_stack;
 extern size_t g_stack_ptr;
 extern array_t *g_symtab;

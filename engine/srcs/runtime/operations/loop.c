@@ -14,7 +14,7 @@ loop:
 	}
 
 	if (!is_true_object(stack_top())) {
-		goto beach;
+		return (true);
 	}
 
 	stack_pop_discard();
@@ -24,9 +24,6 @@ loop:
 	}
 
 	stack_pop_discard();
-	goto loop;
 
-beach:
-	__stack_top_enable_attr(ATTR_READABLE);
-	return (true);
+	goto loop;
 }

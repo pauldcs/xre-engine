@@ -14,10 +14,5 @@ XRE_API_OPERATOR_FUNC(oper_separator)
 
 	stack_pop_discard();
 
-	if (!__br_eval(__right_branch)) {
-		return (false);
-	}
-
-	__stack_top_disable_attr(ATTR_READABLE);
-	return (true);
+	return (__br_eval(__right_branch));
 }

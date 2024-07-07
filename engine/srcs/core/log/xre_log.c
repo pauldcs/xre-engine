@@ -7,7 +7,7 @@
 #include <sys/time.h>
 #include <time.h>
 
-t_log_level log_level = debug;
+t_log_level log_level = info;
 
 void xre_report_error(const char *format, ...)
 {

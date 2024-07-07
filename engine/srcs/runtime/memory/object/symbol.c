@@ -15,7 +15,9 @@ static void symbol_drop(void *ptr)
 {
 	__return_if_fail__(ptr);
 
-	(void)ptr;
+#if defined XRE_ENABLE_OBJECT_LOGGING
+	__xre_logger(info, "dropping symbol @%p", ptr);
+#endif
 }
 
 object_t *object_create_symbol(int64_t offset)
@@ -30,10 +32,13 @@ object_t *object_create_symbol(int64_t offset)
 	object.data.ptr = (void *)offset;
 	object.data.size = sizeof(int64_t);
 
+#if defined XRE_ENABLE_OBJECT_LOGGING
+	__xre_logger(info, "created symbol @%p", object.data.ptr);
+#endif
 	return (&object);
 }
 
-inline static bool expand_symbol(ast_stmt_t *self, int64_t offset,
+inline static bool unwrap_symbol(ast_stmt_t *self, int64_t offset,
 				 object_t **object)
 {
 	*object = array_access(g_symtab, offset);
@@ -44,25 +49,26 @@ inline static bool expand_symbol(ast_stmt_t *self, int64_t offset,
 	return (true);
 }
 
-bool expand_symbol_read(ast_stmt_t *self, int64_t offset, object_t **object)
+bool unwrap_symbol_read(ast_stmt_t *self, int64_t offset, object_t **object)
 {
-	if (!expand_symbol(self, offset, object)) {
+	if (!unwrap_symbol(self, offset, object)) {
 		return (false);
 	}
-	if ((*object)->attrs & ATTR_READABLE) {
+
+	if (__object_has_attr(*object, ATTR_READABLE)) {
 		return (true);
 	}
 
 	return (set_current_error(self, XRE_UNREADABLE_ERROR), false);
 }
 
-bool expand_symbol_write(ast_stmt_t *self, int64_t offset, object_t **object)
+bool unwrap_symbol_write(ast_stmt_t *self, int64_t offset, object_t **object)
 {
-	if (!expand_symbol(self, offset, object)) {
+	if (!unwrap_symbol(self, offset, object)) {
 		return (false);
 	}
 
-	if (!((*object)->attrs & ATTR_MUTABLE)) {
+	if (!__object_has_attr(*object, ATTR_MUTABLE)) {
 		return (set_current_error(self, XRE_WRITE_ON_READONLY_ERROR),
 			false);
 	}

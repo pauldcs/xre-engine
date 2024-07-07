@@ -25,6 +25,9 @@ static void udnefined_drop(void *ptr)
 	__return_if_fail__(ptr);
 
 	(void)ptr;
+#if defined XRE_ENABLE_OBJECT_LOGGING
+	__xre_logger(info, "dropping undefined @%p", ptr);
+#endif
 }
 
 object_t *object_create_undefined(void)
@@ -36,5 +39,8 @@ object_t *object_create_undefined(void)
 				   .data.ptr = NULL,
 				   .data.size = 0 };
 
+#if defined XRE_ENABLE_OBJECT_LOGGING
+	__xre_logger(info, "created undefined @%p", object.data.ptr);
+#endif
 	return (&object);
 }

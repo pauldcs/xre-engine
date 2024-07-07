@@ -61,9 +61,13 @@ xre_expr_type_t get_builtin_type(const char *ptr, size_t size)
 	switch (type) {
 	case BUILTIN_TYPE_BINOP:
 		return EXPR_OP_TYPE_BINOP;
+
 	case BUILTIN_TYPE_UNIOP:
 		return EXPR_OP_TYPE_UNIOP;
+
 	case BUILTIN_TYPE_VALUE:
+		/* fallthrough */
+	
 	default:
 		return EXPR_TYPE_VALUE;
 	}

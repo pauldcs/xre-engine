@@ -80,8 +80,9 @@ ssize_t xre_readline(char **buf, array_t *history)
 		goto prison;
 	}
 
-	if (!rl_init_termcaps() || !rl_raw_mode_enable() || !rl_get_input())
+	if (!rl_init_termcaps() || !rl_raw_mode_enable() || !rl_get_input()) {
 		goto prison;
+	}
 
 	/*
    * clean up screen

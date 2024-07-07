@@ -6,6 +6,8 @@ INCS_DIR       := incs
 LIBARRAY_DIR   := srcs/core/array
 LIBARRAY_NAME  := libarray.a
 
+#MAKEFLAGS += -j6
+
 CFLAGS_RELEASE := \
 	-O3                     \
 	-D XRE_DISABLE_CHECKS=1 \
@@ -125,7 +127,5 @@ SRCS := \
 \
 	runtime/builtin/std/os/print.c \
 	runtime/builtin/std/os/yes.c \
-	runtime/builtin/std/os/typeof.c 
-
-
+	runtime/builtin/std/os/typeof.c
 	

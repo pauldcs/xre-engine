@@ -13,15 +13,10 @@ XRE_API_OPERATOR_FUNC(oper_or)
 	}
 
 	if (is_true_object(stack_top())) {
-		goto beach;
+		return (true);
 	}
 
 	stack_pop_discard();
 
-	if (!__br_eval(__right_branch)) {
-		return (false);
-	}
-
-beach:
-	return (true);
+	return (__br_eval(__right_branch));
 }

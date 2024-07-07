@@ -195,7 +195,6 @@ xre_expr_type_t expr_type_by_kind(xre_expr_kind_t kind)
 	case __ELSE__:
 	case __AND__:
 	case __OR__:
-
 		return (EXPR_OP_TYPE_BINOP);
 
 	case __NOT__:

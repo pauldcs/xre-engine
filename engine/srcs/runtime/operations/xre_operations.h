@@ -5,18 +5,19 @@
 #include "xre_runtime.h"
 #include <stdbool.h>
 
-bool stack_pop_readable(object_t *ptr, ast_stmt_t *stmts);
-bool self_evaluate_binop(ast_stmt_t *self, object_t *left_buffer,
-			 object_t *right_buffer);
-bool stack_pop_readable_binop(ast_stmt_t *self, object_t *left_buffer,
-			      object_t *right_buffer);
+bool binop_evaluate_pop_r(ast_stmt_t *self, object_t *left_buffer,
+			  object_t *right_buffer);
+
+bool stack_pop_r(object_t *ptr, ast_stmt_t *stmts);
+bool stack_pop_r_binop(ast_stmt_t *self, object_t *left_buffer,
+		       object_t *right_buffer);
+
 bool stack_push_enable_attrs(ast_stmt_t *self, object_t *object, int32_t attrs);
 void set_current_error(ast_stmt_t *self, error_type_e type);
 
 bool unwrap_register_object(ast_stmt_t *self, object_t *object, int64_t *data);
-
-bool expand_symbol_read(ast_stmt_t *self, int64_t offset, object_t **object);
-bool expand_symbol_write(ast_stmt_t *self, int64_t offset, object_t **object);
+bool unwrap_symbol_read(ast_stmt_t *self, int64_t offset, object_t **object);
+bool unwrap_symbol_write(ast_stmt_t *self, int64_t offset, object_t **object);
 
 #define XRE_API_OPERATOR_FUNC(name) bool name(ast_stmt_t *self)
 typedef bool (*fptr_t)(ast_stmt_t *self);
