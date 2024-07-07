@@ -11,7 +11,7 @@ int get_precedence_by_kind(xre_expr_kind_t kind)
 
 		case EXPR_OP_TYPE_UNIOP:
 			goto uniop;
-	
+
 		default:
 			goto prison;
 		}
@@ -72,7 +72,7 @@ conditional:
 
 	case __SEQUENCE__:
 		return (-16);
-	
+
 	case __ASSIGN__:
 		return (-18);
 

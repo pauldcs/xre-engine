@@ -67,7 +67,7 @@ xre_expr_type_t get_builtin_type(const char *ptr, size_t size)
 
 	case BUILTIN_TYPE_VALUE:
 		/* fallthrough */
-	
+
 	default:
 		return EXPR_TYPE_VALUE;
 	}
