@@ -32,12 +32,11 @@ SRCS := \
 	main.c \
 	core/args/xre_args.c \
 	core/fs/xre_fs.c \
-	core/utils/xwrite.c \
-	core/hex/xre_xdp.c \
 	core/log/xre_log.c \
-	core/stringf/xre_stringf.c \
 	core/ds/dynstr.c \
 \
+	core/utils/stringf/xre_stringf.c \
+	core/utils/hex/xre_xdp.c \
 	core/utils/str_escape.c \
 	core/utils/str_unescape.c \
 	core/utils/str_to_values.c \
@@ -47,11 +46,11 @@ SRCS := \
 	core/utils/st_mode_to_string.c \
 	core/utils/timespec_to_string.c \
 	core/utils/stresc2chr.c \
-	core/utils/str2print.c \
 	core/utils/hash_string.c \
 	core/utils/str_to_int32.c \
 	core/error/xre_errors.c \
 	core/error/xre_print_error.c \
+	core/utils/xwrite.c \
 \
 	parse/lex.c \
 	parse/syntax.c \

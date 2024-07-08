@@ -1,7 +1,6 @@
 #include "array.h"
 #include "xre_log.h"
 #include "xre_memory.h"
-#include "xre_operations.h"
 #include "xre_utils.h"
 #include "xre_xdp.h"
 #include <stdbool.h>

@@ -64,7 +64,7 @@ char *str_escape(const uint8_t *buf, int sz)
 
 	char *new_buf = malloc(1 + sz * 4);
 	if (!new_buf) {
-		return NULL;
+		return (NULL);
 	}
 
 	char *q = new_buf;
@@ -73,6 +73,7 @@ char *str_escape(const uint8_t *buf, int sz)
 	for (i = 0; i < sz; i++) {
 		str_byte_escape((char *)&buf[i], &q);
 	}
+
 	*q = '\0';
-	return new_buf;
+	return (new_buf);
 }
