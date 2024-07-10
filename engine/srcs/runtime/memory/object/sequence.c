@@ -96,7 +96,7 @@ object_t *object_sequence_create(size_t depth, object_t *lval, object_t *rval)
 	__object_set_data_ptr(&object, sequence);
 	__object_set_data_size(&object, array_sizeof(sequence));
 	__object_set_ref_count(&object, 0);
-	__object_set_invalid_address(&object);
+	//__object_set_invalid_address(&object);
 
 #if defined XRE_ENABLE_OBJECT_LOGGING
 	__xre_logger(info, "created sequence @%p", object.data.ptr);

@@ -8,7 +8,28 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-bool xre_process_block(const char *block)
+static void history_free_entry(void *entry)
+{
+	free(*(void **)entry);
+}
+
+static bool history_init(history_array_t **history)
+{
+	*history = array_create(sizeof(char *), 10, history_free_entry);
+	return (*history);
+}
+
+static void history_fini(history_array_t *history)
+{
+	array_kill(history);
+}
+
+static bool history_entry_push(history_array_t *history, void *entry)
+{
+	return (array_pushf(history, &entry));
+}
+
+static bool block_process(const char *block)
 {
 	if (!block || !*block)
 		return (true);
@@ -24,44 +45,38 @@ bool xre_process_block(const char *block)
 	return (false);
 }
 
-// void print_hist(array_t *hist) {
-
-//   size_t size = array_size(hist);
-//   for (size_t i = 0; i < size; i++) {
-//     printf(" - '%s'\n", *(char **)array_at(hist, i));
-//   }
-// }
-
 bool xre_repl_entrypoint(void)
 {
-	/*
-   *   Load the history from a file
-   */
-	// array_t *hist = array_create(sizeof(char *), 10, NULL);
-	void *buffer;
-	// if (!hist)
-	//   return (false);
+	history_array_t *history;
+	void *line_buffer = NULL;
+
+	if (!history_init(&history)) {
+		return (false);
+	}
 
 	(void)xre_repl_sigset_default();
 
 	for (;;) {
-		if (!xre_read_block(&buffer, NULL)) {
-			xre_repl_clear_signals();
-			return (/*array_kill(hist),*/ false);
+		if (!xre_read_block(&line_buffer, history)) {
+			goto prison;
 		}
 
-		(void)xre_process_block(buffer);
+		(void)block_process(line_buffer);
 
-		free(buffer);
-		/*if (!array_push(hist, &buffer)) {
-return (array_kill(hist), free(buffer), false);
-}
-array_kill(hist);
-// print_hist(hist);
-*/
+		if (!history_entry_push(history, line_buffer)) {
+			free(line_buffer);
+			goto prison;
+		}
 	}
 
-	free(buffer);
+	history_fini(history);
 	xre_repl_clear_signals();
+
 	return (true);
+
+prison:
+	history_fini(history);
+	xre_repl_clear_signals();
+
+	return (false);
 }

@@ -2,6 +2,7 @@
 #define __XRE_READLINE_H__
 
 #include "array.h"
+#include "xre_repl.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <termios.h>
@@ -152,9 +153,9 @@ bool rl_get_window_size(size_t *rows, size_t *cols);
 
 /*    READLINE
  */
-ssize_t xre_readline(char **buf, array_t *history);
+ssize_t xre_readline(char **buf, const history_array_t *history);
 int try_read_key_fd(int fildes);
-bool handle_line_mode_char(int ch);
+bool handle_line_mode_char(int ch, const history_array_t *history);
 bool handle_editor_mode_char(char ch);
 
 /*    UTILS
@@ -165,6 +166,7 @@ void rl_putnbr(const int32_t c);
 int rl_xputchar(int c);
 ssize_t rl_xwrite(int fildes, const char *buf, size_t nbytes);
 ssize_t rl_xgetchr(int fildes);
+int rl_clamp(int v, int min, int max);
 
 /*    ACTIONS
  */
@@ -187,6 +189,7 @@ bool rl_redisplay_editor(void);
 void rl_erase_line(void);
 void rl_display_status(const char *mode);
 void rl_clear_status(void);
+void rl_replace_buffer(const char *string);
 
 /*    BUFFER
  */

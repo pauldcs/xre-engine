@@ -1,10 +1,31 @@
 #include "xre_readline.h"
+#include "xre_repl.h"
+#include "array.h"
 #include <stdbool.h>
 
-bool handle_line_mode_char(int ch)
+static char *history_get_index(const history_array_t *history, int index)
 {
+	if (index < (int)array_size(history)) {
+		return (*(char **)array_at(history, index));
+	}
+	return (NULL);
+}
+
+static void history_move_cursor(const history_array_t *history, int depth)
+{
+	char *str = history_get_index(history, depth);
+	if (str) {
+		rl_replace_buffer(str);
+	}
+}
+
+bool handle_line_mode_char(int ch, const history_array_t *history)
+{
+	static int history_depth = 0;
+
 	switch ((int)ch) {
 	case RL_KEY_NEWLINE:
+		history_depth = 0;
 		if (rl_buf_add_nullterm()) {
 			__state__.eof_reached = true;
 			return (true);
@@ -60,15 +81,19 @@ bool handle_line_mode_char(int ch)
 
 		break;
 	case RL_KEY_UP:
-		if (__state__._i)
-			break;
-		// get history up
+		if (array_size(history)) {
+			history_move_cursor(history, history_depth);
+			history_depth = rl_clamp(history_depth + 1, 0,
+						 array_size(history) - 1);
+		}
+
 		break;
 
 	case RL_KEY_DOWN:
-		if (__state__._i)
-			break;
-		// get history down
+		history_depth =
+			rl_clamp(history_depth - 1, 0, array_size(history) - 1);
+		history_move_cursor(history, history_depth);
+
 		break;
 
 	default:

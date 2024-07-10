@@ -5,7 +5,7 @@
 #include <termcap.h>
 #include <unistd.h>
 
-int clamp(int v, int min, int max)
+int rl_clamp(int v, int min, int max)
 {
 	return (v < min) ? min : ((v > max) ? max : v);
 }

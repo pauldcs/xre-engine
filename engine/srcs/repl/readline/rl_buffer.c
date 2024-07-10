@@ -32,3 +32,14 @@ void rl_discard_line(void)
 	array_kill(__state__._v);
 	(void)memset(&__state__, 0x00, sizeof(__state__));
 }
+
+void rl_replace_buffer(const char *string)
+{
+	if (string) {
+		array_clear(__state__._v);
+		(void)array_append(__state__._v, string, strlen(string));
+		__state__._i = 0;
+		__state__._ei = strlen(string);
+		__state__._mei = strlen(string);
+	}
+}

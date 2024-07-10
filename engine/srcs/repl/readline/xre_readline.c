@@ -1,4 +1,5 @@
 #include "xre_readline.h"
+#include "xre_repl.h"
 #include "array.h"
 #include "xre_assert.h"
 #include <ctype.h>
@@ -15,7 +16,7 @@ static bool get_window_size(void)
 	return (rl_get_window_size(&config.screenrows, &config.screencols));
 }
 
-bool rl_get_input(void)
+bool rl_get_input(const history_array_t *history)
 {
 	bool editor_requested = false;
 	__state__.mode = "NORM";
@@ -49,7 +50,7 @@ try_read_key:
 				if (!handle_editor_mode_char(ch))
 					return (false);
 
-			} else if (!handle_line_mode_char(ch)) {
+			} else if (!handle_line_mode_char(ch, history)) {
 				return (false);
 			}
 
@@ -61,7 +62,7 @@ try_read_key:
 	return (true);
 }
 
-ssize_t xre_readline(char **buf, array_t *history)
+ssize_t xre_readline(char **buf, const history_array_t *history)
 {
 	__return_val_if_fail__(buf, -1);
 
@@ -80,7 +81,8 @@ ssize_t xre_readline(char **buf, array_t *history)
 		goto prison;
 	}
 
-	if (!rl_init_termcaps() || !rl_raw_mode_enable() || !rl_get_input()) {
+	if (!rl_init_termcaps() || !rl_raw_mode_enable() ||
+	    !rl_get_input(history)) {
 		goto prison;
 	}
 
