@@ -301,6 +301,10 @@ __default__:
 				/* handle comments
 TODO
 */
+				// if (!strncmp(ptr, "mut", 3)) {
+				// 	_token._kind = __MUT__;
+				// 	tf = 3;
+				// }
 
 				if (!strncmp(ptr, "do", 2)) {
 					_token._kind = __DO__;

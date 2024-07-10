@@ -15,5 +15,6 @@ XRE_API_OPERATOR_FUNC(oper_sequence)
 		return (false);
 	}
 
-	return (__push_r(self, object_create_sequence(&lv, &rv)));
+	return (__push_r(self,
+			 object_sequence_create(self->orig->_depth, &lv, &rv)));
 }

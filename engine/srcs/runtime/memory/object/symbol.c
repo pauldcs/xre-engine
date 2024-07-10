@@ -20,17 +20,19 @@ static void symbol_drop(void *ptr)
 #endif
 }
 
-object_t *object_create_symbol(int64_t offset)
+object_t *object_symbol_create(int64_t offset)
 {
 	__return_val_if_fail__(offset >= 0, NULL);
 
-	static object_t object = { .attrs = ATTR_SYMBOL,
-				   .repr = symbol_repr,
+	static object_t object = { .repr = symbol_repr,
 				   .drop = symbol_drop,
 				   .is_true = NULL };
 
-	object.data.ptr = (void *)offset;
-	object.data.size = sizeof(int64_t);
+	__object_set_attr(&object, ATTR_SYMBOL);
+	__object_set_data_ptr(&object, offset);
+	__object_set_data_size(&object, sizeof(int64_t));
+	__object_set_ref_count(&object, 0);
+	//__object_set_invalid_address(&object);
 
 #if defined XRE_ENABLE_OBJECT_LOGGING
 	__xre_logger(info, "created symbol @%p", object.data.ptr);

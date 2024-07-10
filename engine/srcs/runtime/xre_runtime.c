@@ -112,7 +112,7 @@ static int stmt_tree_init(ast_stmt_t *stmt, xre_ast_t *ast, bool reset_index)
 		break;
 
 	case __VARIABLE__:
-		current->value = symtab_create_entry((char *)ast->string);
+		current->value = symtab_entry_create((char *)ast->string);
 		break;
 
 	case __NOT__:
@@ -174,6 +174,11 @@ bool xre_runtime(xre_ast_t *ast)
 		stmt_tree_destroy(self);
 		goto out_of_memory;
 	}
+
+	// if (!heap_init()) {
+	// 	stmt_tree_destroy(self);
+	// 	goto out_of_memory;
+	// }
 
 	__global_current_stmts_ptr__ = self;
 

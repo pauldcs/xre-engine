@@ -33,15 +33,17 @@ static void register_drop(void *ptr)
 	(void)ptr;
 }
 
-object_t *object_create_register(int64_t data)
+object_t *object_register_create(int64_t data)
 {
-	static object_t object = { .attrs = ATTR_REGISTER,
-				   .repr = register_repr,
+	static object_t object = { .repr = register_repr,
 				   .drop = register_drop,
 				   .is_true = register_test };
 
-	object.data.ptr = (void *)data;
-	object.data.size = sizeof(int64_t);
+	__object_set_attr(&object, ATTR_REGISTER);
+	__object_set_data_ptr(&object, data);
+	__object_set_data_size(&object, sizeof(int64_t));
+	__object_set_ref_count(&object, 0);
+	//__object_set_invalid_address(&object);
 
 #if defined XRE_ENABLE_OBJECT_LOGGING
 	__xre_logger(info, "created register @%p", object.data.ptr);

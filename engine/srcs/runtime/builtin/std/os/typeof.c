@@ -15,7 +15,7 @@ XRE_BUILTIN_FUNCTION(builtin_typeof)
 	}
 
 	top = (object_t *)stack_top();
-	object_attrs_repr(top->attrs);
+	object_attrs_repr(__object_get_attr(top));
 
 	return (true);
 }

@@ -58,14 +58,6 @@ XRE_API_OPERATOR_FUNC(oper_inject);
 XRE_API_OPERATOR_FUNC(oper_scope_annotate);
 XRE_API_OPERATOR_FUNC(oper_print);
 
-#define TYPE_CHECK_NEXT(self, attr)                          \
-	((stack_top()->attrs & attr) ?                       \
-		 true :                                      \
-		 (set_error_type(XRE_UNEXPECTED_TYPE_ERROR), \
-		  set_error_orig(self), false))
-
-#define TYPE_CHECK(object, attr) (object->attrs & attr)
-
 #define __left_branch (&__global_current_stmts_ptr__[self->br.left])
 #define __right_branch (&__global_current_stmts_ptr__[self->br.right])
 

@@ -18,12 +18,12 @@ XRE_BUILTIN_FUNCTION(builtin_array_size)
 
 	stack_pop(&top);
 
-	if (!(top.attrs & ATTR_READABLE)) {
+	if (!__object_has_attr(&top, ATTR_READABLE)) {
 		return (set_current_error(__left_branch, XRE_UNREADABLE_ERROR),
 			false);
 	}
 
-	if (!(top.attrs & ATTR_SEQUENCE)) {
+	if (!__object_has_attr(&top, ATTR_SEQUENCE)) {
 		return (set_current_error(__left_branch,
 					  XRE_UNEXPECTED_TYPE_ERROR),
 			false);
@@ -31,7 +31,7 @@ XRE_BUILTIN_FUNCTION(builtin_array_size)
 
 	data = array_size((array_t *)top.data.ptr);
 
-	return (stack_push_enable_attrs(self, object_create_register(data),
+	return (stack_push_enable_attrs(self, object_register_create(data),
 					ATTR_READABLE | ATTR_MUTABLE));
 
 	return (true);

@@ -10,6 +10,6 @@ XRE_API_OPERATOR_FUNC(oper_string)
 	__return_val_if_fail__(self, false);
 
 	return (__push_r(self,
-			 object_create_string((unsigned char *)self->string,
+			 object_string_create((unsigned char *)self->string,
 					      strlen(self->string))));
 }

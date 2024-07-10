@@ -33,5 +33,5 @@ XRE_API_OPERATOR_FUNC(oper_lshift)
 			false);
 	}
 
-	return (__push_rw(self, object_create_register(a << b)));
+	return (__push_rw(self, object_register_create(a << b)));
 }

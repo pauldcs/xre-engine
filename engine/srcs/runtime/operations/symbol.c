@@ -24,5 +24,5 @@ XRE_API_OPERATOR_FUNC(oper_symbol_addr)
 {
 	__return_val_if_fail__(self, false);
 
-	return (__push_r(self, object_create_symbol(self->value)));
+	return (__push_r(self, object_symbol_create(self->value)));
 }

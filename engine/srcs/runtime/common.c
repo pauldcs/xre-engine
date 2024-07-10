@@ -26,6 +26,11 @@ void object_attrs_repr(int32_t attrs)
 {
 	const char *separator = "";
 
+	if (attrs & ATTR_CONSTANT) {
+		fprintf(stderr, "%sconstant", separator);
+		separator = "-";
+	}
+
 	if (attrs & ATTR_READABLE) {
 		fprintf(stderr, "%sreadable", separator);
 		separator = "-";
@@ -84,10 +89,11 @@ void object_drop(void *ptr)
 bool stack_pop_r(object_t *ptr, ast_stmt_t *stmts)
 {
 	stack_pop(ptr);
-
 	if (!__object_has_attr(ptr, ATTR_READABLE)) {
 		return (set_current_error(stmts, XRE_UNREADABLE_ERROR), false);
 	}
+
+	// (void)object_delete(ptr);
 
 	return (true);
 }
@@ -112,12 +118,19 @@ bool binop_evaluate_pop_r(ast_stmt_t *self, object_t *left_buffer,
 
 bool stack_push_enable_attrs(ast_stmt_t *self, object_t *object, int32_t attrs)
 {
-	object->attrs |= attrs;
-	object->depth = self->orig->_depth;
+	__object_set_attr(object, attrs);
+	__object_set_depth(object, self->orig->_depth);
+
+	// if (!object_new(object)) {
+	// 	return (set_current_error(self, XRE_OUT_OF_MEMORY_ERROR),
+	// 		false);
+	// }
 
 	if (!stack_push(object)) {
+		// (void)object_delete(object);
 		return (set_current_error(self, XRE_STACK_OVERFLOW_ERROR),
 			false);
 	}
+
 	return (true);
 }

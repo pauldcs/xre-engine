@@ -14,5 +14,5 @@ XRE_API_OPERATOR_FUNC(oper_not)
 		return (false);
 	}
 
-	return (__push_rw(self, object_create_register(!is_true_object(&v))));
+	return (__push_rw(self, object_register_create(!is_true_object(&v))));
 }

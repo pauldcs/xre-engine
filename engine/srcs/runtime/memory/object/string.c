@@ -31,21 +31,24 @@ static void string_drop(void *ptr)
 	dynstr_kill((dynstr_t *)ptr);
 }
 
-object_t *object_create_string(unsigned char *ptr, size_t size)
+object_t *object_string_create(unsigned char *ptr, size_t size)
 {
 	__return_val_if_fail__(ptr, NULL);
 
-	static object_t object = { .attrs = ATTR_STRING,
-				   .repr = string_repr,
+	static object_t object = { .repr = string_repr,
 				   .drop = string_drop,
 				   .is_true = string_test };
 
-	object.data.ptr = dynstr_from((const char *)ptr, size);
-	if (!object.data.ptr) {
+	dynstr_t *dynstr = dynstr_from((const char *)ptr, size);
+	if (!dynstr) {
 		return (NULL);
 	}
 
-	object.data.size = size;
+	__object_set_attr(&object, ATTR_STRING);
+	__object_set_data_ptr(&object, dynstr);
+	__object_set_data_size(&object, size);
+	__object_set_ref_count(&object, 0);
+	//__object_set_invalid_address(&object);
 
 #if defined XRE_ENABLE_OBJECT_LOGGING
 	__xre_logger(info, "created string @%p", object.data.ptr);

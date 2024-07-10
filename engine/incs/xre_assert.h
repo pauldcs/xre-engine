@@ -7,7 +7,7 @@
 #include "xre_log.h"
 #include <stdio.h>
 
-#ifdef DISABLE_ASSERTS
+#ifdef XRE_DISABLE_ASSERTS
 
 #define xre_assert(expr)
 #define xre_assert_not_reached()
@@ -32,8 +32,9 @@
 
 #define __assert__(expr)                                                 \
 	do {                                                             \
-		if (!(expr))                                             \
+		if (!(expr)) {                                           \
 			__xre_logger(warning, "Assertion failed: (%s)"); \
+		}                                                        \
 	} while (0)
 
 #define __assert_not_reached__()                                \

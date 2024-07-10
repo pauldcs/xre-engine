@@ -15,7 +15,7 @@ typedef struct {
 array_t *g_symtab = NULL;
 array_t *g_symcache = NULL;
 
-int symtab_create_entry(const char *sym)
+int symtab_entry_create(const char *sym)
 {
 	size_t cache_size = array_size(g_symcache);
 	size_t i = 0;
@@ -34,17 +34,12 @@ int symtab_create_entry(const char *sym)
 
 	cache_entry_t e = { .id = id, .offset = array_size(g_symtab) };
 
-	if (!array_push(g_symtab, object_create_undefined()) ||
+	if (!array_push(g_symtab, object_undefined_create()) ||
 	    !array_push(g_symcache, &e)) {
 		return (-1);
 	}
 
 	return (e.offset);
-}
-
-object_t *symtab_get_entry(int index)
-{
-	return (array_unsafe_access(g_symtab, index));
 }
 
 bool symtab_init(void)

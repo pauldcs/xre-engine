@@ -109,6 +109,7 @@ SRCS := \
 	runtime/operations/bw_or.c \
 	runtime/operations/symbol.c \
 \
+	runtime/memory/heap.c \
 	runtime/memory/stack.c \
 	runtime/memory/symtab.c \
 \
