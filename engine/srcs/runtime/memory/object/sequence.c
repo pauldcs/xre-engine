@@ -64,32 +64,39 @@ static bool unfold_sequence_object(object_t *object, array_t *buffer)
 	return (true);
 }
 
-object_t *object_create_sequence(object_t *lval, object_t *rval)
+object_t *object_sequence_create(size_t depth, object_t *lval, object_t *rval)
 {
 	__return_val_if_fail__(lval, NULL);
 	__return_val_if_fail__(rval, NULL);
 
-	static object_t object = { .attrs = ATTR_SEQUENCE,
-				   .repr = sequence_repr,
+	static object_t object = { .repr = sequence_repr,
 				   .drop = sequence_drop,
 				   .is_true = sequence_test };
 
 	array_t *sequence = array_create(sizeof(object_t), 2, object_drop);
 
-	if (lval->depth > rval->depth) {
+	if (__object_get_depth(lval) > __object_get_depth(rval)) {
 		if (!array_append(sequence, lval, 1) ||
 		    !unfold_sequence_object(rval, sequence)) {
 			goto prison;
 		}
 	} else {
-		if (!unfold_sequence_object(lval, sequence) ||
-		    !array_append(sequence, rval, 1)) {
+		if (__object_get_depth(lval) != depth) {
+			if (!array_append(sequence, lval, 1) ||
+			    !array_append(sequence, rval, 1)) {
+				goto prison;
+			}
+		} else if (!unfold_sequence_object(lval, sequence) ||
+			   !array_append(sequence, rval, 1)) {
 			goto prison;
 		}
 	}
 
-	object.data.ptr = sequence;
-	object.data.size = array_sizeof(sequence);
+	__object_set_attr(&object, ATTR_SEQUENCE);
+	__object_set_data_ptr(&object, sequence);
+	__object_set_data_size(&object, array_sizeof(sequence));
+	__object_set_ref_count(&object, 0);
+	__object_set_invalid_address(&object);
 
 #if defined XRE_ENABLE_OBJECT_LOGGING
 	__xre_logger(info, "created sequence @%p", object.data.ptr);
