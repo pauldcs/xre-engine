@@ -1,7 +1,7 @@
-#include "xre_operations.h"
-#include "xre_memory.h"
 #include "xre_assert.h"
 #include "xre_log.h"
+#include "xre_memory.h"
+#include "xre_operations.h"
 #include <stdbool.h>
 
 XRE_API_OPERATOR_FUNC(oper_not)
@@ -10,11 +10,9 @@ XRE_API_OPERATOR_FUNC(oper_not)
 
 	static object_t v;
 
-	if (!BR_EVAL((LEFT_BRANCH)) || !pop_object(&v, LEFT_BRANCH)) {
+	if (!__br_eval(__left_branch) || !stack_pop_r(&v, __left_branch)) {
 		return (false);
 	}
 
-	return (stack_push_flagged(self,
-				   object_create_register(!is_true_object(&v)),
-				   FLAG_READABLE | FLAG_MUTABLE));
+	return (__push_rw(self, object_number_create(!is_true_object(&v))));
 }

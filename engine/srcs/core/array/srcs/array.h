@@ -12,7 +12,6 @@
 // # define DISABLE_HARDENED_RUNTIME_LOGGING
 
 #define ARRAY_INITIAL_SIZE 64
-#define META_TRACE_SIZE 10
 
 /* DEFINED TYPES */
 #define SIZE_TYPE(__n) size_t __n
@@ -29,69 +28,96 @@
 #define NONE_TYPE(__x) void __x
 
 typedef struct {
-  int8_t _v;
+	int8_t _v;
 } x_st8_t;
 
 typedef struct {
-  int16_t _v;
+	int16_t _v;
 } x_st16_t;
 
 typedef struct {
-  int32_t _v;
+	int32_t _v;
 } x_st32_t;
 
 typedef struct {
-  int64_t _v;
+	int64_t _v;
 } x_st64_t;
 
 typedef struct {
-  uint8_t _v;
+	uint8_t _v;
 } x_ut8_t;
 
 typedef struct {
-  uint16_t _v;
+	uint16_t _v;
 } x_ut16_t;
 
 typedef struct {
-  uint32_t _v;
+	uint32_t _v;
 } x_ut32_t;
 
 typedef struct {
-  uint64_t _v;
+	uint64_t _v;
 } x_ut64_t;
 
 typedef struct {
-  const char *_ptr;
-  size_t _size;
+	const char *_ptr;
+	size_t _size;
 } x_str_t;
 
 typedef struct {
-  int32_t _val;
-  int32_t _point;
+	int32_t _val;
+	int32_t _point;
 } x_fixed_t;
 
-#define __PTRIZE_ST8__(x)                                                      \
-  &(x_st8_t) { ._v = x }
-#define __PTRIZE_ST16__(x)                                                     \
-  &(x_st16_t) { ._v = x }
-#define __PTRIZE_ST32__(x)                                                     \
-  &(x_st32_t) { ._v = x }
-#define __PTRIZE_ST64__(x)                                                     \
-  &(x_st64_t) { ._v = x }
-#define __PTRIZE_UT8__(x)                                                      \
-  &(x_ut8_t) { ._v = x }
-#define __PTRIZE_UT16__(x)                                                     \
-  &(x_ut16_t) { ._v = x }
-#define __PTRIZE_UT32__(x)                                                     \
-  &(x_ut32_t) { ._v = x }
-#define __PTRIZE_UT64__(x)                                                     \
-  &(x_ut64_t) { ._v = x }
-#define __PTRIZE_STR__(s)                                                      \
-  &(x_str_t) { ._ptr = s, ._size = strlen(s) }
+#define __PTRIZE_ST8__(x) \
+	&(x_st8_t)        \
+	{                 \
+		._v = x   \
+	}
+#define __PTRIZE_ST16__(x) \
+	&(x_st16_t)        \
+	{                  \
+		._v = x    \
+	}
+#define __PTRIZE_ST32__(x) \
+	&(x_st32_t)        \
+	{                  \
+		._v = x    \
+	}
+#define __PTRIZE_ST64__(x) \
+	&(x_st64_t)        \
+	{                  \
+		._v = x    \
+	}
+#define __PTRIZE_UT8__(x) \
+	&(x_ut8_t)        \
+	{                 \
+		._v = x   \
+	}
+#define __PTRIZE_UT16__(x) \
+	&(x_ut16_t)        \
+	{                  \
+		._v = x    \
+	}
+#define __PTRIZE_UT32__(x) \
+	&(x_ut32_t)        \
+	{                  \
+		._v = x    \
+	}
+#define __PTRIZE_UT64__(x) \
+	&(x_ut64_t)        \
+	{                  \
+		._v = x    \
+	}
+#define __PTRIZE_STR__(s)                     \
+	&(x_str_t)                            \
+	{                                     \
+		._ptr = s, ._size = strlen(s) \
+	}
 
 #ifdef __has_builtin
-#if __has_builtin(__builtin_memset) && __has_builtin(__builtin_memcpy) &&      \
-    __has_builtin(__builtin_memmove)
+#if __has_builtin(__builtin_memset) && __has_builtin(__builtin_memcpy) && \
+	__has_builtin(__builtin_memmove)
 #define BUILTIN_MEM_FUNCTIONS_AVAILABLE
 #endif
 #if __has_builtin(__builtin_expect)
@@ -118,38 +144,45 @@ typedef struct {
 #define builtin_memmove(dest, src, size) memmove(dest, src, size)
 #endif
 
+#if defined(DISABLE_SIGSEGV_ON_CHECK_FAIL)
+#define __segfault
+#else
+#define __segfault (*((volatile int *)0) = 0)
+#endif
+
 #if defined(DISABLE_HARDENED_RUNTIME)
-#define HR_COMPLAIN_IF(expr)
+#define notify_bug_on(expr)
 #else
 #include <stdlib.h>
 #if defined(DISABLE_HARDENED_RUNTIME_LOGGING)
-#define LOG_ERROR_MSG(expr)
+#define __log_error_message(expr)
 #else
-#define LOG_ERROR_MSG(expr)                                                    \
-  do {                                                                         \
-    (void)fprintf(stderr,                                                      \
-                  "error: HARDENED_RUNTIME file '%s', line: %d: (%s)\n",       \
-                  __FILE__, __LINE__, #expr);                                  \
-  } while (0)
+#define __log_error_message(expr)                                              \
+	do {                                                                   \
+		(void)fprintf(                                                 \
+			stderr,                                                \
+			"error: HARDENED_RUNTIME file '%s', line: %d: (%s)\n", \
+			__FILE__, __LINE__, #expr);                            \
+	} while (0)
 #endif /* defined(DISABLE_HARDENED_RUNTIME_LOGGING) */
-#define HR_COMPLAIN_IF(expr)                                                   \
-  do {                                                                         \
-    if (expr) {                                                                \
-      LOG_ERROR_MSG(expr);                                                     \
-      exit(1);                                                                 \
-    };                                                                         \
-  } while (0)
+#define notify_bug_on(expr)                        \
+	do {                                       \
+		if (expr) {                        \
+			__log_error_message(expr); \
+			__segfault;                \
+		};                                 \
+	} while (0)
 
 #endif /* defined (DISABLE_HARDENED_RUNTIME) */
 
 #if defined __has_attribute
 #if __has_attribute(pure)
-#define __attr_pure __attribute__((pure))
+#define __pure_function __attribute__((pure))
 #else
-#define __attr_pure
+#define __pure_function
 #endif
 #else
-#define __attr_pure
+#define __pure_function
 #endif
 
 #define SAFE_TO_ADD(a, b, max) (a <= max - b)
@@ -165,25 +198,25 @@ typedef struct {
 #define ABS(a) ((size_t)(((a) < 0) ? -(a) : (a)))
 
 typedef struct {
-  void *(*_memory_alloc)(size_t);
-  void *(*_memory_realloc)(void *, size_t);
-  void (*_memory_free)(void *);
+	void *(*_memory_alloc)(size_t);
+	void *(*_memory_realloc)(void *, size_t);
+	void (*_memory_free)(void *);
 } array_allocator_t;
 
 extern array_allocator_t __array_allocator__;
 
 typedef struct {
-  void *_ptr;       /* A pointer to the start of the buffer */
-  size_t _nmemb;    /* The number of elements in the buffer */
-  size_t _cap;      /* The size of the reserved memory block (in bytes) */
-  size_t _elt_size; /* The size of one element (in bytes) */
+	void *_ptr; /* A pointer to the start of the buffer */
+	size_t _nmemb; /* The number of elements in the buffer */
+	size_t _cap; /* The size of the reserved memory block (in bytes) */
+	size_t _elt_size; /* The size of one element (in bytes) */
 
-  bool _is_own_buffer; /* is the array the actual owner of it's buffer */
-  bool _settled; /* Once settled, any attempts to reallocate the buffer are
+	bool _is_own_buffer; /* is the array the actual owner of it's buffer */
+	bool _settled; /* Once settled, any attempts to reallocate the buffer are
                   * blocked so new pointers to the data are guaranteed to
                   * stay valid until the array is freed, or unsettled. */
 
-  void (*_free)(void *); /* the element destructor function */
+	void (*_free)(void *); /* the element destructor function */
 
 } array_t;
 
@@ -195,8 +228,8 @@ typedef struct {
 #define _freefunc(array) array->_free
 #define _is_owner(array) array->_is_own_buffer
 
-#define _relative_data(array, pos)                                             \
-  ((char *)(array)->_ptr + (array)->_elt_size * (pos))
+#define _relative_data(array, pos) \
+	((char *)(array)->_ptr + (array)->_elt_size * (pos))
 /* Creates an array and adjusts its starting capacity to be at least
  * enough to hold 'n' elements.
  */
@@ -238,33 +271,33 @@ NONE_TYPE(array_unsettle)(ARRAY_TYPE(self));
 
 /* Returns true if 'self' is marked as settled.
  */
-__attr_pure BOOL_TYPE(array_is_settled)(RDONLY_ARRAY_TYPE(self));
+__pure_function BOOL_TYPE(array_is_settled)(RDONLY_ARRAY_TYPE(self));
 
 /* Returns the number of elements contained in the array.
  */
-__attr_pure SIZE_TYPE(array_size)(RDONLY_ARRAY_TYPE(self));
+__pure_function SIZE_TYPE(array_size)(RDONLY_ARRAY_TYPE(self));
 
 /* Returns the number of bytes in use in the array.
  */
-__attr_pure SIZE_TYPE(array_sizeof)(RDONLY_ARRAY_TYPE(self));
+__pure_function SIZE_TYPE(array_sizeof)(RDONLY_ARRAY_TYPE(self));
 
 /* Returns the number of bytes currently reserved by the array.
  */
-__attr_pure SIZE_TYPE(array_cap)(RDONLY_ARRAY_TYPE(self));
+__pure_function SIZE_TYPE(array_cap)(RDONLY_ARRAY_TYPE(self));
 
 /* Pointer to the underlying element storage. For non-empty containers,
  * the returned pointer compares equal to the address of the first element.
  */
-__attr_pure PTR_TYPE(array_data)(RDONLY_ARRAY_TYPE(self));
+__pure_function PTR_TYPE(array_data)(RDONLY_ARRAY_TYPE(self));
 
 /* Returns the number of elements that can fit in the buffer without
  * having to reallocate.
  */
-__attr_pure SIZE_TYPE(array_uninitialized_size)(RDONLY_ARRAY_TYPE(self));
+__pure_function SIZE_TYPE(array_uninitialized_size)(RDONLY_ARRAY_TYPE(self));
 
 /* Pointer to the first uninitialized element in the buffer.
  */
-__attr_pure PTR_TYPE(array_uninitialized_data)(RDONLY_ARRAY_TYPE(self));
+__pure_function PTR_TYPE(array_uninitialized_data)(RDONLY_ARRAY_TYPE(self));
 
 /* Returns the data contained in 'self' in between start -> end into a newly
  * allocated buffer.
@@ -317,8 +350,7 @@ NONE_TYPE(array_popf)(ARRAY_TYPE(self), PTR_TYPE(into));
 
 /* Creates a duplicate of 'self'
  */
-ARRAY_TYPE(array_dup)
-(ARRAY_TYPE(self));
+ARRAY_TYPE(array_dup)(ARRAY_TYPE(self));
 
 /* Copies 'n' bytes of data pointed to by 'src' directly into the array's
  * buffer, overwriting the data at the specified offset (in bytes).
@@ -358,39 +390,40 @@ BOOL_TYPE(array_foreach)(ARRAY_TYPE(self), bool (*callback)(PTR_TYPE(elem)));
 
 /* Returns the first element in 'self' that satisfies the callback.
  * If no values satisfy the testing function, NULL is returned. */
-__attr_pure PTR_TYPE(array_find)(ARRAY_TYPE(self),
-                                 bool (*callback)(RDONLY_PTR_TYPE(elem)));
+__pure_function PTR_TYPE(array_find)(ARRAY_TYPE(self),
+				     bool (*callback)(RDONLY_PTR_TYPE(elem)));
 
 /* Behaves the same as 'find' except it returns an index (that can be used with
  * 'at'), or -1 if no element was found.
  */
-__attr_pure
-    SSIZE_TYPE(array_find_index)(ARRAY_TYPE(self),
-                                 bool (*callback)(RDONLY_PTR_TYPE(elem)));
+__pure_function
+	SSIZE_TYPE(array_find_index)(ARRAY_TYPE(self),
+				     bool (*callback)(RDONLY_PTR_TYPE(elem)));
 
 /* Behaves the same as 'find' expect it starts the search from the end.
  */
-__attr_pure PTR_TYPE(array_rfind)(ARRAY_TYPE(self),
-                                  bool (*callback)(RDONLY_PTR_TYPE(elem)));
+__pure_function PTR_TYPE(array_rfind)(ARRAY_TYPE(self),
+				      bool (*callback)(RDONLY_PTR_TYPE(elem)));
 
 /* Behaves the same as 'find' except it starts the search from the end and
  * returns an index (that can be used with 'at'), or -1 if no element was found.
  */
-__attr_pure
-    PTR_TYPE(array_rfind_index)(ARRAY_TYPE(self),
-                                bool (*callback)(RDONLY_PTR_TYPE(elem)));
+__pure_function
+	PTR_TYPE(array_rfind_index)(ARRAY_TYPE(self),
+				    bool (*callback)(RDONLY_PTR_TYPE(elem)));
 
 /* Returns a pointer to the element at the specified position.
  */
-__attr_pure PTR_TYPE(array_access)(RDONLY_ARRAY_TYPE(self), SIZE_TYPE(p));
-__attr_pure PTR_TYPE(array_unsafe_access)(RDONLY_ARRAY_TYPE(self),
-                                          SIZE_TYPE(p));
+__pure_function PTR_TYPE(array_access)(RDONLY_ARRAY_TYPE(self), SIZE_TYPE(p));
+__pure_function PTR_TYPE(array_unsafe_access)(RDONLY_ARRAY_TYPE(self),
+					      SIZE_TYPE(p));
 
 /* Identical to 'access', only this returns a const pointer.
  */
-__attr_pure RDONLY_PTR_TYPE(array_at)(RDONLY_ARRAY_TYPE(self), SIZE_TYPE(p));
-__attr_pure RDONLY_PTR_TYPE(array_unsafe_at)(RDONLY_ARRAY_TYPE(self),
-                                             SIZE_TYPE(pos));
+__pure_function RDONLY_PTR_TYPE(array_at)(RDONLY_ARRAY_TYPE(self),
+					  SIZE_TYPE(p));
+__pure_function RDONLY_PTR_TYPE(array_unsafe_at)(RDONLY_ARRAY_TYPE(self),
+						 SIZE_TYPE(pos));
 
 /* Appends 'n' elements from capacity. The application must have initialized
  * the storage backing these elements otherwise the behavior is undefined.
@@ -424,11 +457,11 @@ BOOL_TYPE(array_adjust)(ARRAY_TYPE(self), SIZE_TYPE(n));
 
 /* Returns a pointer to the first element in the array.
  */
-__attr_pure PTR_TYPE(array_head)(RDONLY_ARRAY_TYPE(self));
+__pure_function PTR_TYPE(array_head)(RDONLY_ARRAY_TYPE(self));
 
 /* Returns a pointer to the last element in the array.
  */
-__attr_pure PTR_TYPE(array_tail)(RDONLY_ARRAY_TYPE(self));
+__pure_function PTR_TYPE(array_tail)(RDONLY_ARRAY_TYPE(self));
 
 /* Swaps two arrays together array.
  */

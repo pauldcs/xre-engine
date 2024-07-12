@@ -4,8 +4,10 @@
 #include "array.h"
 #include <stdbool.h>
 
+typedef array_t history_array_t;
+
 bool xre_repl_entrypoint(void);
-bool xre_read_block(void **block, array_t *history);
+bool xre_read_block(void **block, const history_array_t *history);
 
 bool xre_repl_sigset_default(void);
 void xre_repl_clear_signals(void);

@@ -1,8 +1,9 @@
+#include "array.h"
 #include "xre_assert.h"
+#include "xre_builtin.h"
 #include "xre_errors.h"
 #include "xre_parse.h"
 #include "xre_utils.h"
-#include "array.h"
 #include <ctype.h>
 #include <string.h>
 #include <sys/types.h>
@@ -42,7 +43,12 @@ static bool accept_token(array_t *tokens, size_t len)
 	__return_val_if_fail__(tokens, false);
 
 	_token._len = len;
-	_token._type = expr_type_by_kind(_token._kind);
+	if (_token._kind == __BUILTIN_CALL__) {
+		_token._type = get_builtin_type(_token._ptr, _token._len);
+	} else {
+		_token._type = expr_type_by_kind(_token._kind);
+	}
+
 	if (!array_push(tokens, &_token))
 		return (false);
 
@@ -152,12 +158,12 @@ not_a_constant_value:
 				tf = 1;
 				break;
 
-			case '(':
+			case '{':
 				_token._kind = __LPAREN__;
 				tf = 1;
 
 				break;
-			case ')':
+			case '}':
 				_token._kind = __RPAREN__;
 				tf = 1;
 
@@ -173,11 +179,6 @@ not_a_constant_value:
 
 				break;
 
-			case ':':
-				_token._kind = __ANNOTATE__;
-				tf = 1;
-
-				break;
 			case '=':
 				if (*(ptr + 1) == '=') {
 					_token._kind = __EQ__;
@@ -218,6 +219,15 @@ not_a_constant_value:
 				}
 
 				break;
+
+			case ':':
+				if (*(ptr + 1) == ':') {
+					_token._kind = __SCOPE_RESOLUTION__;
+					tf = 2;
+					break;
+				}
+				goto __default__;
+
 			case '|':
 				if (*(ptr + 1) == '|') {
 					_token._kind = __OR__;
@@ -244,9 +254,6 @@ not_a_constant_value:
 					tf = 2;
 				} else if (*(ptr + 1) == '=') {
 					_token._kind = __LE__;
-					tf = 2;
-				} else if (*(ptr + 1) == '%') {
-					_token._kind = __INJECT__;
 					tf = 2;
 				} else {
 					_token._kind = __LT__;
@@ -290,17 +297,16 @@ not_a_constant_value:
 
 				break;
 			default:
+__default__:
+				/* handle comments
+TODO
+*/
+				// if (!strncmp(ptr, "mut", 3)) {
+				// 	_token._kind = __MUT__;
+				// 	tf = 3;
+				// }
 
-				/* handle comments here
-         ...
-         */
-
-				if (!strncmp(ptr, "print", 5)) {
-					_token._kind = __PRINT__;
-					tf = 5;
-				}
-
-				else if (!strncmp(ptr, "do", 2)) {
+				if (!strncmp(ptr, "do", 2)) {
 					_token._kind = __DO__;
 					tf = 2;
 				}
@@ -316,12 +322,16 @@ not_a_constant_value:
 				}
 
 				else {
-					_token._kind = __IDENTIFIER__;
+					_token._kind = __VARIABLE__;
 					tmp = ptr;
 					tf++;
-					while (*tmp && isalnum(*(tmp + 1))) {
+					while (*tmp && (isalnum(*(tmp + 1)) ||
+							*(tmp + 1) == '_')) {
 						tf++;
 						tmp++;
+					}
+					if (is_defined_builtin(ptr, tf)) {
+						_token._kind = __BUILTIN_CALL__;
 					}
 				}
 			}

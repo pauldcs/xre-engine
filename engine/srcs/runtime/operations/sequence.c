@@ -1,7 +1,7 @@
-#include "xre_operations.h"
-#include "xre_memory.h"
 #include "xre_assert.h"
 #include "xre_log.h"
+#include "xre_memory.h"
+#include "xre_operations.h"
 #include <stdbool.h>
 
 XRE_API_OPERATOR_FUNC(oper_sequence)
@@ -11,14 +11,10 @@ XRE_API_OPERATOR_FUNC(oper_sequence)
 	static object_t lv;
 	static object_t rv;
 
-	if (!evaluate_binops(self, &lv, &rv)) {
+	if (!binop_evaluate_pop_r(self, &lv, &rv)) {
 		return (false);
 	}
 
-	if (!stack_push_flagged(self, object_create_sequence(&lv, &rv),
-				FLAG_READABLE)) {
-		return (false);
-	}
-
-	return (true);
+	return (__push_r(self,
+			 object_sequence_create(self->orig->_depth, &lv, &rv)));
 }

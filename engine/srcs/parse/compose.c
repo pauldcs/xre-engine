@@ -31,6 +31,7 @@ beach:
 	if (__xre_args__.flags & FLAGS_DEBUG) {
 		ast_show(ast);
 	}
+
 	array_kill(tokens);
 	return (ast);
 }

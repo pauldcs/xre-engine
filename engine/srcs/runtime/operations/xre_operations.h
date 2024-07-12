@@ -1,18 +1,25 @@
 #ifndef __XRE_OPERATIONS_H__
 #define __XRE_OPERATIONS_H__
 
-#include "xre_runtime.h"
 #include "xre_memory.h"
-#include "xre_object.h"
+#include "xre_runtime.h"
 #include <stdbool.h>
 
-bool pop_object(object_t *ptr, ast_stmt_t *stmts);
-bool evaluate_binops(ast_stmt_t *self, object_t *left_buffer, object_t *right_buffer);
-bool pop_binop_return(ast_stmt_t *self, object_t *left_buffer, object_t *right_buffer);
-bool stack_push_flagged(ast_stmt_t *self, object_t *object, int32_t flags);
-void trigger_error_on(ast_stmt_t *self, error_type_e type);
+bool binop_evaluate_pop_r(ast_stmt_t *self, object_t *left_buffer,
+			  object_t *right_buffer);
 
-# define XRE_API_OPERATOR_FUNC(name) bool name(ast_stmt_t *self)
+bool stack_pop_r(object_t *ptr, ast_stmt_t *stmts);
+bool stack_pop_r_binop(ast_stmt_t *self, object_t *left_buffer,
+		       object_t *right_buffer);
+
+bool stack_push_enable_attrs(ast_stmt_t *self, object_t *object, int32_t attrs);
+void set_current_error(ast_stmt_t *self, error_type_e type);
+
+bool unwrap_number_object(ast_stmt_t *self, object_t *object, int64_t *data);
+bool unwrap_symbol_read(ast_stmt_t *self, int64_t offset, object_t **object);
+bool unwrap_symbol_write(ast_stmt_t *self, int64_t offset, object_t **object);
+
+#define XRE_API_OPERATOR_FUNC(name) bool name(ast_stmt_t *self)
 typedef bool (*fptr_t)(ast_stmt_t *self);
 
 XRE_API_OPERATOR_FUNC(oper_add);
@@ -41,7 +48,7 @@ XRE_API_OPERATOR_FUNC(oper_ne);
 XRE_API_OPERATOR_FUNC(oper_not);
 XRE_API_OPERATOR_FUNC(oper_string);
 XRE_API_OPERATOR_FUNC(oper_value);
-XRE_API_OPERATOR_FUNC(oper_symbol);
+XRE_API_OPERATOR_FUNC(oper_symbol_expand);
 XRE_API_OPERATOR_FUNC(oper_symbol_addr);
 XRE_API_OPERATOR_FUNC(oper_annotate);
 XRE_API_OPERATOR_FUNC(oper_separator);
@@ -51,20 +58,7 @@ XRE_API_OPERATOR_FUNC(oper_inject);
 XRE_API_OPERATOR_FUNC(oper_scope_annotate);
 XRE_API_OPERATOR_FUNC(oper_print);
 
-#define TYPE_CHECK_NEXT(self, flag) \
-    ((stack_top()->flags & flag)                \
-				? true                                      \
-				: (                                         \
-					set_error_type(XRE_TYPE_MISSMATCH_ERROR), \
-					set_error_orig(self),                     \
-					false                                     \
-				))     
-
-#define TYPE_CHECK(object, flag) (object->flags & flag)
-
-#define LEFT_BRANCH (&__statements__[self->br.left])
-#define RIGHT_BRANCH (&__statements__[self->br.right])
-
-#define IS_ERROR_RETURN is_true_object((object_t *)stack_top())
+#define __left_branch (&__global_current_stmts_ptr__[self->br.left])
+#define __right_branch (&__global_current_stmts_ptr__[self->br.right])
 
 #endif /* __XRE_OPERATIONS_H__ */

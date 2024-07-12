@@ -12,11 +12,11 @@ dynstr_t *dynstr_new(size_t n)
 	size_t init_size = n + sizeof(char);
 
 	str = malloc(sizeof(dynstr_t));
-	if (unlikely(!str))
+	if (!str)
 		return (NULL);
 
 	str->_ptr = malloc(init_size);
-	if (unlikely(!str->_ptr)) {
+	if (!str->_ptr) {
 		free(str);
 		return (NULL);
 	}
@@ -38,11 +38,11 @@ dynstr_t *dynstr_from(const char *src, size_t n)
 	size_t init_size = n + sizeof(char);
 
 	str = malloc(sizeof(dynstr_t));
-	if (unlikely(!str))
+	if (!str)
 		return (NULL);
 
 	str->_ptr = malloc(init_size);
-	if (unlikely(!str->_ptr)) {
+	if (!str->_ptr) {
 		free(str);
 		return (NULL);
 	}
@@ -69,7 +69,7 @@ bool dynstr_adjust(dynstr_t *self, size_t n)
 	n < self->_cap << 1 ? (size = self->_cap << 1) : (size = n);
 
 	ptr = realloc(self->_ptr, size);
-	if (unlikely(!ptr))
+	if (!ptr)
 		return (false);
 
 	self->_cap = size;
@@ -83,7 +83,7 @@ bool dynstr_append(dynstr_t *self, const char *src)
 	__return_val_if_fail__(src, 0);
 
 	size_t size = strlen(src);
-	if (unlikely(!dynstr_adjust(self, self->_size + size)))
+	if (!dynstr_adjust(self, self->_size + size))
 		return (false);
 
 	(void)memmove(self->_ptr + self->_size - 1, src, size + 1);
@@ -99,7 +99,7 @@ dynstr_t *dynstr_assign(const char *src)
 	size_t str_size = strlen(src);
 
 	dynstr_t *str = dynstr_new(str_size);
-	if (unlikely(!str))
+	if (!str)
 		return (NULL);
 
 	(void)memcpy(str->_ptr, src, str_size + sizeof(char));
@@ -116,7 +116,7 @@ bool dynstr_inject(dynstr_t *self, const char *src, size_t p)
 
 	size_t str_size = strlen(src);
 
-	if (unlikely(!dynstr_adjust(self, self->_size + str_size)))
+	if (!dynstr_adjust(self, self->_size + str_size))
 		return (false);
 
 	if (self->_size == sizeof(char))
@@ -166,7 +166,10 @@ void dynstr_clear(dynstr_t *self)
 
 size_t dynstr_cap(dynstr_t *self)
 {
-	__return_val_if_fail__(self, -1);
-
 	return (self->_cap);
+}
+
+size_t dynstr_len(dynstr_t *self)
+{
+	return (self->_size);
 }

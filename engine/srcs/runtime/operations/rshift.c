@@ -1,36 +1,37 @@
-#include "xre_operations.h"
-#include "xre_memory.h"
 #include "xre_assert.h"
 #include "xre_log.h"
+#include "xre_memory.h"
+#include "xre_operations.h"
 #include <stdbool.h>
 
 XRE_API_OPERATOR_FUNC(oper_rshift)
 {
 	__return_val_if_fail__(self, false);
 
-	static object_t lv;
-	static object_t rv;
-	static int32_t data;
+	static object_t lbuf;
+	static object_t rbuf;
 
-	if (!evaluate_binops(self, &lv, &rv)) {
+	if (!binop_evaluate_pop_r(self, &lbuf, &rbuf)) {
 		return (false);
 	}
 
-	if (VALUE_OF(int64_t, &rv) > 64) {
-		return (trigger_error_on(self, XRE_EXCEEDS_SHIFT_LIMIT_ERROR),
-			false);
-	}
+	static int64_t a;
+	static int64_t b;
 
-	if (VALUE_OF(int64_t, &rv) < 0) {
-		return (trigger_error_on(self, XRE_NEGATIVE_SHIFT_ERROR),
-			false);
-	}
-
-	data = VALUE_OF(int64_t, &lv) >> VALUE_OF(int64_t, &rv);
-	if (!stack_push_flagged(self, object_create_register(data),
-				FLAG_READABLE | FLAG_MUTABLE)) {
+	if (!unwrap_number_object(self, &lbuf, &a) ||
+	    !unwrap_number_object(self, &rbuf, &b)) {
 		return (false);
 	}
 
-	return (true);
+	if (b > 64) {
+		return (set_current_error(self, XRE_EXCEEDS_SHIFT_LIMIT_ERROR),
+			false);
+	}
+
+	if (b < 0) {
+		return (set_current_error(self, XRE_NEGATIVE_SHIFT_ERROR),
+			false);
+	}
+
+	return (__push_rw(self, object_number_create(a >> b)));
 }

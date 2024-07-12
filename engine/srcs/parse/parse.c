@@ -1,7 +1,9 @@
 #include "array.h"
 #include "xre_assert.h"
+#include "xre_builtin.h"
 #include "xre_errors.h"
 #include "xre_parse.h"
+#include "xre_utils.h"
 #include <assert.h>
 #include <string.h>
 #include <sys/types.h>
@@ -52,11 +54,17 @@ static xre_ast_t *ast_new_node(xre_token_t *token)
 		node->value = token->_value;
 
 	if (node->kind == __STRING_LITERAL__) {
-		node->string = strndup(token->_ptr + 1, token->_len - 2);
+		char *tmp = strndup(token->_ptr + 1, token->_len - 2);
+		(void)str_unescape(tmp);
+		node->string = tmp;
 	}
 
-	if (node->kind == __IDENTIFIER__) {
+	if (node->kind == __VARIABLE__) {
 		node->string = strndup(token->_ptr, token->_len);
+	}
+
+	if (node->kind == __BUILTIN_CALL__) {
+		node->string = get_builtin_name_ptr(token->_ptr, token->_len);
 	}
 
 	return (node);
@@ -88,8 +96,8 @@ xre_ast_t *xre_expr_parse(array_t *tokens)
 	__top_a = 0;
 	__top_b = 0;
 
-	memset(__stack_a, 0, MICROSTACK_SIZE * sizeof(void *));
-	memset(__stack_b, 0, MICROSTACK_SIZE * sizeof(void *));
+	(void)memset(__stack_a, 0, MICROSTACK_SIZE * sizeof(void *));
+	(void)memset(__stack_b, 0, MICROSTACK_SIZE * sizeof(void *));
 
 	while (true) {
 		token = (xre_token_t *)array_unsafe_at(tokens, ++idx);
@@ -106,7 +114,7 @@ xre_ast_t *xre_expr_parse(array_t *tokens)
 			break;
 
 		case __NOT__:
-		case __PRINT__:
+		case __BUILTIN_CALL__:
 			__push_a(ast_new_node(token));
 
 			break;
@@ -121,13 +129,14 @@ xre_ast_t *xre_expr_parse(array_t *tokens)
 			break;
 		case __VAL__:
 		case __STRING_LITERAL__:
-		case __IDENTIFIER__:
+		case __VARIABLE__:
 			__push_b(ast_new_node(token));
 
 			break;
 		default:
-			while (__top_a && (get_expr_precedence(TOP_A_KIND) >=
-					   get_expr_precedence(token->_kind))) {
+			while (__top_a &&
+			       (get_precedence_by_kind(TOP_A_KIND) >=
+				get_precedence_by_kind(token->_kind))) {
 				__make_value_to_b();
 			}
 

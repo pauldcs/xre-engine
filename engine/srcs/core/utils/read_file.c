@@ -2,6 +2,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 /* Read FILENAME into a locally-allocated buffer and return the buffer.
    The size of the buffer is returned in *SIZEP.  Returns NULL if any

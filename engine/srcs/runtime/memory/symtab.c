@@ -1,11 +1,11 @@
-#include "xre_memory.h"
-#include "xre_log.h"
 #include "array.h"
+#include "xre_log.h"
+#include "xre_memory.h"
 #include "xre_utils.h"
 #include "xre_xdp.h"
-#include <stdio.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
 
 typedef struct {
 	int32_t id;
@@ -15,7 +15,7 @@ typedef struct {
 array_t *g_symtab = NULL;
 array_t *g_symcache = NULL;
 
-int symtab_create_entry(const char *sym)
+int symtab_entry_create(const char *sym)
 {
 	size_t cache_size = array_size(g_symcache);
 	size_t i = 0;
@@ -34,19 +34,12 @@ int symtab_create_entry(const char *sym)
 
 	cache_entry_t e = { .id = id, .offset = array_size(g_symtab) };
 
-	object_t obj;
-	(void)memset(&obj, 0, sizeof(object_t));
-
-	if (!array_push(g_symtab, &obj) || !array_push(g_symcache, &e)) {
+	if (!array_push(g_symtab, object_undefined_create()) ||
+	    !array_push(g_symcache, &e)) {
 		return (-1);
 	}
 
 	return (e.offset);
-}
-
-object_t *symtab_get_entry(int index)
-{
-	return array_unsafe_access(g_symtab, index);
 }
 
 bool symtab_init(void)
@@ -63,8 +56,10 @@ bool symtab_init(void)
 	g_symcache = array_create(sizeof(cache_entry_t), STACK_SIZE, NULL);
 	if (!g_symcache) {
 		array_kill(g_symtab);
+
 		g_symtab = NULL;
 		g_symcache = NULL;
+
 		return (false);
 	}
 
@@ -76,6 +71,7 @@ void symtab_fini(void)
 	if (!g_symtab || !g_symcache) {
 		return;
 	}
+
 	array_kill(g_symtab);
 	array_kill(g_symcache);
 

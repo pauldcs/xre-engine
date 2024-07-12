@@ -1,4 +1,4 @@
-#include "runtime/memory/xre_memory.h"
+#include "xre_memory.h"
 #include "xre_alloc.h"
 #include "xre_args.h"
 #include "xre_assert.h"
@@ -14,7 +14,7 @@
 
 t_xre_state __xre_state__ = {
 	.title = "xre",
-	.version = "0.7.5",
+	.version = "0.8.5",
 };
 
 static bool init_source_file(t_xre_args *args, const char *path)
@@ -32,16 +32,21 @@ static bool init_source_file(t_xre_args *args, const char *path)
 	switch (sb.st_mode & S_IFMT) {
 	case S_IFCHR:
 		/* handle character device */
+
 	case S_IFBLK:
 		/* handle block device */
+
 	case S_IFIFO:
 		/* handle pipe */
+
 	case S_IFLNK:
 		/* handle symlink */
+
 	case S_IFSOCK:
 		/* handle socket */
 		xre_report_error("%s: Invalid file type", path);
 		break;
+
 	case S_IFDIR:
 		/* handle directory */
 		xre_report_error("%s: %s", path, "Is a directory");
@@ -55,6 +60,7 @@ static bool init_source_file(t_xre_args *args, const char *path)
 
 			goto club;
 		}
+
 		xre_report_error("%s: %s", path, "Permission denied");
 		return (false);
 
@@ -62,9 +68,8 @@ static bool init_source_file(t_xre_args *args, const char *path)
 		xre_report_error("%s: %s", path, "Foreigh tongue");
 		return (false);
 	}
-	return (false);
 
-	__assert_not_reached__();
+	return (false);
 
 club:
 
@@ -115,6 +120,7 @@ int main(int ac, char *av[])
 				if (!init_source_file(args, file)) {
 					goto prison;
 				}
+
 			} else {
 				(void)fprintf(
 					stderr,
@@ -122,6 +128,7 @@ int main(int ac, char *av[])
 					__xre_state__.title);
 				goto prison;
 			}
+
 		} else {
 			if (args->code) {
 				ast = xre_ast_compose(args->code);
@@ -136,8 +143,10 @@ int main(int ac, char *av[])
 
 				symtab_fini();
 				stack_fini();
+				//heap_fini();
 				ast_free(ast);
 				free(args);
+
 				return (true);
 
 			} else {

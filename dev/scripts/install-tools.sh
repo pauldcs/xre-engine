@@ -6,6 +6,7 @@ sudo apt update -y
 sudo apt-get install -y \
 \
   build-essential       \
+  vim                   \
   lldb                  \
   python3               \
   python3-pip           \

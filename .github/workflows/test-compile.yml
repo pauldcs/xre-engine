@@ -75,7 +75,7 @@ jobs:
         working-directory: tools/tester
         run: >
           chmod +x run
-          && (cd ../../engine && make fclean && make g)
+          && (cd ../../engine && make fclean && make asan)
           && mv ../../engine/xre .
           && chmod +x xre
           && ./run

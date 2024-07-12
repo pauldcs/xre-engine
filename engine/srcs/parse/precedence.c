@@ -1,22 +1,33 @@
-#include "xre_parse.h"
 #include "xre_assert.h"
+#include "xre_parse.h"
 
-int get_expr_precedence(xre_expr_kind_t kind)
+int get_precedence_by_kind(xre_expr_kind_t kind)
 {
+	// if (kind == __BUILTIN_CALL__) {
+	// 	switch (expr_type_by_kind(kind)) {
+	// 		case EXPR_OP_TYPE_BINOP:
+	// 			goto builtin_binop;
+
+	// 		case EXPR_OP_TYPE_UNIOP:
+	// 			goto uniop;
+
+	// 		default:
+	// 			goto prison;
+	// 	}
+	// }
+
 	switch (kind) {
 	case __SCOPE_RESOLUTION__:
 	case __START__:
 	case __END__:
 		return (0);
 
-	case __ANNOTATE__:
+	case __NOT__:
+	case __BUILTIN_CALL__:
 		return (-1);
 
 	case __POW__:
 		return (-2);
-
-	case __INJECT__:
-		return (-3);
 
 	case __MUL__:
 	case __DIV__:
@@ -35,42 +46,44 @@ int get_expr_precedence(xre_expr_kind_t kind)
 	case __GT__:
 	case __LE__:
 	case __GE__:
-		return (-8);
+		return (-7);
 
 	case __EQ__:
 	case __NE__:
-		return (-9);
+		return (-8);
 
 	case __BAND__:
-		return (-10);
+		return (-9);
 
 	case __BXOR__:
-		return (-11);
+		return (-10);
 
 	case __BOR__:
-		return (-12);
+		return (-11);
 
 	case __AND__:
-	case __NOT__:
-	case __DO__:
-	case __OR__:
-	case __ELSE__:
 		return (-13);
 
-	case __ASSIGN__:
+	case __OR__:
 		return (-14);
 
-	case __LOOP__:
+	case __DO__:
 		return (-15);
 
-	case __SEQUENCE__:
+	case __ELSE__:
 		return (-16);
 
-	case __PRINT__:
+	case __LOOP__:
 		return (-17);
 
-	case __SEPARATOR__:
+	case __SEQUENCE__:
 		return (-18);
+
+	case __ASSIGN__:
+		return (-19);
+
+	case __SEPARATOR__:
+		return (-20);
 
 	case __LPAREN__:
 	case __RPAREN__:
@@ -78,7 +91,9 @@ int get_expr_precedence(xre_expr_kind_t kind)
 
 	case __VAL__:
 	case __STRING_LITERAL__:
-	case __IDENTIFIER__:
+	case __VARIABLE__:
+	default:
+
 		break;
 	}
 

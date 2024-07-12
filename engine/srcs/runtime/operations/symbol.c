@@ -1,25 +1,28 @@
-#include "xre_operations.h"
-#include "xre_memory.h"
 #include "xre_assert.h"
 #include "xre_log.h"
+#include "xre_memory.h"
+#include "xre_operations.h"
 #include <stdbool.h>
 
-XRE_API_OPERATOR_FUNC(oper_symbol)
+/*    Executes when a symbol is called as
+ *    a value.
+ */
+XRE_API_OPERATOR_FUNC(oper_symbol_expand)
 {
 	__return_val_if_fail__(self, false);
 
-	if (!stack_push_flagged(self, symtab_get_entry(self->value),
-				FLAG_READABLE)) {
-		return (false);
-	}
+	static object_t *object;
 
-	return (true);
+	return (unwrap_symbol_read(self, self->value, &object) &&
+		__push_r(self, object));
 }
 
+/*    Executes when a symbol is called for
+ *    assignment.
+ */
 XRE_API_OPERATOR_FUNC(oper_symbol_addr)
 {
 	__return_val_if_fail__(self, false);
 
-	return (stack_push_flagged(self, object_create_symbol(self->value),
-				   FLAG_READABLE));
+	return (__push_r(self, object_symbol_create(self->value)));
 }

@@ -39,8 +39,8 @@ static inline BOOL_TYPE(array_init)(ARRAY_TYPE(*self), size_t size)
 ARRAY_TYPE(array_create)
 (SIZE_TYPE(elt_size), SIZE_TYPE(n), void (*free)(void *))
 {
-	HR_COMPLAIN_IF(elt_size == 0);
-	HR_COMPLAIN_IF(SIZE_T_SAFE_TO_MUL(elt_size, n) == false);
+	notify_bug_on(elt_size == 0);
+	notify_bug_on(SIZE_T_SAFE_TO_MUL(elt_size, n) == false);
 
 	if (!n) {
 		n = ARRAY_INITIAL_SIZE;
@@ -63,8 +63,8 @@ ARRAY_TYPE(array_seize_buffer)
 (PTR_TYPE(*buffer), SIZE_TYPE(bufsize), SIZE_TYPE(elt_size), SIZE_TYPE(n),
  void (*_free)(void *))
 {
-	HR_COMPLAIN_IF(elt_size == 0);
-	HR_COMPLAIN_IF(SIZE_T_SAFE_TO_MUL(elt_size, n) == false);
+	notify_bug_on(elt_size == 0);
+	notify_bug_on(SIZE_T_SAFE_TO_MUL(elt_size, n) == false);
 
 	ARRAY_TYPE(self) = NULL;
 
@@ -88,8 +88,8 @@ ARRAY_TYPE(array_borrow_buffer)
 (PTR_TYPE(*buffer), SIZE_TYPE(bufsize), SIZE_TYPE(elt_size), SIZE_TYPE(n),
  void (*_free)(void *))
 {
-	HR_COMPLAIN_IF(elt_size == 0);
-	HR_COMPLAIN_IF(SIZE_T_SAFE_TO_MUL(elt_size, n) == false);
+	notify_bug_on(elt_size == 0);
+	notify_bug_on(SIZE_T_SAFE_TO_MUL(elt_size, n) == false);
 
 	ARRAY_TYPE(self) = NULL;
 
@@ -112,8 +112,8 @@ ARRAY_TYPE(array_borrow_buffer)
 ARRAY_TYPE(array_filter)
 (RDONLY_ARRAY_TYPE(self), bool (*callback)(RDONLY_PTR_TYPE(elem)))
 {
-	HR_COMPLAIN_IF(self == NULL);
-	HR_COMPLAIN_IF(callback == NULL);
+	notify_bug_on(self == NULL);
+	notify_bug_on(callback == NULL);
 
 	ARRAY_TYPE(array) = array_create(_typesize(self), ARRAY_INITIAL_SIZE,
 					 _freefunc(self));
@@ -146,12 +146,12 @@ error:
 PTR_TYPE(array_extract)
 (RDONLY_ARRAY_TYPE(src), SIZE_TYPE(start), SIZE_TYPE(end))
 {
-	HR_COMPLAIN_IF(src == NULL);
-	HR_COMPLAIN_IF(SIZE_T_SAFE_TO_SUB(end, start) == false);
-	HR_COMPLAIN_IF(SIZE_T_SAFE_TO_MUL((end - start), _typesize(src)) ==
-		       false);
-	HR_COMPLAIN_IF(SIZE_T_SAFE_TO_SUB(_size(src), start) == false);
-	HR_COMPLAIN_IF((_size(src) - start) < (end - start));
+	notify_bug_on(src == NULL);
+	notify_bug_on(SIZE_T_SAFE_TO_SUB(end, start) == false);
+	notify_bug_on(SIZE_T_SAFE_TO_MUL((end - start), _typesize(src)) ==
+		      false);
+	notify_bug_on(SIZE_T_SAFE_TO_SUB(_size(src), start) == false);
+	notify_bug_on((_size(src) - start) < (end - start));
 
 	PTR_TYPE(ptr) = __array_allocator__._memory_alloc((end - start) *
 							  _typesize(src));
@@ -167,9 +167,9 @@ PTR_TYPE(array_extract)
 ARRAY_TYPE(array_pull)
 (RDONLY_ARRAY_TYPE(src), SSIZE_TYPE(start), SSIZE_TYPE(end))
 {
-	HR_COMPLAIN_IF(src == NULL);
-	HR_COMPLAIN_IF(_size(src) <= ABS(start));
-	HR_COMPLAIN_IF(_size(src) <= ABS(end));
+	notify_bug_on(src == NULL);
+	notify_bug_on(_size(src) <= ABS(start));
+	notify_bug_on(_size(src) <= ABS(end));
 
 	ARRAY_TYPE(arr) = NULL;
 
@@ -218,7 +218,7 @@ ARRAY_TYPE(array_pull)
 
 NONE_TYPE(array_clear)(ARRAY_TYPE(self))
 {
-	HR_COMPLAIN_IF(self == NULL);
+	notify_bug_on(self == NULL);
 
 	if (_freefunc(self)) {
 		while (_size(self)--) {
@@ -231,7 +231,7 @@ NONE_TYPE(array_clear)(ARRAY_TYPE(self))
 
 NONE_TYPE(array_kill)(ARRAY_TYPE(self))
 {
-	HR_COMPLAIN_IF(self == NULL);
+	notify_bug_on(self == NULL);
 
 	array_clear(self);
 
@@ -244,11 +244,11 @@ NONE_TYPE(array_kill)(ARRAY_TYPE(self))
 
 BOOL_TYPE(array_adjust)(ARRAY_TYPE(self), SIZE_TYPE(n))
 {
-	HR_COMPLAIN_IF(self == NULL);
-	HR_COMPLAIN_IF(SIZE_T_SAFE_TO_MUL(_capacity(self), 2) == false);
-	HR_COMPLAIN_IF(SIZE_T_SAFE_TO_ADD(_size(self), n) == false);
-	HR_COMPLAIN_IF(SIZE_T_SAFE_TO_MUL(_size(self) + n, _typesize(self)) ==
-		       false);
+	notify_bug_on(self == NULL);
+	notify_bug_on(SIZE_T_SAFE_TO_MUL(_capacity(self), 2) == false);
+	notify_bug_on(SIZE_T_SAFE_TO_ADD(_size(self), n) == false);
+	notify_bug_on(SIZE_T_SAFE_TO_MUL(_size(self) + n, _typesize(self)) ==
+		      false);
 
 	SIZE_TYPE(new_size) = 0;
 
@@ -293,8 +293,8 @@ BOOL_TYPE(array_adjust)(ARRAY_TYPE(self), SIZE_TYPE(n))
 
 BOOL_TYPE(array_push)(ARRAY_TYPE(self), RDONLY_PTR_TYPE(e))
 {
-	HR_COMPLAIN_IF(self == NULL);
-	HR_COMPLAIN_IF(!e);
+	notify_bug_on(self == NULL);
+	notify_bug_on(!e);
 
 	if (unlikely(!array_adjust(self, 1))) {
 		return (false);
@@ -310,8 +310,8 @@ BOOL_TYPE(array_push)(ARRAY_TYPE(self), RDONLY_PTR_TYPE(e))
 
 NONE_TYPE(array_pop)(ARRAY_TYPE(self), PTR_TYPE(into))
 {
-	HR_COMPLAIN_IF(self == NULL);
-	HR_COMPLAIN_IF(_size(self) == 0);
+	notify_bug_on(self == NULL);
+	notify_bug_on(_size(self) == 0);
 
 	_size(self)--;
 
@@ -333,8 +333,8 @@ BOOL_TYPE(array_pushf)(ARRAY_TYPE(self), PTR_TYPE(e))
 
 NONE_TYPE(array_popf)(ARRAY_TYPE(self), PTR_TYPE(into))
 {
-	HR_COMPLAIN_IF(self == NULL);
-	HR_COMPLAIN_IF(_size(self) == 0);
+	notify_bug_on(self == NULL);
+	notify_bug_on(_size(self) == 0);
 
 	if (into) {
 		(void)builtin_memcpy(into, _data(self), _typesize(self));
@@ -345,8 +345,8 @@ NONE_TYPE(array_popf)(ARRAY_TYPE(self), PTR_TYPE(into))
 
 BOOL_TYPE(array_insert)(ARRAY_TYPE(self), SIZE_TYPE(p), PTR_TYPE(e))
 {
-	HR_COMPLAIN_IF(self == NULL);
-	HR_COMPLAIN_IF((p <= _size(self)) == false);
+	notify_bug_on(self == NULL);
+	notify_bug_on((p <= _size(self)) == false);
 
 	if (unlikely(!array_adjust(self, 1))) {
 		return (false);
@@ -370,8 +370,8 @@ skip:
 NONE_TYPE(array_tipex)
 (ARRAY_TYPE(self), SIZE_TYPE(off), RDONLY_PTR_TYPE(src), SIZE_TYPE(n))
 {
-	HR_COMPLAIN_IF(self == NULL);
-	HR_COMPLAIN_IF(src == NULL);
+	notify_bug_on(self == NULL);
+	notify_bug_on(src == NULL);
 
 	(void)builtin_memmove((char *)_data(self) + off, src, n);
 }
@@ -379,7 +379,7 @@ NONE_TYPE(array_tipex)
 ARRAY_TYPE(array_dup)
 (ARRAY_TYPE(self))
 {
-	HR_COMPLAIN_IF(self == NULL);
+	notify_bug_on(self == NULL);
 	array_t *array =
 		array_create(_typesize(self), _size(self), _freefunc(self));
 	if (!array) {
@@ -397,10 +397,10 @@ ARRAY_TYPE(array_dup)
 BOOL_TYPE(array_inject)
 (ARRAY_TYPE(self), SIZE_TYPE(p), RDONLY_PTR_TYPE(src), SIZE_TYPE(n))
 {
-	HR_COMPLAIN_IF(self == NULL);
-	HR_COMPLAIN_IF(src == NULL);
-	HR_COMPLAIN_IF(p > _size(self));
-	HR_COMPLAIN_IF(SIZE_T_SAFE_TO_ADD(p, n) == false);
+	notify_bug_on(self == NULL);
+	notify_bug_on(src == NULL);
+	notify_bug_on(p > _size(self));
+	notify_bug_on(SIZE_T_SAFE_TO_ADD(p, n) == false);
 
 	if (unlikely(!array_adjust(self, n))) {
 		return (false);
@@ -428,8 +428,8 @@ skip_moving:
 
 BOOL_TYPE(array_append)(ARRAY_TYPE(self), RDONLY_PTR_TYPE(src), SIZE_TYPE(n))
 {
-	HR_COMPLAIN_IF(self == NULL);
-	HR_COMPLAIN_IF(src == NULL);
+	notify_bug_on(self == NULL);
+	notify_bug_on(src == NULL);
 
 	if (unlikely(!array_adjust(self, n))) {
 		return (false);
@@ -445,9 +445,9 @@ BOOL_TYPE(array_append)(ARRAY_TYPE(self), RDONLY_PTR_TYPE(src), SIZE_TYPE(n))
 
 BOOL_TYPE(array_concat)(ARRAY_TYPE(self), ARRAY_TYPE(other))
 {
-	HR_COMPLAIN_IF(self == NULL);
-	HR_COMPLAIN_IF(other == NULL);
-	HR_COMPLAIN_IF(self->_elt_size != other->_elt_size);
+	notify_bug_on(self == NULL);
+	notify_bug_on(other == NULL);
+	notify_bug_on(self->_elt_size != other->_elt_size);
 
 	if (unlikely(!array_adjust(self,
 				   array_size(self) + array_size(other)))) {
@@ -462,10 +462,10 @@ BOOL_TYPE(array_concat)(ARRAY_TYPE(self), ARRAY_TYPE(other))
 	return (true);
 }
 
-__attr_pure RDONLY_PTR_TYPE(array_at)(RDONLY_ARRAY_TYPE(self), SIZE_TYPE(p))
+__pure_function RDONLY_PTR_TYPE(array_at)(RDONLY_ARRAY_TYPE(self), SIZE_TYPE(p))
 {
-	HR_COMPLAIN_IF(self == NULL);
-	HR_COMPLAIN_IF(p >= _size(self));
+	notify_bug_on(self == NULL);
+	notify_bug_on(p >= _size(self));
 
 	if (unlikely(p >= _size(self))) {
 		return (NULL);
@@ -474,16 +474,16 @@ __attr_pure RDONLY_PTR_TYPE(array_at)(RDONLY_ARRAY_TYPE(self), SIZE_TYPE(p))
 	return (_relative_data(self, p));
 }
 
-__attr_pure RDONLY_PTR_TYPE(array_unsafe_at)(RDONLY_ARRAY_TYPE(self),
-					     SIZE_TYPE(p))
+__pure_function RDONLY_PTR_TYPE(array_unsafe_at)(RDONLY_ARRAY_TYPE(self),
+						 SIZE_TYPE(p))
 {
 	return (_relative_data(self, p));
 }
 
-__attr_pure PTR_TYPE(array_access)(RDONLY_ARRAY_TYPE(self), SIZE_TYPE(p))
+__pure_function PTR_TYPE(array_access)(RDONLY_ARRAY_TYPE(self), SIZE_TYPE(p))
 {
-	HR_COMPLAIN_IF(self == NULL);
-	HR_COMPLAIN_IF(_size(self) <= p);
+	notify_bug_on(self == NULL);
+	notify_bug_on(_size(self) <= p);
 
 	if (unlikely(p >= _size(self))) {
 		return (NULL);
@@ -492,15 +492,16 @@ __attr_pure PTR_TYPE(array_access)(RDONLY_ARRAY_TYPE(self), SIZE_TYPE(p))
 	return (_relative_data(self, p));
 }
 
-__attr_pure PTR_TYPE(array_unsafe_access)(RDONLY_ARRAY_TYPE(self), SIZE_TYPE(p))
+__pure_function PTR_TYPE(array_unsafe_access)(RDONLY_ARRAY_TYPE(self),
+					      SIZE_TYPE(p))
 {
 	return (_relative_data(self, p));
 }
 
 NONE_TYPE(array_evict)(ARRAY_TYPE(self), SIZE_TYPE(p))
 {
-	HR_COMPLAIN_IF(self == NULL);
-	HR_COMPLAIN_IF(p >= _size(self));
+	notify_bug_on(self == NULL);
+	notify_bug_on(p >= _size(self));
 
 	SIZE_TYPE(n) = (_size(self) - p) * _typesize(self);
 
@@ -519,9 +520,9 @@ NONE_TYPE(array_evict)(ARRAY_TYPE(self), SIZE_TYPE(p))
 
 NONE_TYPE(array_wipe)(ARRAY_TYPE(self), SIZE_TYPE(start), SIZE_TYPE(end))
 {
-	HR_COMPLAIN_IF(self == NULL);
-	HR_COMPLAIN_IF(SIZE_T_SAFE_TO_SUB(end, start) == false);
-	HR_COMPLAIN_IF(end - start > _size(self));
+	notify_bug_on(self == NULL);
+	notify_bug_on(SIZE_T_SAFE_TO_SUB(end, start) == false);
+	notify_bug_on(end - start > _size(self));
 
 	SIZE_TYPE(n) = end - start;
 
@@ -543,9 +544,9 @@ NONE_TYPE(array_wipe)(ARRAY_TYPE(self), SIZE_TYPE(start), SIZE_TYPE(end))
 
 NONE_TYPE(array_swap_elems)(ARRAY_TYPE(self), SIZE_TYPE(a), SIZE_TYPE(b))
 {
-	HR_COMPLAIN_IF(self == NULL);
-	HR_COMPLAIN_IF(a >= _size(self));
-	HR_COMPLAIN_IF(b >= _size(self));
+	notify_bug_on(self == NULL);
+	notify_bug_on(a >= _size(self));
+	notify_bug_on(b >= _size(self));
 
 	SIZE_TYPE(n) = _typesize(self);
 
@@ -559,14 +560,14 @@ NONE_TYPE(array_swap_elems)(ARRAY_TYPE(self), SIZE_TYPE(a), SIZE_TYPE(b))
 	}
 }
 
-__attr_pure PTR_TYPE(array_head)(RDONLY_ARRAY_TYPE(self))
+__pure_function PTR_TYPE(array_head)(RDONLY_ARRAY_TYPE(self))
 {
 	return (array_access(self, 0));
 }
 
-__attr_pure PTR_TYPE(array_tail)(RDONLY_ARRAY_TYPE(self))
+__pure_function PTR_TYPE(array_tail)(RDONLY_ARRAY_TYPE(self))
 {
-	HR_COMPLAIN_IF(self == NULL);
+	notify_bug_on(self == NULL);
 
 	if (likely(_size(self))) {
 		return (array_access(self, _size(self) - 1));
@@ -575,38 +576,38 @@ __attr_pure PTR_TYPE(array_tail)(RDONLY_ARRAY_TYPE(self))
 	return (NULL);
 }
 
-__attr_pure SIZE_TYPE(array_size)(RDONLY_ARRAY_TYPE(self))
+__pure_function SIZE_TYPE(array_size)(RDONLY_ARRAY_TYPE(self))
 {
-	HR_COMPLAIN_IF(self == NULL);
+	notify_bug_on(self == NULL);
 
 	return (_size(self));
 }
 
-__attr_pure SIZE_TYPE(array_sizeof)(RDONLY_ARRAY_TYPE(self))
+__pure_function SIZE_TYPE(array_sizeof)(RDONLY_ARRAY_TYPE(self))
 {
-	HR_COMPLAIN_IF(self == NULL);
+	notify_bug_on(self == NULL);
 
 	return (_size(self) * _typesize(self));
 }
 
-__attr_pure PTR_TYPE(array_data)(RDONLY_ARRAY_TYPE(self))
+__pure_function PTR_TYPE(array_data)(RDONLY_ARRAY_TYPE(self))
 {
 	return array_head(self);
 }
 
-__attr_pure PTR_TYPE(array_uninitialized_data)(RDONLY_ARRAY_TYPE(self))
+__pure_function PTR_TYPE(array_uninitialized_data)(RDONLY_ARRAY_TYPE(self))
 {
-	HR_COMPLAIN_IF(self == NULL);
-	HR_COMPLAIN_IF(_data(self) == NULL);
+	notify_bug_on(self == NULL);
+	notify_bug_on(_data(self) == NULL);
 
 	return (array_unsafe_access(self, _size(self)));
 }
 
-__attr_pure SIZE_TYPE(array_uninitialized_size)(RDONLY_ARRAY_TYPE(self))
+__pure_function SIZE_TYPE(array_uninitialized_size)(RDONLY_ARRAY_TYPE(self))
 {
-	HR_COMPLAIN_IF(self == NULL);
-	HR_COMPLAIN_IF(SIZE_T_SAFE_TO_SUB(_capacity(self),
-					  array_sizeof(self)) == false);
+	notify_bug_on(self == NULL);
+	notify_bug_on(SIZE_T_SAFE_TO_SUB(_capacity(self), array_sizeof(self)) ==
+		      false);
 
 	SIZE_TYPE(size_in_bytes) = _capacity(self) - array_sizeof(self);
 
@@ -617,16 +618,16 @@ __attr_pure SIZE_TYPE(array_uninitialized_size)(RDONLY_ARRAY_TYPE(self))
 	return (size_in_bytes);
 }
 
-__attr_pure SIZE_TYPE(array_cap)(RDONLY_ARRAY_TYPE(self))
+__pure_function SIZE_TYPE(array_cap)(RDONLY_ARRAY_TYPE(self))
 {
-	HR_COMPLAIN_IF(self == NULL);
+	notify_bug_on(self == NULL);
 
 	return (_capacity(self));
 }
 
 BOOL_TYPE(array_append_from_capacity)(ARRAY_TYPE(self), SIZE_TYPE(n))
 {
-	HR_COMPLAIN_IF(self == NULL);
+	notify_bug_on(self == NULL);
 
 	if (n > array_uninitialized_size(self)) {
 		return (false);
@@ -646,7 +647,7 @@ NONE_TYPE(array_swap)(ARRAY_TYPE(*self), ARRAY_TYPE(*other))
 
 BOOL_TYPE(array_slimcheck)(ARRAY_TYPE(self))
 {
-	HR_COMPLAIN_IF(self == NULL);
+	notify_bug_on(self == NULL);
 
 	if (unlikely(_settled(self))) {
 		return (false);
@@ -673,22 +674,22 @@ BOOL_TYPE(array_slimcheck)(ARRAY_TYPE(self))
 
 NONE_TYPE(array_settle)(ARRAY_TYPE(self))
 {
-	HR_COMPLAIN_IF(self == NULL);
+	notify_bug_on(self == NULL);
 
 	_settled(self) = true;
 }
 
 NONE_TYPE(array_unsettle)(ARRAY_TYPE(self))
 {
-	HR_COMPLAIN_IF(self == NULL);
-	HR_COMPLAIN_IF(_is_owner(self) == false);
+	notify_bug_on(self == NULL);
+	notify_bug_on(_is_owner(self) == false);
 
 	_settled(self) = false;
 }
 
-__attr_pure BOOL_TYPE(array_is_settled)(RDONLY_ARRAY_TYPE(self))
+__pure_function BOOL_TYPE(array_is_settled)(RDONLY_ARRAY_TYPE(self))
 {
-	HR_COMPLAIN_IF(self == NULL);
+	notify_bug_on(self == NULL);
 
 	return (_settled(self));
 }
