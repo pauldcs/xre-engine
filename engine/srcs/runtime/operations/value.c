@@ -8,5 +8,5 @@ XRE_API_OPERATOR_FUNC(oper_value)
 {
 	__return_val_if_fail__(self, false);
 
-	return (__push_rw(self, object_register_create(self->value)));
+	return (__push_rw(self, object_number_create(self->value)));
 }

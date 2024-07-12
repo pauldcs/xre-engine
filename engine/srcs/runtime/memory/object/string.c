@@ -31,22 +31,22 @@ static void string_drop(void *ptr)
 	dynstr_kill((dynstr_t *)ptr);
 }
 
-object_t *object_string_create(unsigned char *ptr, size_t size)
+object_t *object_string_create(unsigned char *string)
 {
-	__return_val_if_fail__(ptr, NULL);
+	__return_val_if_fail__(string, NULL);
 
 	static object_t object = { .repr = string_repr,
 				   .drop = string_drop,
 				   .is_true = string_test };
 
-	dynstr_t *dynstr = dynstr_from((const char *)ptr, size);
+	size_t str_len = strlen((const char *)string);
+	dynstr_t *dynstr = dynstr_from((const char *)string, str_len);
 	if (!dynstr) {
 		return (NULL);
 	}
 
 	__object_set_attr(&object, ATTR_STRING);
-	__object_set_data_ptr(&object, dynstr);
-	__object_set_data_size(&object, size);
+	__object_set_data_as_string(&object, dynstr);
 	__object_set_ref_count(&object, 0);
 	//__object_set_invalid_address(&object);
 

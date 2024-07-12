@@ -18,10 +18,10 @@ XRE_API_OPERATOR_FUNC(oper_mul)
 	static int64_t a;
 	static int64_t b;
 
-	if (!unwrap_register_object(self, &lbuf, &a) ||
-	    !unwrap_register_object(self, &rbuf, &b)) {
+	if (!unwrap_number_object(self, &lbuf, &a) ||
+	    !unwrap_number_object(self, &rbuf, &b)) {
 		return (false);
 	}
 
-	return (__push_rw(self, object_register_create(a * b)));
+	return (__push_rw(self, object_number_create(a * b)));
 }

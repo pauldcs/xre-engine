@@ -19,7 +19,7 @@ typedef struct {
 	builtin_func_ptr func;
 } builtin_func_t;
 
-extern builtin_func_t builtin_func_lookup[5];
+extern builtin_func_t builtin_func_lookup[3];
 
 bool is_defined_builtin(const char *ptr, size_t size);
 builtin_func_ptr get_builtin_ptr(const char *ptr, size_t size);
@@ -31,8 +31,6 @@ xre_expr_type_t get_builtin_type(const char *ptr, size_t size);
 
 XRE_BUILTIN_FUNCTION(builtin_print);
 XRE_BUILTIN_FUNCTION(builtin_typeof);
-XRE_BUILTIN_FUNCTION(builtin_array_size);
-XRE_BUILTIN_FUNCTION(builtin_str_size);
 XRE_BUILTIN_FUNCTION(builtin_yes);
 
 #endif /* __XRE_BUILIN_H__ */

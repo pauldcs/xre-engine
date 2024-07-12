@@ -41,8 +41,8 @@ void object_attrs_repr(int32_t attrs)
 		separator = "-";
 	}
 
-	if (attrs & ATTR_REGISTER) {
-		fprintf(stderr, "%sregister", separator);
+	if (attrs & ATTR_NUMBER) {
+		fprintf(stderr, "%snumber", separator);
 		separator = "-";
 	}
 
@@ -72,7 +72,7 @@ void object_attrs_repr(int32_t attrs)
 bool is_true_object(const object_t *object)
 {
 	__return_val_if_fail__(object, false);
-	return (object->is_true(object->data.ptr));
+	return (object->is_true(__object_get_data_as_any(object)));
 }
 
 void object_drop(void *ptr)
@@ -82,7 +82,7 @@ void object_drop(void *ptr)
 	object_t *object = (object_t *)ptr;
 
 	if (!__object_has_attr(object, ATTR_REFERENCE)) {
-		object->drop(object->data.ptr);
+		object->drop(__object_get_data_as_any(object));
 	}
 }
 

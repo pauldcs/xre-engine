@@ -2,6 +2,7 @@
 #define __XRE_MEMORY_H__
 
 #include "array.h"
+#include "dynstr.h"
 #include "xre_assert.h"
 #include "xre_runtime.h"
 #include <stdbool.h>
@@ -26,16 +27,15 @@ extern array_t *g_symcache;
 
 #define ATTR(name, shift) (1LL << (shift))
 
-#define ATTR_STRING ATTR(STRING, 1) // is allocated on the heap
-#define ATTR_REGISTER ATTR(REGISTER, 2) // fits in a register
-#define ATTR_SEQUENCE ATTR(SEQUENCE, 3) // the beginning of a sequence
-#define ATTR_SYMBOL ATTR(SYMBOL, 4) // is a reference to another object
-#define ATTR_MUTABLE ATTR(MUTABLE, 5) // is mutable object
-#define ATTR_READABLE ATTR(READABLE, 6) // is readable object
-#define ATTR_REFERENCE ATTR(REFERENCE, 7) // is reference object
-#define ATTR_CONSTANT ATTR(CONSTANT, 8) // is a constant object
-
-#define __as_int64_t(obj_ptr) ((int64_t)(obj_ptr)->data.ptr)
+#define ATTR_MUTABLE ATTR(MUTABLE, 1)
+#define ATTR_READABLE ATTR(READABLE, 2)
+#define ATTR_REFERENCE ATTR(REFERENCE, 3)
+#define ATTR_CONSTANT ATTR(CONSTANT, 4)
+#define ATTR_NUMBER ATTR(NUMBER, 1)
+#define ATTR_SYMBOL ATTR(SYMBOL, 2)
+#define ATTR_SEQUENCE ATTR(SEQUENCE, 3)
+#define ATTR_STRING ATTR(STRING, 4)
+#define ATTR_UNDEFINED ATTR(UNDEFINED, 6)
 
 /*    A representation of a value during runtime.
  */
@@ -52,40 +52,63 @@ extern array_t *g_symcache;
 #define __object_set_depth(object_ptr, __depth) \
 	((object_ptr)->header.depth = __depth)
 
-#define __object_get_ref_count(object_ptr) ((object_ptr)->header.ref_count)
+#define __object_get_ref_count(object_ptr) ((object_ptr)->header.refcnt)
 #define __object_set_ref_count(object_ptr, __ref_count) \
-	((object_ptr)->header.ref_count = __ref_count)
-#define __object_incr_ref_count(object_ptr) ((object_ptr)->header.ref_count++)
-#define __object_decr_ref_count(object_ptr) ((object_ptr)->header.ref_count--)
+	((object_ptr)->header.refcnt = __ref_count)
+#define __object_incr_ref_count(object_ptr) ((object_ptr)->header.refcnt++)
+#define __object_decr_ref_count(object_ptr) ((object_ptr)->header.refcnt--)
 
-#define __object_get_data_ptr(object_ptr) ((object_ptr)->data.ptr)
-#define __object_set_data_ptr(object_ptr, __ptr) \
-	((object_ptr)->data.ptr = (void *)__ptr)
+#define __object_get_data_as_number(object_ptr) ((object_ptr)->number)
+#define __object_set_data_as_number(object_ptr, __number) \
+	((object_ptr)->number = (xre_number_t)__number)
 
-#define __object_get_data_size(object_ptr) ((object_ptr)->data.size)
-#define __object_set_data_size(object_ptr, __size) \
-	((object_ptr)->data.size = __size)
+#define __object_get_data_as_sequence(object_ptr) ((object_ptr)->sequence)
+#define __object_set_data_as_sequence(object_ptr, __sequence) \
+	((object_ptr)->sequence = (xre_sequence_t *)__sequence)
+
+#define __object_get_data_as_string(object_ptr) ((object_ptr)->string)
+#define __object_set_data_as_string(object_ptr, __string) \
+	((object_ptr)->string = (xre_string_t *)__string)
+
+#define __object_get_data_as_symbol(object_ptr) ((object_ptr)->symbol)
+#define __object_set_data_as_symbol(object_ptr, __symbol) \
+	((object_ptr)->symbol = (xre_symbol_t)__symbol)
+
+#define __object_get_data_as_any(object_ptr) ((object_ptr)->any)
+#define __object_set_data_as_any(object_ptr, __any) \
+	((object_ptr)->any = (void *)__any)
 
 // #define __object_set_invalid_address(object_ptr) \
 // 	((object_ptr)->header.address = -1)
 // #define __object_get_address(object_ptr) ((object_ptr)->header.address)
 
+typedef dynstr_t xre_string_t;
+typedef array_t xre_sequence_t;
+typedef int64_t xre_number_t;
+typedef int64_t xre_symbol_t;
+// typedef struct {
+// 	uint8_t *ptr;
+// 	size_t size;
+// } xre_bytes_t;
+
 typedef struct {
-	uint32_t attrs; // contains the object's attributes (declared above)
-	uint32_t depth; // the level of { } the object is in
-	uint64_t ref_count; // the number of other objects that reference this object
-	// int64_t address;
+	uint64_t refcnt;
+	uint32_t otype;
+	uint32_t attrs;
+	int32_t address;
+	uint32_t depth;
 } object_header_t;
 
 typedef struct {
 	object_header_t header;
-	struct {
-		union {
-			void *ptr; // a pointer to the buffer
-			int64_t value; // the value
-		};
-		size_t size; // the size of the data in bytes
-	} data;
+	union {
+		void *any;
+		xre_string_t *string;
+		xre_sequence_t *sequence;
+		xre_number_t number;
+		xre_symbol_t symbol;
+		//xre_bytes_t  bytes;
+	};
 
 	void (*drop)(void *);
 	void (*repr)(void *);
@@ -94,10 +117,12 @@ typedef struct {
 
 void object_attrs_repr(int32_t attrs);
 
-object_t *object_register_create(int64_t data);
-object_t *object_string_create(unsigned char *ptr, size_t size);
+object_t *object_number_create(int64_t data);
+object_t *object_string_create(unsigned char *string);
 object_t *object_symbol_create(int64_t offset);
 object_t *object_sequence_create(size_t depth, object_t *lval, object_t *rval);
+//object_t *object_bytes_create(void *ptr, size_t size);
+
 object_t *object_undefined_create(void);
 
 void object_drop(void *ptr);

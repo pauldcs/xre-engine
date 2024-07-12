@@ -29,8 +29,7 @@ object_t *object_symbol_create(int64_t offset)
 				   .is_true = NULL };
 
 	__object_set_attr(&object, ATTR_SYMBOL);
-	__object_set_data_ptr(&object, offset);
-	__object_set_data_size(&object, sizeof(int64_t));
+	__object_set_data_as_symbol(&object, offset);
 	__object_set_ref_count(&object, 0);
 	//__object_set_invalid_address(&object);
 

@@ -33,7 +33,7 @@ static void sequence_repr(void *ptr)
 	for (size_t i = 0; i < seq_size; i++) {
 		object_t *obj = array_access(array, i);
 		if (obj) {
-			obj->repr(obj->data.ptr);
+			obj->repr(__object_get_data_as_any(obj));
 		} else {
 			(void)fprintf(stderr, "<no_repr>");
 		}
@@ -51,7 +51,8 @@ static bool unfold_sequence_object(object_t *object, array_t *buffer)
 	__return_val_if_fail__(buffer, false);
 
 	if (__object_has_attr(object, ATTR_SEQUENCE)) {
-		if (!array_concat(buffer, (array_t *)object->data.ptr)) {
+		if (!array_concat(buffer,
+				  __object_get_data_as_sequence(object))) {
 			return (false);
 		}
 
@@ -73,7 +74,8 @@ object_t *object_sequence_create(size_t depth, object_t *lval, object_t *rval)
 				   .drop = sequence_drop,
 				   .is_true = sequence_test };
 
-	array_t *sequence = array_create(sizeof(object_t), 2, object_drop);
+	xre_sequence_t *sequence =
+		array_create(sizeof(object_t), 2, object_drop);
 
 	if (__object_get_depth(lval) > __object_get_depth(rval)) {
 		if (!array_append(sequence, lval, 1) ||
@@ -93,8 +95,7 @@ object_t *object_sequence_create(size_t depth, object_t *lval, object_t *rval)
 	}
 
 	__object_set_attr(&object, ATTR_SEQUENCE);
-	__object_set_data_ptr(&object, sequence);
-	__object_set_data_size(&object, array_sizeof(sequence));
+	__object_set_data_as_sequence(&object, sequence);
 	__object_set_ref_count(&object, 0);
 	//__object_set_invalid_address(&object);
 

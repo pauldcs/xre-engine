@@ -18,7 +18,8 @@ XRE_API_OPERATOR_FUNC(oper_assign)
 		return (false);
 	}
 
-	if (!unwrap_symbol_write(self, __as_int64_t(&lv), &object)) {
+	if (!unwrap_symbol_write(self, __object_get_data_as_symbol(&lv),
+				 &object)) {
 		return (false);
 	}
 

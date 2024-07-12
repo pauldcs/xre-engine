@@ -113,7 +113,7 @@ SRCS := \
 	runtime/memory/stack.c \
 	runtime/memory/symtab.c \
 \
-	runtime/memory/object/register.c \
+	runtime/memory/object/number.c \
 	runtime/memory/object/sequence.c \
 	runtime/memory/object/string.c \
 	runtime/memory/object/symbol.c \
@@ -122,10 +122,7 @@ SRCS := \
 	runtime/builtin/builtins.c \
 	runtime/builtin/xre_builtin.c \
 \
-	runtime/builtin/std/array/array_size.c \
-	runtime/builtin/std/str/str_size.c \
-\
-	runtime/builtin/std/os/print.c \
-	runtime/builtin/std/os/yes.c \
-	runtime/builtin/std/os/typeof.c
+	runtime/builtin/std/print.c \
+	runtime/builtin/std/yes.c \
+	runtime/builtin/std/typeof.c
 	

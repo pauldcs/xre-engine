@@ -1,4 +1,4 @@
-#include "runtime/memory/xre_memory.h"
+#include "xre_memory.h"
 #include "xre_alloc.h"
 #include "xre_args.h"
 #include "xre_assert.h"
@@ -14,7 +14,7 @@
 
 t_xre_state __xre_state__ = {
 	.title = "xre",
-	.version = "0.8.4",
+	.version = "0.8.5",
 };
 
 static bool init_source_file(t_xre_args *args, const char *path)
@@ -60,6 +60,7 @@ static bool init_source_file(t_xre_args *args, const char *path)
 
 			goto club;
 		}
+
 		xre_report_error("%s: %s", path, "Permission denied");
 		return (false);
 
@@ -69,8 +70,6 @@ static bool init_source_file(t_xre_args *args, const char *path)
 	}
 
 	return (false);
-
-	__assert_not_reached__();
 
 club:
 

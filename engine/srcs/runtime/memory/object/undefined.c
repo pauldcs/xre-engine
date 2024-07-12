@@ -37,8 +37,7 @@ object_t *object_undefined_create(void)
 				   .is_true = undefined_test };
 
 	__object_set_attr(&object, ATTR_MUTABLE);
-	__object_set_data_ptr(&object, NULL);
-	__object_set_data_size(&object, 0);
+	__object_set_data_as_any(&object, NULL);
 	__object_set_ref_count(&object, 0);
 	//__object_set_invalid_address(&object);
 

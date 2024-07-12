@@ -7,6 +7,5 @@
 XRE_BUILTIN_FUNCTION(builtin_yes)
 {
 	__return_val_if_fail__(self, false);
-	return (__push_r(self,
-			 object_string_create((unsigned char *)"yes", 3)));
+	return (__push_r(self, object_string_create((unsigned char *)"yes")));
 }

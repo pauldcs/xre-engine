@@ -15,7 +15,7 @@ XRE_BUILTIN_FUNCTION(builtin_print)
 	}
 
 	top = (object_t *)stack_top();
-	top->repr(top->data.ptr);
+	top->repr(__object_get_data_as_any(top));
 
 	(void)fprintf(stderr, "\n");
 

@@ -18,8 +18,8 @@ XRE_API_OPERATOR_FUNC(oper_mod)
 	static int64_t a;
 	static int64_t b;
 
-	if (!unwrap_register_object(self, &lv, &a) ||
-	    !unwrap_register_object(self, &rv, &b)) {
+	if (!unwrap_number_object(self, &lv, &a) ||
+	    !unwrap_number_object(self, &rv, &b)) {
 		return (false);
 	}
 
@@ -28,5 +28,5 @@ XRE_API_OPERATOR_FUNC(oper_mod)
 			false);
 	}
 
-	return (__push_rw(self, object_register_create(a % b)));
+	return (__push_rw(self, object_number_create(a % b)));
 }
