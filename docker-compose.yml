@@ -14,6 +14,6 @@ services:
     volumes:
       - ./engine:/root/engine
     ports:
-      - '0.0.0.0:7000:3000'
+      - '0.0.0.0:8000:3000'
     expose:
       - 7000

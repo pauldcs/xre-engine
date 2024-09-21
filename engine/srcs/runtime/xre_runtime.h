@@ -11,7 +11,7 @@
  */
 
 typedef struct stmt_tree_s ast_stmt_t;
-typedef int stmt_t;
+typedef int		   stmt_t;
 typedef bool (*runtime_op_t)(ast_stmt_t *);
 
 extern ast_stmt_t *__global_current_stmts_ptr__;
@@ -22,7 +22,7 @@ struct stmt_tree_s {
 		orig; // the code fragment from which this statement is parsed from
 	union {
 		int64_t value; // the value that the token represents
-		char *string; // the string that the token represents
+		char *string;  // the string that the token represents
 		struct {
 			stmt_t left; // index of the left child branch
 			stmt_t right; // index of the right child branch
@@ -32,9 +32,10 @@ struct stmt_tree_s {
 
 #define __br_eval(obj_ptr) obj_ptr->eval(obj_ptr)
 
-#define __push_r_as_ref(self_ptr, obj_ptr)         \
-	stack_push_enable_attrs(self_ptr, obj_ptr, \
-				ATTR_READABLE | ATTR_REFERENCE)
+#define __push_r_as_ref(self_ptr, obj_ptr)                        \
+	stack_push_enable_attrs(                                  \
+		self_ptr, obj_ptr, ATTR_READABLE | ATTR_REFERENCE \
+	)
 
 #define __push_r(self_ptr, obj_ptr) \
 	stack_push_enable_attrs(self_ptr, obj_ptr, ATTR_READABLE)
@@ -42,8 +43,10 @@ struct stmt_tree_s {
 #define __push_w(self_ptr, obj_ptr) \
 	stack_push_enable_attrs(self_ptr, obj_ptr, ATTR_MUTABLE)
 
-#define __push_rw(self_ptr, obj_ptr) \
-	stack_push_enable_attrs(self_ptr, obj_ptr, ATTR_READABLE | ATTR_MUTABLE)
+#define __push_rw(self_ptr, obj_ptr)                            \
+	stack_push_enable_attrs(                                \
+		self_ptr, obj_ptr, ATTR_READABLE | ATTR_MUTABLE \
+	)
 
 /*    Execute the ast
  */

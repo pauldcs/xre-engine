@@ -1,12 +1,14 @@
-#include "xre_assert.h"
+#include "xre_compiler.h"
 #include "xre_log.h"
 #include "xre_memory.h"
 #include "xre_operations.h"
 #include <stdbool.h>
 
-XRE_API_OPERATOR_FUNC(oper_value)
+XRE_API(oper_value)
 {
-	__return_val_if_fail__(self, false);
+	__trigger_bug_if(self == NULL);
+	static object_t _result = { 0 };
 
-	return (__push_rw(self, object_number_create(self->value)));
+	object_number_init(self->value, &_result);
+	return (__push_rw(self, &_result));
 }

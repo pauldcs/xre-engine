@@ -1,7 +1,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-/* COPY PASTED FROM linux/lib/glob.c
+/* FROM linux/lib/glob.c
  */
 
 /**
@@ -61,20 +61,22 @@ bool strpcmp(char const *str, char const *pat)
 			break;
 
 		case '*': /* Any-length wildcard */
-			if (*pat == '\0') { /* Optimize trailing * case */
+			if (*pat ==
+			    '\0') { /* Optimize trailing * case */
 				return (true);
 			}
 
 			back_pat = pat;
-			back_str = --str; /* Allow zero-length match */
+			back_str =
+				--str; /* Allow zero-length match */
 
 			break;
 
 		case '[': { /* Character class */
-			bool match = false;
-			bool inverted = (*pat == '!');
+			bool match	  = false;
+			bool inverted	  = (*pat == '!');
 			char const *class = pat + inverted;
-			unsigned char a = *class ++;
+			unsigned char a	  = *class ++;
 
 			/*
 			 * Iterate over each span in the character class.
@@ -88,7 +90,8 @@ bool strpcmp(char const *str, char const *pat)
 					goto literal;
 				}
 
-				if (class[0] == '-' && class[1] != ']') {
+				if (class[0] == '-' &&
+				    class[1] != ']') {
 					b = class[1];
 
 					if (b == '\0') {
@@ -123,7 +126,8 @@ literal:
 			}
 backtrack:
 			if (c == '\0' || !back_pat) {
-				return (false); /* No point continuing */
+				return (false
+				); /* No point continuing */
 			}
 
 			/* Try again from last *, one character later in str. */

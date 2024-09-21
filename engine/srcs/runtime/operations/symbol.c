@@ -1,4 +1,4 @@
-#include "xre_assert.h"
+#include "xre_compiler.h"
 #include "xre_log.h"
 #include "xre_memory.h"
 #include "xre_operations.h"
@@ -7,22 +7,34 @@
 /*    Executes when a symbol is called as
  *    a value.
  */
-XRE_API_OPERATOR_FUNC(oper_symbol_expand)
+static inline bool _oper_symbol_expand(ast_stmt_t *self, object_t *object)
 {
-	__return_val_if_fail__(self, false);
-
-	static object_t *object;
-
-	return (unwrap_symbol_read(self, self->value, &object) &&
-		__push_r(self, object));
+	return (unwrap_symbol_read(self, self->value, &object)&&  __push_r(self, object));
 }
 
 /*    Executes when a symbol is called for
  *    assignment.
  */
-XRE_API_OPERATOR_FUNC(oper_symbol_addr)
+static inline bool _oper_symbol_addr(ast_stmt_t *self, object_t *object)
 {
-	__return_val_if_fail__(self, false);
+	object_symbol_init(self->value, object);
+	return (__push_r(self, object));
+}
 
-	return (__push_r(self, object_symbol_create(self->value)));
+XRE_API(oper_symbol_expand)
+{
+	__trigger_bug_if(self == NULL);
+	static object_t _result = { 0 };
+
+	bool ret = _oper_symbol_expand(self, &_result);
+	return (ret);
+}
+
+XRE_API(oper_symbol_addr)
+{
+	__trigger_bug_if(self == NULL);
+	static object_t _result = { 0 };
+
+	bool ret = _oper_symbol_addr(self, &_result);
+	return (ret);
 }

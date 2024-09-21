@@ -10,9 +10,9 @@
 char *read_file(char *filename, size_t *sizep)
 {
 	struct stat finfo;
-	size_t file_size;
-	char *buffer;
-	int i, file;
+	size_t	    file_size;
+	char	   *buffer;
+	int	    i, file;
 
 	if ((stat(filename, &finfo) < 0) ||
 	    (file = open(filename, O_RDONLY, 0666)) < 0)
@@ -32,7 +32,7 @@ char *read_file(char *filename, size_t *sizep)
 
 	/* Read the file into BUFFER. */
 	buffer = xmalloc(file_size + 1);
-	i = read(file, buffer, file_size);
+	i      = read(file, buffer, file_size);
 	close(file);
 
 	if (i < 0) {

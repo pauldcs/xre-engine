@@ -1,28 +1,28 @@
-#include "array.h"
+#include "vec.h"
 #include "xre_log.h"
 #include "xre_memory.h"
 #include "xre_utils.h"
-#include "xre_xdp.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 
 typedef struct {
 	int32_t id;
-	int offset;
+	int	offset;
 } cache_entry_t;
 
-array_t *g_symtab = NULL;
-array_t *g_symcache = NULL;
+vec_t *g_symtab	  = NULL;
+vec_t *g_symcache = NULL;
 
 int symtab_entry_create(const char *sym)
 {
-	size_t cache_size = array_size(g_symcache);
-	size_t i = 0;
-	int id = hash_string(sym);
+	size_t cache_size = vec_size(g_symcache);
+	size_t i	  = 0;
+	int    id	  = hash_string(sym);
 
 	for (; i < cache_size; i++) {
-		cache_entry_t *entry = (cache_entry_t *)array_at(g_symcache, i);
+		cache_entry_t *entry =
+			(cache_entry_t *)vec_at(g_symcache, i);
 		if (!entry) {
 			return (-1);
 		}
@@ -32,10 +32,13 @@ int symtab_entry_create(const char *sym)
 		}
 	}
 
-	cache_entry_t e = { .id = id, .offset = array_size(g_symtab) };
+	cache_entry_t e = { .id = id, .offset = vec_size(g_symtab) };
+	
+	object_t obj = { 0 };
+	object_undefined_init(&obj);
 
-	if (!array_push(g_symtab, object_undefined_create()) ||
-	    !array_push(g_symcache, &e)) {
+	if (!vec_push(g_symtab, &obj) ||
+	    !vec_push(g_symcache, &e)) {
 		return (-1);
 	}
 
@@ -48,16 +51,17 @@ bool symtab_init(void)
 		return (true);
 	}
 
-	g_symtab = array_create(sizeof(object_t), STACK_SIZE, NULL);
+	g_symtab = vec_create(sizeof(object_t), STACK_SIZE, NULL);
 	if (!g_symtab) {
 		return (false);
 	}
 
-	g_symcache = array_create(sizeof(cache_entry_t), STACK_SIZE, NULL);
+	g_symcache =
+		vec_create(sizeof(cache_entry_t), STACK_SIZE, NULL);
 	if (!g_symcache) {
-		array_kill(g_symtab);
+		vec_kill(g_symtab);
 
-		g_symtab = NULL;
+		g_symtab   = NULL;
 		g_symcache = NULL;
 
 		return (false);
@@ -72,9 +76,9 @@ void symtab_fini(void)
 		return;
 	}
 
-	array_kill(g_symtab);
-	array_kill(g_symcache);
+	vec_kill(g_symtab);
+	vec_kill(g_symcache);
 
-	g_symtab = NULL;
+	g_symtab   = NULL;
 	g_symcache = NULL;
 }

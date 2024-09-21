@@ -1,5 +1,5 @@
-#include "array.h"
-#include "xre_assert.h"
+#include "vec.h"
+#include "xre_compiler.h"
 #include "xre_memory.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -12,52 +12,58 @@ static void sequence_drop(void *ptr)
 #if defined XRE_ENABLE_OBJECT_LOGGING
 	__xre_logger(info, "dropping sequence @%p", ptr);
 #endif
-	array_kill((array_t *)ptr);
+	vec_kill((vec_t *)ptr);
 }
 
 static bool sequence_test(void *ptr)
 {
 	__return_val_if_fail__(ptr, false);
 
-	return (array_size((array_t *)ptr) > 0);
+	return (vec_size((vec_t *)ptr) > 0);
 }
 
 static void sequence_repr(void *ptr)
 {
 	__return_if_fail__(ptr);
 
-	array_t *array = (array_t *)ptr;
-	size_t seq_size = array_size(array);
+	vec_t *array	= (vec_t *)ptr;
+	size_t seq_size = vec_size(array);
 
-	(void)fprintf(stderr, "[");
+	(void)fprintf(stdout, "[");
 	for (size_t i = 0; i < seq_size; i++) {
-		object_t *obj = array_access(array, i);
+		object_t *obj = vec_access(array, i);
 		if (obj) {
 			obj->repr(__object_get_data_as_any(obj));
 		} else {
-			(void)fprintf(stderr, "<no_repr>");
+			(void)fprintf(stdout, "<no_repr>");
 		}
 
 		if (i != seq_size - 1) {
-			(void)fprintf(stderr, ", ");
+			(void)fprintf(stdout, ", ");
 		}
 	}
-	(void)fprintf(stderr, "]");
+	(void)fprintf(stdout, "]");
 }
 
-static bool unfold_sequence_object(object_t *object, array_t *buffer)
+static bool unfold_sequence_object(object_t *object, vec_t *buffer)
 {
 	__return_val_if_fail__(object, false);
 	__return_val_if_fail__(buffer, false);
 
 	if (__object_has_attr(object, ATTR_SEQUENCE)) {
-		if (!array_concat(buffer,
-				  __object_get_data_as_sequence(object))) {
+		if (!vec_concat(
+			    buffer,
+			    __object_get_data_as_sequence(object)
+		    )) {
 			return (false);
+		}
+		
+		if (!__object_has_attr(object, ATTR_REFERENCE) && __object_get_depth(object) > 1) {
+			sequence_drop(object->sequence);
 		}
 
 	} else {
-		if (!array_append(buffer, object, 1)) {
+		if (!vec_append(buffer, object, 1)) {
 			return (false);
 		}
 	}
@@ -65,46 +71,46 @@ static bool unfold_sequence_object(object_t *object, array_t *buffer)
 	return (true);
 }
 
-object_t *object_sequence_create(size_t depth, object_t *lval, object_t *rval)
+bool object_sequence_init(
+	size_t depth, object_t *lval, object_t *rval, object_t *buf
+)
 {
 	__return_val_if_fail__(lval, NULL);
 	__return_val_if_fail__(rval, NULL);
 
-	static object_t object = { .repr = sequence_repr,
-				   .drop = sequence_drop,
-				   .is_true = sequence_test };
+	buf->repr    = sequence_repr;
+	buf->drop    = sequence_drop;
+	buf->is_true = sequence_test;
 
 	xre_sequence_t *sequence =
-		array_create(sizeof(object_t), 2, object_drop);
+		vec_create(sizeof(object_t), 2, object_drop);
 
 	if (__object_get_depth(lval) > __object_get_depth(rval)) {
-		if (!array_append(sequence, lval, 1) ||
+		if (!vec_append(sequence, lval, 1) ||
 		    !unfold_sequence_object(rval, sequence)) {
 			goto prison;
 		}
 	} else {
 		if (__object_get_depth(lval) != depth) {
-			if (!array_append(sequence, lval, 1) ||
-			    !array_append(sequence, rval, 1)) {
+			if (!vec_append(sequence, lval, 1) ||
+			    !vec_append(sequence, rval, 1)) {
 				goto prison;
 			}
-		} else if (!unfold_sequence_object(lval, sequence) ||
-			   !array_append(sequence, rval, 1)) {
+		} else if (!unfold_sequence_object(lval, sequence) || !vec_append(sequence, rval, 1)) {
 			goto prison;
 		}
 	}
 
-	__object_set_attr(&object, ATTR_SEQUENCE);
-	__object_set_data_as_sequence(&object, sequence);
-	__object_set_ref_count(&object, 0);
-	//__object_set_invalid_address(&object);
+	__object_set_attr(buf, ATTR_SEQUENCE);
+	__object_set_data_as_sequence(buf, sequence);
+	__object_set_ref_count(buf, 0);
 
 #if defined XRE_ENABLE_OBJECT_LOGGING
 	__xre_logger(info, "created sequence @%p", object.data.ptr);
 #endif
-	return (&object);
+	return (true);
 
 prison:
-	array_kill(sequence);
-	return (NULL);
+	vec_kill(sequence);
+	return (false);
 }

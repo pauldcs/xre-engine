@@ -11,8 +11,8 @@
 char *str_to_int32(const char *str, int32_t *result)
 {
 	int64_t tmp;
-	char *ptr = (char *)str;
-	int negative = 0;
+	char   *ptr	 = (char *)str;
+	int	negative = 0;
 
 	tmp = 0;
 
@@ -26,7 +26,7 @@ char *str_to_int32(const char *str, int32_t *result)
 
 	if (*ptr == '0') {
 		char *endptr;
-		int base;
+		int   base;
 
 		if (*(ptr + 1) == 'x' || *(ptr + 1) == 'X')
 			base = 16;
@@ -42,7 +42,8 @@ char *str_to_int32(const char *str, int32_t *result)
 		tmp = strtol(ptr, &endptr, base);
 		ptr = endptr;
 
-		if (errno == ERANGE || tmp > ((int64_t)INT_MAX + negative)) {
+		if (errno == ERANGE ||
+		    tmp > ((int64_t)INT_MAX + negative)) {
 			return (NULL);
 		}
 

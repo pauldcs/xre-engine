@@ -1,13 +1,11 @@
-#include "xre_assert.h"
+#include "xre_compiler.h"
 #include "xre_log.h"
 #include "xre_memory.h"
 #include "xre_operations.h"
 #include <stdbool.h>
 
-XRE_API_OPERATOR_FUNC(oper_sequence)
+static inline bool _oper_sequence(ast_stmt_t *self, object_t *object)
 {
-	__return_val_if_fail__(self, false);
-
 	static object_t lv;
 	static object_t rv;
 
@@ -15,6 +13,18 @@ XRE_API_OPERATOR_FUNC(oper_sequence)
 		return (false);
 	}
 
-	return (__push_r(self,
-			 object_sequence_create(self->orig->_depth, &lv, &rv)));
+	object_sequence_init(
+		self->orig->_depth, &lv, &rv, object
+	);
+	
+	return (true);
+}
+
+XRE_API(oper_sequence)
+{
+	__trigger_bug_if(self == NULL);
+	static object_t _result = { 0 };
+
+	bool ret = _oper_sequence(self, &_result);
+	return (ret ? __push_r(self, &_result) : false);
 }

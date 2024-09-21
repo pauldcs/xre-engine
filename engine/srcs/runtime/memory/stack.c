@@ -1,15 +1,14 @@
-#include "array.h"
+#include "vec.h"
 #include "xre_log.h"
 #include "xre_memory.h"
 #include "xre_utils.h"
-#include "xre_xdp.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 
-array_t *g_stack = NULL;
+vec_t *g_stack	   = NULL;
 size_t g_stack_ptr = 0;
-size_t g_max_ptr = 0;
+size_t g_max_ptr   = 0;
 
 bool stack_init(void)
 {
@@ -18,30 +17,29 @@ bool stack_init(void)
 	}
 
 	g_stack_ptr = 0;
-	g_stack = array_create(sizeof(object_t), STACK_SIZE,
-			       /* object_drop */ NULL);
+	g_stack	    = vec_create(sizeof(object_t), STACK_SIZE, NULL);
 
 	if (!g_stack) {
 		return (false);
 	}
 
-	array_settle(g_stack);
+	//vec_settle(g_stack);
 
 	return (true);
 }
 
 void stack_fini(void)
 {
-	array_kill(g_stack);
+	vec_kill(g_stack);
 
 	g_stack_ptr = 0;
-	g_max_ptr = 0;
-	g_stack = NULL;
+	g_max_ptr   = 0;
+	g_stack	    = NULL;
 }
 
 bool stack_push(object_t *object)
 {
-	if (!array_push(g_stack, object)) {
+	if (!vec_push(g_stack, object)) {
 		return (false);
 	}
 
@@ -53,12 +51,12 @@ bool stack_push(object_t *object)
 
 const object_t *stack_top(void)
 {
-	return (const object_t *)array_tail(g_stack);
+	return (const object_t *)vec_tail(g_stack);
 }
 
 void stack_pop(object_t *ptr)
 {
-	array_pop(g_stack, ptr);
+	vec_pop(g_stack, ptr);
 
 	g_stack_ptr--;
 }
@@ -67,8 +65,9 @@ void stack_pop_discard(void)
 {
 	object_t object;
 
-	array_pop(g_stack, &object);
-	object_drop(&object);
+	stack_pop(&object);
+	if (!__object_has_attr(&object, ATTR_REFERENCE))
+		object_drop(&object);
 
 	g_stack_ptr--;
 }

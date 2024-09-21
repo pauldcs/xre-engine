@@ -1,4 +1,4 @@
-#include "xre_assert.h"
+#include "xre_compiler.h"
 #include "xre_parse.h"
 
 int get_precedence_by_kind(xre_expr_kind_t kind)
@@ -23,6 +23,7 @@ int get_precedence_by_kind(xre_expr_kind_t kind)
 		return (0);
 
 	case __NOT__:
+	case __METHOD__:
 	case __BUILTIN_CALL__:
 		return (-1);
 
@@ -81,12 +82,15 @@ int get_precedence_by_kind(xre_expr_kind_t kind)
 
 	case __ASSIGN__:
 		return (-19);
+	
+	case __CLOSURE__:
+		return (-21);
 
 	case __SEPARATOR__:
-		return (-20);
+		return (-22);
 
-	case __LPAREN__:
-	case __RPAREN__:
+	case __LBRACK__:
+	case __RBRACK__:
 		return (-1000);
 
 	case __VAL__:

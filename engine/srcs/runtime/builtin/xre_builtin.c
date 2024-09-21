@@ -4,7 +4,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-static bool get_builtin_offset(const char *ptr, size_t size, size_t *offset)
+static bool
+get_builtin_offset(const char *ptr, size_t size, size_t *offset)
 {
 	size_t lookup_size =
 		sizeof(builtin_func_lookup) / sizeof(builtin_func_t);
@@ -12,7 +13,8 @@ static bool get_builtin_offset(const char *ptr, size_t size, size_t *offset)
 
 	while (i < lookup_size) {
 		const char *name = builtin_func_lookup[i].name;
-		if (strlen(name) == size && !memcmp(name, ptr, size)) {
+		if (strlen(name) == size &&
+		    !memcmp(name, ptr, size)) {
 			*offset = i;
 			return (true);
 		}

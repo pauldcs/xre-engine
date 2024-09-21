@@ -1,4 +1,4 @@
-#include "array.h"
+#include "vec.h"
 #include "xre_core.h"
 #include "xre_readline.h"
 #include "xre_stringf.h"
@@ -15,7 +15,9 @@ void rl_display_status(const char *mode)
 	rl_erase_line();
 
 	(void)mode;
-	slcpyf(screen, config.screencols - 1, "xre-engine-%s",
+	slcpyf(screen,
+	       config.screencols - 1,
+	       "xre-engine-%s",
 	       __xre_state__.version);
 	fputstr(1, " %s%s%s", "\033[0;93m", screen, "\033[0m");
 	rl_move_cursor_to(__state__._pt.x, __state__._pt.y);
@@ -37,13 +39,15 @@ size_t str_count_char(const char *str, int c)
 	return (n);
 }
 
-static int get_num_lines(int string_size, int terminal_x, int terminal_y)
+static int
+get_num_lines(int string_size, int terminal_x, int terminal_y)
 {
-	int num_lines = string_size / terminal_x;
+	int num_lines	    = string_size / terminal_x;
 	int remaining_chars = string_size % terminal_x;
 
-	if (remaining_chars > 0)
+	if (remaining_chars > 0) {
 		num_lines++;
+	}
 
 	return num_lines > terminal_y ? terminal_y : num_lines;
 }
@@ -63,22 +67,26 @@ bool rl_redisplay(void)
 	}
 
 	__state__._pt.x = 0;
-	__state__._pt.y = config.screenrows - get_num_lines(__state__._mei + 3,
-							    config.screencols,
-							    config.screenrows);
+	__state__._pt.y =
+		config.screenrows - get_num_lines(
+					    __state__._mei + 3,
+					    config.screencols,
+					    config.screenrows
+				    );
 	__state__._pt.y -= 1;
 
 	rl_move_cursor_to(0, __state__._pt.y);
 
-	char *str = tgetstr("cd", NULL);
+	char  *str = tgetstr("cd", NULL);
 	size_t len = strlen(str);
 
 	xmemcpy(screen, str, len);
 	xmemcpy(&screen[len], "%> ", 3);
-	xmemcpy(&screen[len + 3], array_unsafe_access(__state__._v, 0),
+	xmemcpy(&screen[len + 3],
+		vec_unsafe_access(__state__._v, 0),
 		__state__._ei);
 
-	write(1, screen, __state__._ei + len + 3);
+	(void)write(STDOUT_FILENO, screen, __state__._ei + len + 3);
 
 	__state__._cc.x = __state__._pt.x;
 	__state__._cc.y = __state__._pt.y;
@@ -89,5 +97,6 @@ bool rl_redisplay(void)
 	rl_display_status(__state__.mode);
 	rl_move_cursor_to(__state__._cc.x, __state__._cc.y);
 	rl_set_cursor(true);
+
 	return (true);
 }

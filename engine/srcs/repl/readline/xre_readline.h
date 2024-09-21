@@ -1,14 +1,14 @@
 #ifndef __XRE_READLINE_H__
 #define __XRE_READLINE_H__
 
-#include "array.h"
+#include "vec.h"
 #include "xre_repl.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <termios.h>
 #include <unistd.h>
 
-#define CTRL_KEY(k) ((k) & 0x1f)
+#define CTRL_KEY(k)	  ((k)&0x1f)
 #define DEFAULT_LINE_SIZE 64
 
 extern bool __terminal_in_raw_mode__;
@@ -16,8 +16,8 @@ extern bool __is_termcap_inited__;
 
 typedef struct rl_config {
 	struct termios orig_termios;
-	size_t screenrows;
-	size_t screencols;
+	size_t	       screenrows;
+	size_t	       screencols;
 } t_rl_config;
 
 extern t_rl_config config;
@@ -28,27 +28,28 @@ typedef struct {
 } t_screen_pt;
 
 typedef struct {
-	array_t *_v;
-	bool eof_reached;
-	char *mode;
-	int _i; /* current index */
-	int _ei; /* end index */
-	int _mei; /* mac end index */
-	t_screen_pt _pt; /* point on the screen were we start printing */
+	vec_t *_v;
+	bool   eof_reached;
+	char  *mode;
+	int    _i;   /* current index */
+	int    _ei;  /* end index */
+	int    _mei; /* mac end index */
+	t_screen_pt
+		_pt; /* point on the screen were we start printing */
 	t_screen_pt _cc; /* cursor x and cursor y relative to window */
 } t_rl_state;
 
 extern t_rl_state __state__;
 
 typedef struct {
-	void *vec;
+	void  *vec;
 	size_t line_size;
 } t_rl;
 
 struct _tc_string {
 	const char *tc_var;
-	char **tc_value;
-	size_t tc_len;
+	char	  **tc_value;
+	size_t	    tc_len;
 };
 
 extern char *_term_clreol;
@@ -92,14 +93,14 @@ extern struct _tc_string tc_strings[32];
 
 #define _XA 0x200 /* extra alphabetic */
 #define _XS 0x100 /* extra space */
-#define _BB 0x80 /* BEL, BS, etc. */
-#define _CN 0x40 /* CR, FF, HT, NL, VT */
-#define _DI 0x20 /* '0'-'9' */
-#define _LO 0x10 /* 'a'-'z' */
-#define _PU 0x08 /* punctuation */
-#define _SP 0x04 /* space */
-#define _UP 0x02 /* 'A'-'Z' */
-#define _XD 0x01 /* '0'-'9', 'A'-'F', 'a'-'f' */
+#define _BB 0x80  /* BEL, BS, etc. */
+#define _CN 0x40  /* CR, FF, HT, NL, VT */
+#define _DI 0x20  /* '0'-'9' */
+#define _LO 0x10  /* 'a'-'z' */
+#define _PU 0x08  /* punctuation */
+#define _SP 0x04  /* space */
+#define _UP 0x02  /* 'A'-'Z' */
+#define _XD 0x01  /* '0'-'9', 'A'-'F', 'a'-'f' */
 
 #define XDI (_DI | _XD)
 #define XLO (_LO | _XD)
@@ -109,37 +110,40 @@ extern struct _tc_string tc_strings[32];
 #define XC_ALPHA(c) (_CharType[(int)(c)] & (_LO | _UP | _XA))
 #define XC_CNTRL(c) (_CharType[(int)(c)] & (_BB | _CN))
 #define XC_DIGIT(c) (_CharType[(int)(c)] & _DI)
-#define XC_GRAPH(c) (_CharType[(int)(c)] & (_DI | _LO | _PU | _UP | _XA))
+#define XC_GRAPH(c) \
+	(_CharType[(int)(c)] & (_DI | _LO | _PU | _UP | _XA))
 #define XC_LOWER(c) (_CharType[(int)(c)] & _LO)
-#define XC_PRINT(c) (_CharType[(int)(c)] & (_DI | _LO | _PU | _SP | _UP | _XA))
-#define XC_PUNCT(c) (_CharType[(int)(c)] & _PU)
-#define XC_SPACE(c) (_CharType[(int)(c)] & (_CN | _SP | _XS))
-#define XC_UPPER(c) (_CharType[(int)(c)] & _UP)
+#define XC_PRINT(c) \
+	(_CharType[(int)(c)] & (_DI | _LO | _PU | _SP | _UP | _XA))
+#define XC_PUNCT(c)  (_CharType[(int)(c)] & _PU)
+#define XC_SPACE(c)  (_CharType[(int)(c)] & (_CN | _SP | _XS))
+#define XC_UPPER(c)  (_CharType[(int)(c)] & _UP)
 #define XC_XDIGIT(c) (_CharType[(int)(c)] & _XD)
 
 extern const uint16_t _CharType[256];
 
-#define NUM_TC_STRINGS (sizeof(tc_strings) / sizeof(struct _tc_string))
+#define NUM_TC_STRINGS \
+	(sizeof(tc_strings) / sizeof(struct _tc_string))
 
 typedef enum {
-	RL_KEY_NONE = 0,
-	RL_KEY_EOF = 2,
-	RL_KEY_UP = 3,
-	RL_KEY_DOWN = 4,
-	RL_KEY_LEFT = 5,
-	RL_KEY_RIGHT = 6,
-	RL_KEY_DEL = 7,
-	RL_KEY_HOME = 8,
-	RL_KEY_END = 9,
-	RL_KEY_WORDLEFT = 10,
-	RL_KEY_WORDRIGHT = 11,
-	RL_KEY_ADDLINE = 12,
-	RL_KEY_REMLINE = 13,
-	RL_KEY_DEL_INPLACE = 14,
+	RL_KEY_NONE	    = 0,
+	RL_KEY_EOF	    = 2,
+	RL_KEY_UP	    = 3,
+	RL_KEY_DOWN	    = 4,
+	RL_KEY_LEFT	    = 5,
+	RL_KEY_RIGHT	    = 6,
+	RL_KEY_DEL	    = 7,
+	RL_KEY_HOME	    = 8,
+	RL_KEY_END	    = 9,
+	RL_KEY_WORDLEFT	    = 10,
+	RL_KEY_WORDRIGHT    = 11,
+	RL_KEY_ADDLINE	    = 12,
+	RL_KEY_REMLINE	    = 13,
+	RL_KEY_DEL_INPLACE  = 14,
 	RL_KEY_CLEAR_SCREEN = 15,
 	RL_KEY_START_EDITOR = 16,
-	RL_KEY_NEWLINE = 17,
-	RL_KEY_INTR = 18,
+	RL_KEY_NEWLINE	    = 17,
+	RL_KEY_INTR	    = 18,
 } rl_keys;
 
 /*    TERMINAL
@@ -153,20 +157,20 @@ bool rl_get_window_size(size_t *rows, size_t *cols);
 
 /*    READLINE
  */
-ssize_t xre_readline(char **buf, const history_array_t *history);
-int try_read_key_fd(int fildes);
-bool handle_line_mode_char(int ch, const history_array_t *history);
-bool handle_editor_mode_char(char ch);
+ssize_t xre_readline(char **buf, const history_vec_t *history);
+int	try_read_key_fd(int fildes);
+bool	handle_line_mode_char(int ch, const history_vec_t *history);
+bool	handle_editor_mode_char(char ch);
 
 /*    UTILS
  */
-void rl_set_cursor(bool visible);
-size_t rl_esc_to_str(char *s);
-void rl_putnbr(const int32_t c);
-int rl_xputchar(int c);
+void	rl_set_cursor(bool visible);
+size_t	rl_esc_to_str(char *s);
+void	rl_putnbr(const int32_t c);
+int	rl_xputchar(int c);
 ssize_t rl_xwrite(int fildes, const char *buf, size_t nbytes);
 ssize_t rl_xgetchr(int fildes);
-int rl_clamp(int v, int min, int max);
+int	rl_clamp(int v, int min, int max);
 
 /*    ACTIONS
  */

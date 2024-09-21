@@ -14,7 +14,8 @@ static void iob_write(t_iobuf *iob, const char *src, size_t n)
 
 	i = 0;
 	while (n && iob->len + i < iob->cap) {
-		*(unsigned char *)((char *)iob->data + iob->len + i) = src[i];
+		*(unsigned char *)((char *)iob->data + iob->len + i) =
+			src[i];
 		i++;
 		n--;
 	}
@@ -41,8 +42,8 @@ static void __chr(t_iobuf *iob, const int c)
 static void __hex(t_iobuf *iob, const uint32_t n)
 {
 	uint64_t tmp;
-	char bytes[16];
-	size_t i;
+	char	 bytes[16];
+	size_t	 i;
 
 	i = 16;
 	if (n == 0) {
@@ -61,9 +62,9 @@ static void __hex(t_iobuf *iob, const uint32_t n)
 
 static void __int(t_iobuf *iob, const int32_t c)
 {
-	char nbr[20];
+	char	 nbr[20];
 	uint32_t n;
-	size_t i;
+	size_t	 i;
 
 	if (c < 0) {
 		n = c * -1;
@@ -91,8 +92,8 @@ static void __int(t_iobuf *iob, const int32_t c)
 static void __ptr(t_iobuf *iob, const uint64_t *p)
 {
 	uint64_t ptr;
-	char hex[18];
-	size_t i;
+	char	 hex[18];
+	size_t	 i;
 
 	i = 18;
 
@@ -125,7 +126,7 @@ static void __str(t_iobuf *iob, const char *s)
 static char *format_field(t_iobuf *iob, char *ptr, va_list *ap)
 {
 	char *tmp = ptr;
-	int ok = 0;
+	int   ok  = 0;
 
 	if (*tmp == 'd' && ++tmp && ++ok)
 		__int(iob, va_arg(*ap, int32_t));
@@ -143,7 +144,8 @@ static char *format_field(t_iobuf *iob, char *ptr, va_list *ap)
 	return (iob_write(iob, "%", 1), ptr);
 }
 
-static void iob_format_str(t_iobuf *iob, const char *format, va_list *ap)
+static void
+iob_format_str(t_iobuf *iob, const char *format, va_list *ap)
 {
 	char *ptr;
 
@@ -170,7 +172,7 @@ size_t cpyf(void *dst, size_t dstsize, const char *format, ...)
 	(void)xmemset(&iob, '\0', sizeof(t_iobuf));
 
 	iob.data = dst;
-	iob.cap = dstsize;
+	iob.cap	 = dstsize;
 
 	va_start(ap, format);
 	iob_format_str(&iob, format, &ap);
@@ -187,7 +189,7 @@ size_t scpyf(char *str, const char *format, ...)
 	(void)xmemset(&iob, '\0', sizeof(t_iobuf));
 
 	iob.data = str;
-	iob.cap = IOBUF_MAX - 1;
+	iob.cap	 = IOBUF_MAX - 1;
 
 	va_start(ap, format);
 	iob_format_str(&iob, format, &ap);
@@ -205,7 +207,7 @@ size_t slcpyf(char *dst, size_t dstsize, const char *format, ...)
 	xmemset(&iob, '\0', sizeof(t_iobuf));
 
 	iob.data = dst;
-	iob.cap = dstsize;
+	iob.cap	 = dstsize;
 
 	va_start(ap, format);
 	iob_format_str(&iob, format, &ap);
@@ -220,13 +222,13 @@ size_t slcpyf(char *dst, size_t dstsize, const char *format, ...)
 ssize_t ssavef(char **dst, const char *format, ...)
 {
 	static char buf[IOBUF_MAX];
-	va_list ap;
-	t_iobuf iob;
+	va_list	    ap;
+	t_iobuf	    iob;
 
 	(void)xmemset(&iob, '\0', sizeof(t_iobuf));
 
 	iob.data = buf;
-	iob.cap = sizeof(buf) - 1;
+	iob.cap	 = sizeof(buf) - 1;
 
 	va_start(ap, format);
 	iob_format_str(&iob, format, &ap);
@@ -245,13 +247,13 @@ ssize_t ssavef(char **dst, const char *format, ...)
 size_t fputstr(int fd, const char *format, ...)
 {
 	static char buf[IOBUF_MAX];
-	va_list ap;
-	t_iobuf iob;
+	va_list	    ap;
+	t_iobuf	    iob;
 
 	xmemset(&iob, '\0', sizeof(t_iobuf));
 
 	iob.data = buf;
-	iob.cap = sizeof(buf);
+	iob.cap	 = sizeof(buf);
 
 	va_start(ap, format);
 	iob_format_str(&iob, format, &ap);

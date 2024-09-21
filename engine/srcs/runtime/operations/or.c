@@ -1,13 +1,11 @@
-#include "xre_assert.h"
+#include "xre_compiler.h"
 #include "xre_log.h"
 #include "xre_memory.h"
 #include "xre_operations.h"
 #include <stdbool.h>
 
-XRE_API_OPERATOR_FUNC(oper_or)
+static inline bool _oper_or(ast_stmt_t *self)
 {
-	__return_val_if_fail__(self, false);
-
 	if (!__br_eval(__left_branch)) {
 		return (false);
 	}
@@ -19,4 +17,10 @@ XRE_API_OPERATOR_FUNC(oper_or)
 	stack_pop_discard();
 
 	return (__br_eval(__right_branch));
+}
+
+XRE_API(oper_or)
+{
+	__trigger_bug_if(self == NULL);
+	return (_oper_or(self));
 }

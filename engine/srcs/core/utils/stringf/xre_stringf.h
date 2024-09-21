@@ -2,15 +2,17 @@
 #define __XRE_STRINGF_H__
 
 #if defined(__GNUC__) && __GNUC__ >= 4
-#define xmemcpy(dst, src, size) __builtin_memcpy((void *)dst, (void *)src, size)
-#define xmemset(b, c, len) __builtin_memset((void *)b, c, len)
+#define xmemcpy(dst, src, size) \
+	__builtin_memcpy((void *)dst, (void *)src, size)
+#define xmemset(b, c, len)  __builtin_memset((void *)b, c, len)
 #define xmemmove(b, c, len) __builtin_memmove((void *)b, c, len)
-#define xstrlen(str) __builtin_strlen(str)
+#define xstrlen(str)	    __builtin_strlen(str)
 #else
 #define xmemcpy(dst, src, size) memcpy((void *)dst, (void *)src, size)
-#define xmemmove(dst, src, size) memmove((void *)dst, (void *)src, size)
+#define xmemmove(dst, src, size) \
+	memmove((void *)dst, (void *)src, size)
 #define xmemset(b, c, len) memset((void *)b, c, len)
-#define xstrlen(str) strlen(str)
+#define xstrlen(str)	   strlen(str)
 #endif
 
 #include <stdarg.h>
@@ -21,7 +23,7 @@
 #define IOBUF_MAX 4096
 
 typedef struct s_iobuf {
-	void *data;
+	void  *data;
 	size_t cap;
 	size_t len;
 	size_t disc;

@@ -1,5 +1,5 @@
-#include "array.h"
-#include "xre_assert.h"
+#include "vec.h"
+#include "xre_compiler.h"
 #include "xre_builtin.h"
 #include "xre_errors.h"
 #include "xre_parse.h"
@@ -7,12 +7,13 @@
 #include <assert.h>
 #include <string.h>
 #include <sys/types.h>
+#include <stdlib.h>
 
 #define MICROSTACK_SIZE 2048
 static const void *__stack_a[MICROSTACK_SIZE];
 static const void *__stack_b[MICROSTACK_SIZE];
-static size_t __top_a;
-static size_t __top_b;
+static size_t	   __top_a;
+static size_t	   __top_b;
 
 #define TOP_A_KIND ((xre_ast_t *)__stack_a[__top_a])->kind
 #define TOP_B_KIND ((xre_ast_t *)__stack_b[__top_b])->kind
@@ -48,7 +49,8 @@ static xre_ast_t *ast_new_node(xre_token_t *token)
 	node->kind = token->_kind;
 	node->type = token->_type;
 
-	(void)memcpy((void *)&node->token, token, sizeof(xre_token_t));
+	(void
+	)memcpy((void *)&node->token, token, sizeof(xre_token_t));
 
 	if (node->kind == __VAL__)
 		node->value = token->_value;
@@ -64,7 +66,9 @@ static xre_ast_t *ast_new_node(xre_token_t *token)
 	}
 
 	if (node->kind == __BUILTIN_CALL__) {
-		node->string = get_builtin_name_ptr(token->_ptr, token->_len);
+		node->string = get_builtin_name_ptr(
+			token->_ptr, token->_len
+		);
 	}
 
 	return (node);
@@ -80,18 +84,18 @@ static void __make_value_to_b(void)
 
 	} else {
 		node->_binop.right = __pop_b();
-		node->_binop.left = __pop_b();
+		node->_binop.left  = __pop_b();
 	}
 
 	__push_b(node);
 }
 
-xre_ast_t *xre_expr_parse(array_t *tokens)
+xre_ast_t *xre_expr_parse(vec_t *tokens)
 {
 	__return_val_if_fail__(tokens, NULL);
 
 	xre_token_t *token = NULL;
-	size_t idx = 0;
+	size_t	     idx   = 0;
 
 	__top_a = 0;
 	__top_b = 0;
@@ -100,7 +104,7 @@ xre_ast_t *xre_expr_parse(array_t *tokens)
 	(void)memset(__stack_b, 0, MICROSTACK_SIZE * sizeof(void *));
 
 	while (true) {
-		token = (xre_token_t *)array_unsafe_at(tokens, ++idx);
+		token = (xre_token_t *)vec_unsafe_at(tokens, ++idx);
 		if (!token)
 			break;
 
@@ -108,7 +112,7 @@ xre_ast_t *xre_expr_parse(array_t *tokens)
 			break;
 
 		switch (token->_kind) {
-		case __LPAREN__:
+		case __LBRACK__:
 			__push_a(ast_new_node(token));
 
 			break;
@@ -119,8 +123,8 @@ xre_ast_t *xre_expr_parse(array_t *tokens)
 
 			break;
 
-		case __RPAREN__:
-			while (__top_a && (TOP_A_KIND != __LPAREN__))
+		case __RBRACK__:
+			while (__top_a && (TOP_A_KIND != __LBRACK__))
 				__make_value_to_b();
 
 			free((void *)__stack_a[__top_a]);
@@ -136,7 +140,8 @@ xre_ast_t *xre_expr_parse(array_t *tokens)
 		default:
 			while (__top_a &&
 			       (get_precedence_by_kind(TOP_A_KIND) >=
-				get_precedence_by_kind(token->_kind))) {
+				get_precedence_by_kind(token->_kind))
+			) {
 				__make_value_to_b();
 			}
 

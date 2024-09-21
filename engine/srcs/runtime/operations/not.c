@@ -1,18 +1,27 @@
-#include "xre_assert.h"
+#include "xre_compiler.h"
 #include "xre_log.h"
 #include "xre_memory.h"
 #include "xre_operations.h"
 #include <stdbool.h>
 
-XRE_API_OPERATOR_FUNC(oper_not)
+static inline bool _oper_not(ast_stmt_t *self, object_t *object)
 {
-	__return_val_if_fail__(self, false);
-
 	static object_t v;
 
-	if (!__br_eval(__left_branch) || !stack_pop_r(&v, __left_branch)) {
+	if (!__br_eval(__left_branch) ||
+	    !stack_pop_r(&v, __left_branch)) {
 		return (false);
 	}
 
-	return (__push_rw(self, object_number_create(!is_true_object(&v))));
+	object_number_init(!is_true_object(&v), object);
+	return (true);
+}
+
+XRE_API(oper_not)
+{
+	__trigger_bug_if(self == NULL);
+	static object_t _result = { 0 };
+
+	bool ret = _oper_not(self, &_result);
+	return (ret ? __push_rw(self, &_result) : false);
 }

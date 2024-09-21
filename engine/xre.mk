@@ -3,8 +3,6 @@ CC             := clang
 SRCS_DIR       := srcs
 OBJS_DIR       := .objs
 INCS_DIR       := incs
-LIBARRAY_DIR   := srcs/core/array
-LIBARRAY_NAME  := libarray.a
 
 #MAKEFLAGS += -j6
 
@@ -14,8 +12,6 @@ CFLAGS_RELEASE := \
 	-D XRE_DISABLE_ASSERTS=1
 
 CFLAGS := \
-	-O0     \
-	-g3     \
 	-Wall   \
 	-Wextra \
 	-Werror \
@@ -33,7 +29,9 @@ SRCS := \
 	core/args/xre_args.c \
 	core/fs/xre_fs.c \
 	core/log/xre_log.c \
-	core/ds/dynstr.c \
+	core/ds/vec.c \
+	core/ds/list.c \
+	core/ds/dstr.c \
 \
 	core/utils/stringf/xre_stringf.c \
 	core/utils/hex/xre_xdp.c \
@@ -76,6 +74,7 @@ SRCS := \
 \
 	runtime/xre_runtime.c \
 	runtime/common.c \
+	runtime/trace.c \
 \
 	runtime/operations/scope_resolution.c \
 	runtime/operations/eq.c \
@@ -94,7 +93,9 @@ SRCS := \
 	runtime/operations/do.c \
 	runtime/operations/else.c \
 	runtime/operations/separator.c \
+	runtime/operations/closure.c \
 	runtime/operations/sequence.c \
+	runtime/operations/method.c \
 	runtime/operations/symbol.c \
 	runtime/operations/mul.c \
 	runtime/operations/rshift.c \
@@ -117,12 +118,17 @@ SRCS := \
 	runtime/memory/object/sequence.c \
 	runtime/memory/object/string.c \
 	runtime/memory/object/symbol.c \
+	runtime/memory/object/buffer.c \
 	runtime/memory/object/undefined.c \
 \
 	runtime/builtin/builtins.c \
 	runtime/builtin/xre_builtin.c \
 \
 	runtime/builtin/std/print.c \
-	runtime/builtin/std/yes.c \
+	runtime/builtin/std/__u8.c \
+	runtime/builtin/std/__str.c \
+	runtime/builtin/std/__map.c \
+	runtime/builtin/std/__foreach.c \
+	runtime/builtin/std/__filter.c \
 	runtime/builtin/std/typeof.c
 	

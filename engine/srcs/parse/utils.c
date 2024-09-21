@@ -1,6 +1,7 @@
 #include "xre_parse.h"
 #include <sys/types.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 static void inner(xre_ast_t *ast, size_t depth);
 
@@ -8,6 +9,13 @@ static void put_binop(xre_ast_t *ast, size_t depth)
 {
 	inner(ast->_binop.left, depth + 1);
 	inner(ast->_binop.right, depth + 1);
+}
+
+static void put_sequence(xre_ast_t *ast, size_t depth)
+{
+	for (size_t c = 0; c < ast->_seq.count; c++) {
+		inner(ast->_seq.iter[c], depth + 1);
+	}
 }
 
 static void put_uniop(xre_ast_t *ast, size_t depth)
@@ -44,6 +52,8 @@ static void inner(xre_ast_t *ast, size_t depth)
 
 	if (ast->token._type & (EXPR_OP_TYPE_BINOP))
 		put_binop(ast, depth);
+	else if (ast->token._type & (EXPR_OP_TYPE_BINOP))
+		put_sequence(ast, depth);
 	else if (ast->token._type & EXPR_OP_TYPE_UNIOP)
 		put_uniop(ast, depth);
 }
@@ -124,6 +134,10 @@ const char *expr_kind_to_string(xre_expr_kind_t kind)
 		return "less_or_eaqual";
 	case __GE__:
 		return "greater_than_or_equal";
+	case __LBRACK__:
+		return "left_bracket";
+	case __RBRACK__:
+		return "right_bracket";
 	case __LPAREN__:
 		return "left_parenthesis";
 	case __RPAREN__:
@@ -142,10 +156,14 @@ const char *expr_kind_to_string(xre_expr_kind_t kind)
 		return "logical_or";
 	case __EQ__:
 		return "equals";
+	case __CLOSURE__:
+		return "closure";
 	case __NE__:
 		return "not_equal";
 	case __SEQUENCE__:
 		return "sequence_point";
+	case __METHOD__:
+		return "method";
 	case __SEPARATOR__:
 		return "separator";
 	case __LOOP__:
@@ -189,12 +207,14 @@ xre_expr_type_t expr_type_by_kind(xre_expr_kind_t kind)
 	case __NE__:
 	case __SEPARATOR__:
 	case __SEQUENCE__:
+	case __METHOD__:
 	case __SCOPE_RESOLUTION__:
 	case __LOOP__:
 	case __DO__:
 	case __ELSE__:
 	case __AND__:
 	case __OR__:
+	case __CLOSURE__:
 		return (EXPR_OP_TYPE_BINOP);
 
 	case __NOT__:
@@ -203,6 +223,8 @@ xre_expr_type_t expr_type_by_kind(xre_expr_kind_t kind)
 
 	case __START__:
 	case __END__:
+	case __LBRACK__:
+	case __RBRACK__:
 	case __LPAREN__:
 	case __RPAREN__:
 		return (EXPR_TYPE_OTHER);

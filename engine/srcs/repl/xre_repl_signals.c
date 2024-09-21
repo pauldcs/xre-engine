@@ -26,7 +26,8 @@ static bool setup_signal_handler(int signal, void (*handler)(int))
 	new_handler_info.sa_handler = (void (*)(int))handler;
 	sigemptyset(&new_handler_info.sa_mask);
 
-	if (sigaction(signal, &new_handler_info, &old_handler_info) != 0)
+	if (sigaction(signal, &new_handler_info, &old_handler_info) !=
+	    0)
 		return (false);
 	return (true);
 }
@@ -60,7 +61,8 @@ bool xre_repl_sigset_default(void)
 		setup_signal_handler(SIGALRM, _signal_handler) &&
 		setup_signal_handler(SIGABRT, _signal_handler) &&
 		setup_signal_handler(SIGQUIT, _signal_handler)
-		/* && setup_signal_handler(SIGWINCH, __rl_signal_handler) */);
+		/* && setup_signal_handler(SIGWINCH, __rl_signal_handler) */
+	);
 }
 
 void xre_repl_clear_signals(void)

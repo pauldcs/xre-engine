@@ -1,4 +1,4 @@
-#include "xre_assert.h"
+#include "xre_compiler.h"
 #include "xre_builtin.h"
 #include "xre_memory.h"
 #include "xre_operations.h"
@@ -17,7 +17,7 @@ XRE_BUILTIN_FUNCTION(builtin_print)
 	top = (object_t *)stack_top();
 	top->repr(__object_get_data_as_any(top));
 
-	(void)fprintf(stderr, "\n");
+	(void)fprintf(stdout, "\n");
 
 	return (true);
 }

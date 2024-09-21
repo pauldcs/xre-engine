@@ -1,6 +1,7 @@
 #include "xre_errors.h"
 #include "xre_memory.h"
 #include "xre_operations.h"
+#include "xre_compiler.h"
 #include "xre_runtime.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -8,7 +9,7 @@
 static void set_error_type(error_type_e type)
 {
 	_error.class = error_type_to_class(type);
-	_error.type = type;
+	_error.type  = type;
 }
 
 static void set_error_orig(ast_stmt_t *origin)
@@ -48,6 +49,10 @@ void object_attrs_repr(int32_t attrs)
 
 	if (attrs & ATTR_STRING) {
 		fprintf(stderr, "%sstring", separator);
+		separator = "-";
+	}
+	if (attrs & ATTR_BUFFER) {
+		fprintf(stderr, "%sbuffer", separator);
 		separator = "-";
 	}
 
@@ -90,7 +95,8 @@ bool stack_pop_r(object_t *ptr, ast_stmt_t *stmts)
 {
 	stack_pop(ptr);
 	if (!__object_has_attr(ptr, ATTR_READABLE)) {
-		return (set_current_error(stmts, XRE_UNREADABLE_ERROR), false);
+		return (set_current_error(stmts, XRE_UNREADABLE_ERROR),
+			false);
 	}
 
 	// (void)object_delete(ptr);
@@ -98,25 +104,36 @@ bool stack_pop_r(object_t *ptr, ast_stmt_t *stmts)
 	return (true);
 }
 
-bool stack_pop_r_binop(ast_stmt_t *self, object_t *left_buffer,
-		       object_t *right_buffer)
+bool stack_pop_r_binop(
+	ast_stmt_t *self,
+	object_t   *left_buffer,
+	object_t   *right_buffer
+)
 {
-	return (stack_pop_r(right_buffer, __right_branch) &&
-		stack_pop_r(left_buffer, __left_branch));
+	return (likely(stack_pop_r(right_buffer, __right_branch)) &&
+		likely(stack_pop_r(left_buffer, __left_branch)));
 }
 
-bool binop_evaluate_pop_r(ast_stmt_t *self, object_t *left_buffer,
-			  object_t *right_buffer)
+bool binop_evaluate_pop_r(
+	ast_stmt_t *self,
+	object_t   *left_buffer,
+	object_t   *right_buffer
+)
 {
-	if (!__br_eval(__left_branch) || !__br_eval(__right_branch) ||
-	    !stack_pop_r_binop(self, left_buffer, right_buffer)) {
+	if (unlikely(!__br_eval(__left_branch)) ||
+	    unlikely(!__br_eval(__right_branch)) ||
+	    unlikely(!stack_pop_r_binop(
+		    self, left_buffer, right_buffer
+	    ))) {
 		return (false);
 	}
 
 	return (true);
 }
 
-bool stack_push_enable_attrs(ast_stmt_t *self, object_t *object, int32_t attrs)
+bool stack_push_enable_attrs(
+	ast_stmt_t *self, object_t *object, int32_t attrs
+)
 {
 	__object_set_attr(object, attrs);
 	__object_set_depth(object, self->orig->_depth);
@@ -126,9 +143,11 @@ bool stack_push_enable_attrs(ast_stmt_t *self, object_t *object, int32_t attrs)
 	// 		false);
 	// }
 
-	if (!stack_push(object)) {
+	if (unlikely(!stack_push(object))) {
 		// (void)object_delete(object);
-		return (set_current_error(self, XRE_STACK_OVERFLOW_ERROR),
+		return (set_current_error(
+				self, XRE_STACK_OVERFLOW_ERROR
+			),
 			false);
 	}
 

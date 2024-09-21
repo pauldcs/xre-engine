@@ -1,4 +1,4 @@
-#include "xre_assert.h"
+#include "xre_compiler.h"
 #include "xre_readline.h"
 #include <errno.h>
 #include <string.h>
@@ -16,7 +16,7 @@ ssize_t rl_xwrite(int fildes, const char *buf, size_t nbytes)
 	int ntry = 0;
 
 	size_t limit = 0x7FFFFFFF;
-	size_t n = nbytes < limit ? nbytes : limit;
+	size_t n     = nbytes < limit ? nbytes : limit;
 
 	for (;;) {
 		i = write(fildes, buf, n);
@@ -37,7 +37,7 @@ ssize_t rl_xwrite(int fildes, const char *buf, size_t nbytes)
 
 ssize_t rl_xgetchr(int fildes)
 {
-	ssize_t nread;
+	ssize_t	      nread;
 	unsigned char ch;
 
 try_read:
@@ -64,9 +64,9 @@ int rl_xputchar(int c)
 
 void rl_putnbr(const int32_t c)
 {
-	char nbr[20];
+	char	 nbr[20];
 	uint32_t n;
-	size_t i;
+	size_t	 i;
 
 	if (c < 0)
 		n = c * -1;
@@ -120,8 +120,8 @@ void rl_putnbr(const int32_t c)
 size_t rl_esc_to_str(char *s)
 {
 	char *p, *q, c;
-	int esc = 0;
-	int x;
+	int   esc = 0;
+	int   x;
 
 	for (p = q = s; (c = *p) != '\0'; p++) {
 		if (esc) {
@@ -177,9 +177,11 @@ size_t rl_esc_to_str(char *s)
 					if (c >= '0' && c <= '9')
 						x = x * 16 + c - '0';
 					else if (c >= 'a' && c <= 'f')
-						x = x * 16 + c - 'a' + 10;
+						x = x * 16 + c - 'a' +
+						    10;
 					else if (c >= 'A' && c <= 'F')
-						x = x * 16 + c - 'A' + 10;
+						x = x * 16 + c - 'A' +
+						    10;
 					else
 						break;
 				}

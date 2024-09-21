@@ -1,30 +1,33 @@
 #include "xre_args.h"
-#include "xre_assert.h"
+#include "xre_compiler.h"
 #include "xre_parse.h"
 
 xre_ast_t *xre_ast_compose(const char *expr)
 {
 	__return_val_if_fail__(expr, NULL);
 
-	array_t *tokens = NULL;
-	xre_ast_t *ast = NULL;
+	vec_t	  *tokens = NULL;
+	xre_ast_t *ast	  = NULL;
 
-	tokens = array_create(sizeof(xre_token_t), 16, NULL);
-	if (!tokens)
+	tokens = vec_create(sizeof(xre_token_t), 16, NULL);
+	if (!tokens) {
 		return (NULL);
+	}
 
-	if (!xre_expr_lex(expr, tokens) || !xre_expr_syntax(tokens))
+	if (!xre_expr_lex(expr, tokens) || !xre_expr_syntax(tokens)) {
 		goto prison;
+	}
 
 	ast = xre_expr_parse(tokens);
-	if (!ast)
+	if (!ast) {
 		goto prison;
+	}
 
 	/* success */
 	goto beach;
 
 prison:
-	array_kill(tokens);
+	vec_kill(tokens);
 	return (NULL);
 
 beach:
@@ -32,6 +35,6 @@ beach:
 		ast_show(ast);
 	}
 
-	array_kill(tokens);
+	vec_kill(tokens);
 	return (ast);
 }

@@ -1,7 +1,7 @@
 #ifndef __XRE_PARSE_H__
 #define __XRE_PARSE_H__
 
-#include "array.h"
+#include "vec.h"
 #include <sys/types.h>
 
 typedef enum {
@@ -10,6 +10,8 @@ typedef enum {
 	/*     && */ __SCOPE_RESOLUTION__,
 	/*   <n>  */ __VAL__,
 	/*  "str" */ __STRING_LITERAL__,
+	/*      { */ __LBRACK__,
+	/*      } */ __RBRACK__,
 	/*      ( */ __LPAREN__,
 	/*      ) */ __RPAREN__,
 	/*      + */ __ADD__,
@@ -27,6 +29,7 @@ typedef enum {
 	/*     && */ __AND__,
 	/*     || */ __OR__,
 	/*     == */ __EQ__,
+	/*     => */ __CLOSURE__,
 	/*     != */ __NE__,
 	/*      & */ __BAND__,
 	/*      | */ __BOR__,
@@ -34,6 +37,7 @@ typedef enum {
 	/*      = */ __ASSIGN__,
 	/*      , */ __SEQUENCE__,
 	/*      ; */ __SEPARATOR__,
+	/*      . */ __METHOD__,
 	/*   loop */ __LOOP__,
 	/*     do */ __DO__,
 	/*   else */ __ELSE__,
@@ -45,51 +49,56 @@ typedef enum {
 typedef enum {
 	EXPR_OP_TYPE_BINOP = 1 << 1,
 	EXPR_OP_TYPE_UNIOP = 1 << 2,
-	EXPR_TYPE_VALUE = 1 << 3,
-	EXPR_TYPE_OTHER = 1 << 4,
+	EXPR_OP_TYPE_SEQUENCE = 1 << 3,
+	EXPR_TYPE_VALUE	   = 1 << 4,
+	EXPR_TYPE_OTHER	   = 1 << 5,
 } xre_expr_type_t;
 
 typedef struct s_xre_expr_token {
 	xre_expr_type_t _type;
 	xre_expr_kind_t _kind;
-	int64_t _value;
-	size_t _line;
-	size_t _cols;
-	const char *_ptr;
-	size_t _len;
-	const char *_line_ptr;
-	size_t _line_len;
-	size_t _depth;
+	int64_t		_value;
+	size_t		_line;
+	size_t		_cols;
+	const char     *_ptr;
+	size_t		_len;
+	const char     *_line_ptr;
+	size_t		_line_len;
+	size_t		_depth;
 } xre_token_t;
 
 typedef struct s_ast xre_ast_t;
 
 struct s_ast {
-	xre_expr_type_t type;
-	xre_expr_kind_t kind;
+	xre_expr_type_t	  type;
+	xre_expr_kind_t	  kind;
 	const xre_token_t token;
 	union {
-		int64_t value;
+		int64_t	    value;
 		const char *string;
-		xre_ast_t *uniop;
+		xre_ast_t  *uniop;
 		struct {
 			xre_ast_t *left;
 			xre_ast_t *right;
 		} _binop;
+		struct {
+			xre_ast_t **iter;
+			size_t count;
+		} _seq;
 	};
 };
 
 xre_ast_t *xre_ast_compose(const char *expr);
-bool xre_expr_lex(const char *expr, array_t *tokens);
-bool xre_expr_syntax(array_t *tokens);
-xre_ast_t *xre_expr_parse(array_t *tokens);
+bool	   xre_expr_lex(const char *expr, vec_t *tokens);
+bool	   xre_expr_syntax(vec_t *tokens);
+xre_ast_t *xre_expr_parse(vec_t *tokens);
 
 int get_precedence_by_kind(xre_expr_kind_t kind);
 
 /*---      UTILS      ---*/
 xre_expr_type_t expr_type_by_kind(xre_expr_kind_t kind);
-const char *expr_kind_to_string(xre_expr_kind_t kind);
-void ast_show(xre_ast_t *ast);
-void ast_free(xre_ast_t *ast);
+const char     *expr_kind_to_string(xre_expr_kind_t kind);
+void		ast_show(xre_ast_t *ast);
+void		ast_free(xre_ast_t *ast);
 
 #endif /* __XRE_PARSE_H__ */

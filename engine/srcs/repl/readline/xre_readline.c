@@ -1,7 +1,7 @@
 #include "xre_readline.h"
 #include "xre_repl.h"
-#include "array.h"
-#include "xre_assert.h"
+#include "vec.h"
+#include "xre_compiler.h"
 #include <ctype.h>
 #include <errno.h>
 #include <stdbool.h>
@@ -13,13 +13,15 @@
 
 static bool get_window_size(void)
 {
-	return (rl_get_window_size(&config.screenrows, &config.screencols));
+	return (rl_get_window_size(
+		&config.screenrows, &config.screencols
+	));
 }
 
-bool rl_get_input(const history_array_t *history)
+bool rl_get_input(const history_vec_t *history)
 {
 	bool editor_requested = false;
-	__state__.mode = "NORM";
+	__state__.mode	      = "NORM";
 	int ch;
 
 	(void)write(STDOUT_FILENO, "\r\n", 2);
@@ -42,7 +44,7 @@ try_read_key:
 
 		case RL_KEY_START_EDITOR:
 			editor_requested = true;
-			__state__.mode = "EDITOR";
+			__state__.mode	 = "EDITOR";
 			break;
 
 		default:
@@ -50,7 +52,9 @@ try_read_key:
 				if (!handle_editor_mode_char(ch))
 					return (false);
 
-			} else if (!handle_line_mode_char(ch, history)) {
+			} else if (!handle_line_mode_char(
+					   ch, history
+				   )) {
 				return (false);
 			}
 
@@ -62,7 +66,7 @@ try_read_key:
 	return (true);
 }
 
-ssize_t xre_readline(char **buf, const history_array_t *history)
+ssize_t xre_readline(char **buf, const history_vec_t *history)
 {
 	__return_val_if_fail__(buf, -1);
 
@@ -71,13 +75,16 @@ ssize_t xre_readline(char **buf, const history_array_t *history)
 
 	memset(&__state__, 0, sizeof(__state__));
 
-	__state__._v = array_create(sizeof(char), 64, NULL);
+	__state__._v = vec_create(sizeof(char), 64, NULL);
 	if (!__state__._v)
 		return (false);
 
 	if (!isatty(STDIN_FILENO)) {
-		(void)rl_xwrite(STDERR_FILENO,
-				"error: STDIN_FILENO: Is not a tty\r\n", 35);
+		(void)rl_xwrite(
+			STDERR_FILENO,
+			"error: STDIN_FILENO: Is not a tty\r\n",
+			35
+		);
 		goto prison;
 	}
 
@@ -91,9 +98,9 @@ ssize_t xre_readline(char **buf, const history_array_t *history)
    */
 	rl_clear_status();
 	(void)rl_raw_mode_disable();
-	bufsize = array_size(__state__._v);
-	*buf = array_extract(__state__._v, 0, bufsize);
-	array_kill(__state__._v);
+	bufsize = vec_size(__state__._v);
+	*buf	= vec_extract(__state__._v, 0, bufsize);
+	vec_kill(__state__._v);
 	return (bufsize);
 
 prison:

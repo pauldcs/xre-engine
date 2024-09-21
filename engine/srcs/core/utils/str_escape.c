@@ -1,4 +1,4 @@
-#include "xre_assert.h"
+#include "xre_compiler.h"
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -68,7 +68,7 @@ char *str_escape(const uint8_t *buf, int sz)
 	}
 
 	char *q = new_buf;
-	int i;
+	int   i;
 
 	for (i = 0; i < sz; i++) {
 		str_byte_escape((char *)&buf[i], &q);

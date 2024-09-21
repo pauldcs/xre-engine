@@ -1,7 +1,7 @@
 #include "xre_memory.h"
 #include "xre_alloc.h"
 #include "xre_args.h"
-#include "xre_assert.h"
+#include "xre_compiler.h"
 #include "xre_core.h"
 #include "xre_fs.h"
 #include "xre_log.h"
@@ -13,15 +13,15 @@
 #include <sys/stat.h>
 
 t_xre_state __xre_state__ = {
-	.title = "xre",
-	.version = "0.8.5",
+	.title	 = "xre",
+	.version = "0.8.6",
 };
 
 static bool init_source_file(t_xre_args *args, const char *path)
 {
 	struct stat sb;
-	int fd;
-	char *buffer = NULL;
+	int	    fd;
+	char	   *buffer = NULL;
 
 	(void)args;
 	if (stat(path, &sb) == -1) {
@@ -54,7 +54,8 @@ static bool init_source_file(t_xre_args *args, const char *path)
 
 	case S_IFREG:
 		/* handle regular file */
-		if ((sb.st_mode & ALLPERMS) & (S_IRUSR | S_IRGRP | S_IROTH)) {
+		if ((sb.st_mode & ALLPERMS) &
+		    (S_IRUSR | S_IRGRP | S_IROTH)) {
 			if (!xre_file_open_read(path, &fd))
 				return (false);
 
@@ -105,8 +106,8 @@ prison:
 int main(int ac, char *av[])
 {
 	t_xre_args *args;
-	xre_ast_t *ast;
-	char *file;
+	xre_ast_t  *ast;
+	char	   *file;
 
 	if (!(args = xre_args_parse(ac, av)))
 		return (EXIT_FAILURE);
@@ -125,7 +126,8 @@ int main(int ac, char *av[])
 				(void)fprintf(
 					stderr,
 					"%s: Failed to import input file\n",
-					__xre_state__.title);
+					__xre_state__.title
+				);
 				goto prison;
 			}
 

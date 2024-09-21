@@ -1,4 +1,4 @@
-#include "xre_assert.h"
+#include "xre_compiler.h"
 #include "xre_builtin.h"
 #include "xre_memory.h"
 #include "xre_operations.h"

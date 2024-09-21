@@ -55,11 +55,12 @@ typedef struct {
 } err_notif_t;
 
 error_class_e error_type_to_class(error_type_e type);
-const char *error_class_str(error_class_e class);
-const char *error_type_str(error_type_e type);
-void xre_error(err_notif_t *notification);
+const char   *error_class_str(error_class_e class);
+const char   *error_type_str(error_type_e type);
+void	      xre_error(err_notif_t *notification);
 
-#define __return_error(frame, error_type) return (set_error(frame, error_type));
+#define __return_error(frame, error_type) \
+	return (set_error(frame, error_type));
 /* #define __return_error(frame, error_type) do { \
         __xre_logger(debug, "trace"); \
         return (set_error(frame, error_type)); \

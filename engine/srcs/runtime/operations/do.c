@@ -1,4 +1,4 @@
-#include "xre_assert.h"
+#include "xre_compiler.h"
 #include "xre_log.h"
 #include "xre_memory.h"
 #include "xre_operations.h"
@@ -20,15 +20,13 @@
  * 
  *            a do b     //      if (a) { b }
  *       else c do d     // else if (c) { d }
- *       else e else f   // else {if (e) { e } else { f }}
+ *       else e else f   // else {
+ *                       //    if (e) { e } else { f }
+ *                       // }
  *    
  */
-XRE_API_OPERATOR_FUNC(oper_do)
+static inline bool _oper_do(ast_stmt_t *self)
 {
-	__return_val_if_fail__(self, false);
-
-	object_t object;
-
 	if (!__br_eval(__left_branch)) {
 		return (false);
 	}
@@ -37,7 +35,7 @@ XRE_API_OPERATOR_FUNC(oper_do)
 		return (true);
 	}
 
-	stack_pop(&object);
+	//	stack_pop(&object);
 
 	if (!__br_eval(__right_branch)) {
 		return (false);
@@ -45,5 +43,14 @@ XRE_API_OPERATOR_FUNC(oper_do)
 
 	stack_pop_discard();
 
-	return (__push_r(self, &object));
+	return (true);
+	//	return (__push_r(self, &object));
+}
+
+XRE_API(oper_do)
+{
+	__trigger_bug_if(self == NULL);
+	
+	bool ret = _oper_do(self);
+	return (ret);
 }

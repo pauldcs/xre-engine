@@ -18,20 +18,15 @@ all: $(NAME)
 -include  $(SRCS_OBJS:.o=.d)
 
 $(NAME): $(SRCS_OBJS)
-	$(MAKE) -C $(LIBARRAY_DIR)
 	$(CC) \
 		$^ \
 		$(CFLAGS) \
 		-o $(NAME) \
 		-I $(INCS_DIR) \
-		-L $(LIBARRAY_DIR) \
-		-larray \
 		-ltermcap 
 
 asan: CFLAGS += $(CFLAGS_ASAN)
 asan: all
-	$(MAKE) fclean -C $(LIBARRAY_DIR)
-	$(MAKE) asan -C $(LIBARRAY_DIR)
 
 release: CFLAGS = $(CFLAGS_RELEASE)
 release: all
@@ -56,14 +51,12 @@ sparse:
 				-style=file -i {} \; 
 
 clean:
-	$(MAKE) clean -C $(LIBARRAY_DIR)
 	rm -rf *.dSYM
 	rm -rf .cache
 	rm -rf .vscode
 	rm -rf $(OBJS_DIR)
 
 fclean: clean
-	$(MAKE) fclean -C $(LIBARRAY_DIR)
 	rm -f $(NAME)
 
 re: fclean all

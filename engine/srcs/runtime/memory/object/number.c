@@ -1,4 +1,4 @@
-#include "xre_assert.h"
+#include "xre_compiler.h"
 #include "xre_memory.h"
 #include "xre_log.h"
 #include <stdbool.h>
@@ -7,20 +7,15 @@
 
 static void number_repr(void *ptr)
 {
-	//__return_if_fail__(ptr);
-
-	int64_t num = (int64_t)ptr;
 #if defined(__linux__)
-	(void)fprintf(stderr, "%ld", num);
+	(void)fprintf(stderr, "%ld", (int64_t)ptr);
 #else
-	(void)fprintf(stderr, "%lld", num);
+	(void)fprintf(stdout, "%lld", (int64_t)ptr);
 #endif
 }
 
 static bool number_test(void *ptr)
 {
-	//__return_val_if_fail__(ptr, false);
-
 	return (!!((int64_t)ptr));
 }
 
@@ -33,24 +28,25 @@ static void number_drop(void *ptr)
 	(void)ptr;
 }
 
-object_t *object_number_create(int64_t data)
+void object_number_init(int64_t data, object_t *buf)
 {
-	static object_t object = { .repr = number_repr,
-				   .drop = number_drop,
-				   .is_true = number_test };
+	__trigger_bug_if(buf == NULL);
 
-	__object_set_attr(&object, ATTR_NUMBER);
-	__object_set_data_as_number(&object, data);
-	__object_set_ref_count(&object, 0);
-	//__object_set_invalid_address(&object);
+	buf->repr    = number_repr;
+	buf->drop    = number_drop;
+	buf->is_true = number_test;
+
+	__object_set_attr(buf, ATTR_NUMBER);
+	__object_set_data_as_number(buf, data);
+	__object_set_ref_count(buf, 0);
 
 #if defined XRE_ENABLE_OBJECT_LOGGING
 	__xre_logger(info, "created register @%p", object.data.ptr);
 #endif
-	return (&object);
 }
 
-static inline bool extract_number_object_value(object_t *object, int64_t *data)
+static inline bool
+extract_number_object_value(object_t *object, int64_t *data)
 {
 	if (!__object_has_attr(object, ATTR_NUMBER)) {
 		return (false);
@@ -61,10 +57,14 @@ static inline bool extract_number_object_value(object_t *object, int64_t *data)
 	return (true);
 }
 
-bool unwrap_number_object(ast_stmt_t *self, object_t *object, int64_t *data)
+bool unwrap_number_object(
+	ast_stmt_t *self, object_t *object, int64_t *data
+)
 {
 	if (!extract_number_object_value(object, data)) {
-		return (set_current_error(self, XRE_UNEXPECTED_TYPE_ERROR),
+		return (set_current_error(
+				self, XRE_UNEXPECTED_TYPE_ERROR
+			),
 			false);
 	}
 
