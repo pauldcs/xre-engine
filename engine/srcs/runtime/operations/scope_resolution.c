@@ -4,7 +4,7 @@
 #include "xre_operations.h"
 #include <stdbool.h>
 
-static inline bool _oper_scope_resolution(ast_stmt_t *self)
+static inline bool _oper_scope_resolution(struct statement *self)
 {
 	return (set_current_error(self, XRE_NOT_IMPLEMENTED_ERROR),
 		false);

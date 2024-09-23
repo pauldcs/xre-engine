@@ -4,7 +4,8 @@
 #include "xre_operations.h"
 #include <stdbool.h>
 
-static inline bool _oper_bw_and(ast_stmt_t *self, object_t *result)
+static inline bool
+_oper_bw_and(struct statement *self, object_t *result)
 {
 	static object_t lbuf;
 	static object_t rbuf;

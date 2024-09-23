@@ -23,7 +23,7 @@ int get_precedence_by_kind(xre_expr_kind_t kind)
 		return (0);
 
 	case __NOT__:
-	case __METHOD__:
+	case __ATTRIBUTE__:
 	case __BUILTIN_CALL__:
 		return (-1);
 
@@ -75,14 +75,15 @@ int get_precedence_by_kind(xre_expr_kind_t kind)
 		return (-16);
 
 	case __LOOP__:
+	case __SEQUENCE__:
 		return (-17);
 
-	case __SEQUENCE__:
+	case __SEQUENCE_POINT__:
 		return (-18);
 
 	case __ASSIGN__:
 		return (-19);
-	
+
 	case __CLOSURE__:
 		return (-21);
 
@@ -91,6 +92,8 @@ int get_precedence_by_kind(xre_expr_kind_t kind)
 
 	case __LBRACK__:
 	case __RBRACK__:
+	case __LPAREN__:
+	case __RPAREN__:
 		return (-1000);
 
 	case __VAL__:

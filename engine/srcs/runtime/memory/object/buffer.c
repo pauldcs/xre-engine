@@ -31,7 +31,7 @@ static void buffer_repr(void *ptr)
 
 	for (size_t i = 0; i < seq_size; i++) {
 		char ch = *(char *)vec_access(vec, i);
-                (void)fprintf(stdout, "%02x", ch);
+		(void)fprintf(stdout, "%02x", ch);
 	}
 	(void)fprintf(stdout, "\n");
 }
@@ -45,8 +45,7 @@ bool object_buffer_init(object_t *source, object_t *buf)
 	buf->drop    = buffer_drop;
 	buf->is_true = buffer_test;
 
-	xre_buffer_t *buffer =
-		vec_create(sizeof(char), 64, NULL);
+	xre_buffer_t *buffer = vec_create(sizeof(char), 64, NULL);
 
 	__object_set_attr(buf, ATTR_BUFFER);
 	__object_set_data_as_buffer(buf, buffer);
@@ -56,5 +55,4 @@ bool object_buffer_init(object_t *source, object_t *buf)
 	__xre_logger(info, "created sequence @%p", object.data.ptr);
 #endif
 	return (true);
-
 }

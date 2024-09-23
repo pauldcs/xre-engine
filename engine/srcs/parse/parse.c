@@ -74,17 +74,79 @@ static xre_ast_t *ast_new_node(xre_token_t *token)
 	return (node);
 }
 
+static bool unfold_sequence_ast(xre_ast_t *ast, vec_t *buffer)
+{
+	if (ast->kind == __SEQUENCE__) {
+		if (!vec_concat(buffer, ast->seq)) {
+			return (false);
+		}
+
+		//vec_kill(ast->seq);
+
+	} else {
+		if (!vec_append(buffer, ast, 1)) {
+			return (false);
+		}
+	}
+	return (true);
+}
+
+bool sequence_node(
+	xre_ast_t *node, size_t depth, xre_ast_t *lval, xre_ast_t *rval
+)
+{
+	__return_val_if_fail__(lval, NULL);
+	__return_val_if_fail__(rval, NULL);
+
+	vec_t *sequence = vec_create(sizeof(xre_ast_t), 8, free);
+
+	if (lval->token._depth > rval->token._depth) {
+		if (!vec_append(sequence, lval, 1) ||
+		    !unfold_sequence_ast(rval, sequence)) {
+			goto prison;
+		}
+	} else {
+		if (rval->token._depth != depth) {
+			if (!vec_append(sequence, lval, 1) ||
+			    !vec_append(sequence, rval, 1)) {
+				goto prison;
+			}
+		} else if (!unfold_sequence_ast(lval, sequence) || !unfold_sequence_ast(rval, sequence)) {
+			goto prison;
+		}
+	}
+
+	node->seq  = sequence;
+	node->kind = __SEQUENCE__;
+	node->type = EXPR_OP_TYPE_SEQUENCE;
+	return (true);
+
+prison:
+	vec_kill(sequence);
+	return (false);
+}
+
 static void __make_value_to_b(void)
 {
 	xre_ast_t *node = __pop_a();
+	void	  *a;
+	void	  *b;
 	assert(node);
 
 	if (node->type & EXPR_OP_TYPE_UNIOP) {
 		node->uniop = __pop_b();
 
 	} else {
-		node->_binop.right = __pop_b();
-		node->_binop.left  = __pop_b();
+		if (node->kind == __SEQUENCE_POINT__) {
+			a = __pop_b();
+			b = __pop_b();
+			(void)sequence_node(
+				node, node->token._depth, a, b
+			);
+		} else {
+			node->_binop.right = __pop_b();
+			node->_binop.left  = __pop_b();
+		}
 	}
 
 	__push_b(node);
@@ -113,6 +175,7 @@ xre_ast_t *xre_expr_parse(vec_t *tokens)
 
 		switch (token->_kind) {
 		case __LBRACK__:
+		case __LPAREN__:
 			__push_a(ast_new_node(token));
 
 			break;
@@ -123,6 +186,14 @@ xre_ast_t *xre_expr_parse(vec_t *tokens)
 
 			break;
 
+		case __RPAREN__:
+			while (__top_a && (TOP_A_KIND != __LPAREN__))
+				__make_value_to_b();
+
+			free((void *)__stack_a[__top_a]);
+			__pop_a();
+
+			break;
 		case __RBRACK__:
 			while (__top_a && (TOP_A_KIND != __LBRACK__))
 				__make_value_to_b();

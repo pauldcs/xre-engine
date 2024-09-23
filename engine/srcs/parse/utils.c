@@ -13,8 +13,9 @@ static void put_binop(xre_ast_t *ast, size_t depth)
 
 static void put_sequence(xre_ast_t *ast, size_t depth)
 {
-	for (size_t c = 0; c < ast->_seq.count; c++) {
-		inner(ast->_seq.iter[c], depth + 1);
+	for (size_t c = 0; c < vec_size(ast->seq); c++) {
+		inner((xre_ast_t *)vec_access(ast->seq, c),
+		      depth + 1);
 	}
 }
 
@@ -50,11 +51,11 @@ static void inner(xre_ast_t *ast, size_t depth)
 		printf("<%s>\n", expr_kind_to_string(ast->kind));
 	}
 
-	if (ast->token._type & (EXPR_OP_TYPE_BINOP))
+	if (ast->type & (EXPR_OP_TYPE_BINOP))
 		put_binop(ast, depth);
-	else if (ast->token._type & (EXPR_OP_TYPE_BINOP))
+	else if (ast->type & (EXPR_OP_TYPE_SEQUENCE)) {
 		put_sequence(ast, depth);
-	else if (ast->token._type & EXPR_OP_TYPE_UNIOP)
+	} else if (ast->type & EXPR_OP_TYPE_UNIOP)
 		put_uniop(ast, depth);
 }
 
@@ -83,6 +84,9 @@ void ast_free(xre_ast_t *ast)
 		ast_free(ast->uniop);
 		break;
 
+	case __SEQUENCE__:
+		break;
+
 	case __VAL__:
 		break;
 
@@ -93,87 +97,105 @@ void ast_free(xre_ast_t *ast)
 	free(ast);
 }
 
+const char *expr_type_to_string (xre_expr_type_t type)
+{
+	switch (type) {
+		case EXPR_TYPE_VALUE: return ("value");
+		case EXPR_OP_TYPE_SEQUENCE: return ("sequence");
+		case EXPR_OP_TYPE_BINOP: return ("binop");
+		case EXPR_OP_TYPE_UNIOP: return ("uniop");
+		case EXPR_TYPE_OTHER: return ("other");
+	}
+
+	__builtin_unreachable();
+}
+
 const char *expr_kind_to_string(xre_expr_kind_t kind)
 {
 	switch (kind) {
 	case __START__:
-		return "start";
+		return "Start";
 	case __END__:
-		return "end";
+		return "End";
 	case __VAL__:
-		return "value";
+		return "Value";
 	case __STRING_LITERAL__:
-		return "string_literal";
+		return "String literal";
 	case __VARIABLE__:
-		return "variable";
+		return "Variable";
 	case __NOT__:
-		return "not";
+		return "Not";
 	case __BUILTIN_CALL__:
-		return "builtin_call";
+		return "Builtin call";
 	case __ADD__:
-		return "addition";
+		return "Addition";
 	case __SUB__:
-		return "substraction";
+		return "Substraction";
 	case __MUL__:
-		return "multiplication";
+		return "Multiplication";
 	case __DIV__:
-		return "division";
+		return "Division";
 	case __MOD__:
-		return "modulus";
+		return "Modulus";
 	case __LSHIFT__:
-		return "left_shift";
+		return "Left shift";
 	case __RSHIFT__:
-		return "right_shift";
+		return "Right shift";
 	case __ASSIGN__:
-		return "assign";
+		return "Assign";
 	case __LT__:
-		return "less_than";
+		return "Less than";
 	case __GT__:
-		return "greater_than";
+		return "Greater than";
 	case __LE__:
-		return "less_or_eaqual";
+		return "Less or eaqual";
 	case __GE__:
-		return "greater_than_or_equal";
+		return "Greater than or equal";
 	case __LBRACK__:
-		return "left_bracket";
+		return "Left bracket";
 	case __RBRACK__:
-		return "right_bracket";
+		return "Right bracket";
 	case __LPAREN__:
-		return "left_parenthesis";
+		return "Left parenthesis";
 	case __RPAREN__:
-		return "right_parenthesis";
+		return "Right parenthesis";
 	case __POW__:
-		return "power";
+		return "Power";
 	case __BXOR__:
-		return "bitwise_xor";
+		return "Bitwise xor";
 	case __BAND__:
-		return "bitwise_and";
+		return "Bitwise and";
 	case __BOR__:
-		return "bitwise_or";
+		return "Bitwise or";
 	case __AND__:
-		return "logical_and";
+		return "Logical and";
 	case __OR__:
-		return "logical_or";
+		return "Logical or";
 	case __EQ__:
-		return "equals";
+		return "Equals";
 	case __CLOSURE__:
-		return "closure";
+		return "Closure";
 	case __NE__:
-		return "not_equal";
+		return "Not equal";
+	case __SEQUENCE_POINT__:
+		return "Sequence point";
 	case __SEQUENCE__:
-		return "sequence_point";
-	case __METHOD__:
-		return "method";
+		return "Sequence";
+	case __ATTRIBUTE__:
+		return "Attribute";
 	case __SEPARATOR__:
-		return "separator";
+		return "Separator";
 	case __LOOP__:
-		return "loop";
+		return "Loop";
 	case __SCOPE_RESOLUTION__:
-		return "scope_resolution";
+		return "Scope resolution";
 	case __DO__:
-		return "do";
+		return "Do";
 	case __ELSE__:
-		return "else";
+		return "Else";
+	default:
+		printf("%d??\n", kind);
+		return "";
 	}
 
 	__builtin_unreachable();
@@ -187,6 +209,9 @@ xre_expr_type_t expr_type_by_kind(xre_expr_kind_t kind)
 	case __VARIABLE__:
 		return (EXPR_TYPE_VALUE);
 
+	case __SEQUENCE__:
+		return (EXPR_OP_TYPE_SEQUENCE);
+
 	case __ADD__:
 	case __SUB__:
 	case __MUL__:
@@ -206,8 +231,8 @@ xre_expr_type_t expr_type_by_kind(xre_expr_kind_t kind)
 	case __EQ__:
 	case __NE__:
 	case __SEPARATOR__:
-	case __SEQUENCE__:
-	case __METHOD__:
+	case __SEQUENCE_POINT__:
+	case __ATTRIBUTE__:
 	case __SCOPE_RESOLUTION__:
 	case __LOOP__:
 	case __DO__:

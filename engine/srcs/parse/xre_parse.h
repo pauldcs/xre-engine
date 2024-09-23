@@ -35,9 +35,10 @@ typedef enum {
 	/*      | */ __BOR__,
 	/*      ^ */ __BXOR__,
 	/*      = */ __ASSIGN__,
-	/*      , */ __SEQUENCE__,
+	/*      , */ __SEQUENCE_POINT__,
+	/*        */ __SEQUENCE__,
 	/*      ; */ __SEPARATOR__,
-	/*      . */ __METHOD__,
+	/*      : */ __ATTRIBUTE__,
 	/*   loop */ __LOOP__,
 	/*     do */ __DO__,
 	/*   else */ __ELSE__,
@@ -47,11 +48,11 @@ typedef enum {
 } xre_expr_kind_t;
 
 typedef enum {
-	EXPR_OP_TYPE_BINOP = 1 << 1,
-	EXPR_OP_TYPE_UNIOP = 1 << 2,
+	EXPR_OP_TYPE_BINOP    = 1 << 1,
+	EXPR_OP_TYPE_UNIOP    = 1 << 2,
 	EXPR_OP_TYPE_SEQUENCE = 1 << 3,
-	EXPR_TYPE_VALUE	   = 1 << 4,
-	EXPR_TYPE_OTHER	   = 1 << 5,
+	EXPR_TYPE_VALUE	      = 1 << 4,
+	EXPR_TYPE_OTHER	      = 1 << 5,
 } xre_expr_type_t;
 
 typedef struct s_xre_expr_token {
@@ -76,15 +77,12 @@ struct s_ast {
 	union {
 		int64_t	    value;
 		const char *string;
+		vec_t	   *seq;
 		xre_ast_t  *uniop;
 		struct {
 			xre_ast_t *left;
 			xre_ast_t *right;
 		} _binop;
-		struct {
-			xre_ast_t **iter;
-			size_t count;
-		} _seq;
 	};
 };
 
@@ -98,6 +96,7 @@ int get_precedence_by_kind(xre_expr_kind_t kind);
 /*---      UTILS      ---*/
 xre_expr_type_t expr_type_by_kind(xre_expr_kind_t kind);
 const char     *expr_kind_to_string(xre_expr_kind_t kind);
+const char *expr_type_to_string (xre_expr_type_t type);
 void		ast_show(xre_ast_t *ast);
 void		ast_free(xre_ast_t *ast);
 

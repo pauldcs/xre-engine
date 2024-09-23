@@ -16,16 +16,18 @@ bool xre_expr_syntax(vec_t *tokens)
 {
 	__return_val_if_fail__(tokens, false);
 
-	xre_token_t *token = NULL;
-	size_t	     size  = tokens->_nmemb;
-	size_t	     idx   = 0;
-	int	     p_open  = 0;
+	xre_token_t *token  = NULL;
+	size_t	     size   = tokens->_nmemb;
+	size_t	     idx    = 0;
+	int	     p_open = 0;
+	int	     p_save = 0;
+	int	     b_open = 0;
 
 	(void)memset(&syntax_error_g, 0, sizeof(syntax_error_g));
 
 	while (size--) {
 		token	      = (xre_token_t *)vec_at(tokens, idx++);
-		token->_depth = p_open;
+		token->_depth = p_open + b_open;
 
 		if (!token)
 			goto prison;
@@ -35,32 +37,37 @@ bool xre_expr_syntax(vec_t *tokens)
 			continue;
 
 		case __LPAREN__:
-		case __RPAREN__:
+			p_open++;
+			p_save = b_open;
+			goto as_value;
 
 		case __LBRACK__:
-			p_open++;
+			b_open++;
 #if defined(__linux__)
 			__attribute__((fallthrough));
 #endif
 		case __BUILTIN_CALL__:
 			switch (token->_type) {
-				case EXPR_OP_TYPE_BINOP:
-					goto as_binop;
-				
-				case EXPR_OP_TYPE_UNIOP:
-					goto as_uniop;
-				
-				case EXPR_TYPE_OTHER:
-				case EXPR_OP_TYPE_SEQUENCE:
-				case EXPR_TYPE_VALUE:
-					break;
+			case EXPR_OP_TYPE_BINOP:
+				goto as_binop;
+
+			case EXPR_OP_TYPE_UNIOP:
+				goto as_uniop;
+
+			case EXPR_TYPE_OTHER:
+			case EXPR_OP_TYPE_SEQUENCE:
+			case EXPR_TYPE_VALUE:
+				break;
 			}
 		case __VAL__:
 		case __STRING_LITERAL__:
 		case __VARIABLE__:
+		case __SEQUENCE__:
+as_value:
 			if (PREV_TOKEN_TYPE & (EXPR_OP_TYPE_BINOP |
 					       EXPR_OP_TYPE_UNIOP) ||
 			    PREV_TOKEN_KIND == __LBRACK__ ||
+			    PREV_TOKEN_KIND == __LPAREN__ ||
 			    PREV_TOKEN_KIND == __START__)
 				continue;
 
@@ -77,6 +84,7 @@ as_uniop:
 			if (PREV_TOKEN_TYPE & (EXPR_OP_TYPE_BINOP |
 					       EXPR_OP_TYPE_UNIOP) ||
 			    PREV_TOKEN_KIND == __LBRACK__ ||
+			    PREV_TOKEN_KIND == __LPAREN__ ||
 			    PREV_TOKEN_KIND == __START__)
 				continue;
 
@@ -85,11 +93,9 @@ as_uniop:
 			);
 			syntax_error_g.type =
 				XRE_UNEXPECTED_OPERATOR_ERROR;
-
 			goto syntax_error;
 
 		case __ASSIGN__:
-		case __CLOSURE__:
 			if (PREV_TOKEN_KIND == __VARIABLE__)
 				continue;
 
@@ -101,18 +107,32 @@ as_uniop:
 
 			goto syntax_error;
 
-		case __RBRACK__:
-			if (p_open == 0) {
+		case __RPAREN__:
+			if (p_open == 0 || b_open > p_save) {
 				syntax_error_g.class =
 					error_type_to_class(
-						XRE_UNMATCHED_PARENTHESIS_ERROR
+						XRE_UNMATCHED_BRACKETS_ERROR
 					);
 				syntax_error_g.type =
-					XRE_UNMATCHED_PARENTHESIS_ERROR;
+					XRE_UNMATCHED_BRACKETS_ERROR;
 
 				goto syntax_error;
 			}
 			p_open--;
+			goto as_binop;
+
+		case __RBRACK__:
+			if (b_open == 0) {
+				syntax_error_g.class =
+					error_type_to_class(
+						XRE_UNMATCHED_BRACKETS_ERROR
+					);
+				syntax_error_g.type =
+					XRE_UNMATCHED_BRACKETS_ERROR;
+
+				goto syntax_error;
+			}
+			b_open--;
 #if defined(__linux__)
 			__attribute__((fallthrough));
 #endif
@@ -138,15 +158,17 @@ as_uniop:
 		case __BAND__:
 		case __BOR__:
 		case __BXOR__:
-		case __SEQUENCE__:
-		case __METHOD__:
+		case __SEQUENCE_POINT__:
+		case __ATTRIBUTE__:
 		case __SEPARATOR__:
 		case __LOOP__:
 		case __SCOPE_RESOLUTION__:
 		case __END__:
+		case __CLOSURE__:
 as_binop:
 			if (PREV_TOKEN_TYPE & EXPR_TYPE_VALUE ||
-			    PREV_TOKEN_KIND == __RBRACK__)
+			    PREV_TOKEN_KIND == __RBRACK__ ||
+			    PREV_TOKEN_KIND == __RPAREN__)
 				continue;
 
 			syntax_error_g.class = error_type_to_class(
@@ -161,11 +183,11 @@ as_binop:
 		__return_val_if_fail__(false, false);
 	}
 
-	if (p_open) {
+	if (b_open || p_open) {
 		syntax_error_g.class = error_type_to_class(
-			XRE_UNMATCHED_PARENTHESIS_ERROR
+			XRE_UNMATCHED_BRACKETS_ERROR
 		);
-		syntax_error_g.type = XRE_UNMATCHED_PARENTHESIS_ERROR;
+		syntax_error_g.type = XRE_UNMATCHED_BRACKETS_ERROR;
 
 		goto syntax_error;
 	}

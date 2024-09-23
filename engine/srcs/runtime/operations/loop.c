@@ -4,7 +4,7 @@
 #include "xre_operations.h"
 #include <stdbool.h>
 
-static inline bool _oper_loop(ast_stmt_t *self)
+static inline bool _oper_loop(struct statement *self)
 {
 	__return_val_if_fail__(self, false);
 

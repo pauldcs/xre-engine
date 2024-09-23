@@ -5,9 +5,9 @@
 #include <stdbool.h>
 #include <string.h>
 
-static inline bool _oper_string(ast_stmt_t *self, object_t *object)
+static inline bool
+_oper_string(struct statement *self, object_t *object)
 {
-	
 	return (object_string_init(
 		(unsigned char *)self->string, object
 	));

@@ -25,7 +25,7 @@
  *                       // }
  *    
  */
-static inline bool _oper_do(ast_stmt_t *self)
+static inline bool _oper_do(struct statement *self)
 {
 	if (!__br_eval(__left_branch)) {
 		return (false);
@@ -50,7 +50,7 @@ static inline bool _oper_do(ast_stmt_t *self)
 XRE_API(oper_do)
 {
 	__trigger_bug_if(self == NULL);
-	
+
 	bool ret = _oper_do(self);
 	return (ret);
 }

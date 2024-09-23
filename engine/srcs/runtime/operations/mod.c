@@ -4,7 +4,7 @@
 #include "xre_operations.h"
 #include <stdbool.h>
 
-static inline bool _oper_mod(ast_stmt_t *self, object_t *object)
+static inline bool _oper_mod(struct statement *self, object_t *object)
 {
 	static object_t lv;
 	static object_t rv;
@@ -36,7 +36,7 @@ XRE_API(oper_mod)
 {
 	__trigger_bug_if(self == NULL);
 	static object_t _result = { 0 };
-	
+
 	bool ret = _oper_mod(self, &_result);
 	return (ret ? __push_rw(self, &_result) : false);
 }

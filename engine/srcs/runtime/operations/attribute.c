@@ -4,14 +4,14 @@
 #include "xre_operations.h"
 #include <stdbool.h>
 
-static inline bool _oper_method(ast_stmt_t *self)
+static inline bool _oper_attribute(struct statement *self)
 {
 	return (set_current_error(self, XRE_NOT_IMPLEMENTED_ERROR),
 		false);
 }
 
-XRE_API(oper_method)
+XRE_API(oper_attribute)
 {
 	__trigger_bug_if(self == NULL);
-	return (_oper_method(self));
+	return (_oper_attribute(self));
 }

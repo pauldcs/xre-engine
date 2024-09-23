@@ -6,38 +6,35 @@
 #include <stdbool.h>
 
 bool binop_evaluate_pop_r(
-	ast_stmt_t *self,
-	object_t   *left_buffer,
-	object_t   *right_buffer
+	struct statement *self,
+	object_t	 *left_buffer,
+	object_t	 *right_buffer
 );
 
-bool stack_pop_r(object_t *ptr, ast_stmt_t *stmts);
+bool stack_pop_r(object_t *ptr, struct statement *stmts);
 bool stack_pop_r_binop(
-	ast_stmt_t *self,
-	object_t   *left_buffer,
-	object_t   *right_buffer
+	struct statement *self,
+	object_t	 *left_buffer,
+	object_t	 *right_buffer
 );
 
 bool stack_push_enable_attrs(
-	ast_stmt_t *self, object_t *object, int32_t attrs
+	struct statement *self, object_t *object, int32_t attrs
 );
-void set_current_error(ast_stmt_t *self, error_type_e type);
+void set_current_error(struct statement *self, error_type_e type);
 
 bool unwrap_number_object(
-	ast_stmt_t *self, object_t *object, int64_t *data
+	struct statement *self, object_t *object, int64_t *data
 );
 bool unwrap_symbol_read(
-	ast_stmt_t *self, int64_t offset, object_t **object
+	struct statement *self, int64_t offset, object_t **object
 );
 bool unwrap_symbol_write(
-	ast_stmt_t *self, int64_t offset, object_t **object
+	struct statement *self, int64_t offset, object_t **object
 );
 
-#define XRE_API(name)                       \
-	bool name( \
-		ast_stmt_t *self                          \
-	)
-typedef bool (*fptr_t)(ast_stmt_t *self);
+#define XRE_API(name) bool name(struct statement *self)
+typedef bool (*fptr_t)(struct statement *self);
 
 XRE_API(oper_add);
 XRE_API(oper_bw_and);
@@ -65,19 +62,18 @@ XRE_API(oper_ne);
 XRE_API(oper_not);
 XRE_API(oper_string);
 XRE_API(oper_value);
-XRE_API(oper_symbol_expand);
 XRE_API(oper_closure);
-XRE_API(oper_symbol_addr);
+XRE_API(oper_symbol);
 XRE_API(oper_annotate);
 XRE_API(oper_separator);
 XRE_API(oper_sequence);
-XRE_API(oper_method);
+XRE_API(oper_attribute);
 XRE_API(oper_scope_resolution);
 XRE_API(oper_inject);
 XRE_API(oper_scope_annotate);
 XRE_API(oper_print);
 
-#define __left_branch  (&__global_current_stmts_ptr__[self->br.left])
-#define __right_branch (&__global_current_stmts_ptr__[self->br.right])
+#define __left_branch  (&__statements__[self->br.left])
+#define __right_branch (&__statements__[self->br.right])
 
 #endif /* __XRE_OPERATIONS_H__ */

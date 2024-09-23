@@ -4,7 +4,7 @@
 #include "xre_operations.h"
 #include <stdbool.h>
 
-static inline bool _oper_gt(ast_stmt_t *self, object_t *object)
+static inline bool _oper_gt(struct statement *self, object_t *object)
 {
 	static object_t lbuf;
 	static object_t rbuf;
@@ -29,7 +29,7 @@ XRE_API(oper_gt)
 {
 	__trigger_bug_if(self == NULL);
 	static object_t _result = { 0 };
-	
+
 	bool ret = _oper_gt(self, &_result);
 	return (ret ? __push_rw(self, &_result) : false);
 }

@@ -4,27 +4,35 @@
 #include "xre_operations.h"
 #include <stdbool.h>
 
-static inline bool _oper_sequence(ast_stmt_t *self, object_t *object)
+static inline bool _oper_sequence(struct statement *self)
 {
-	static object_t lv;
-	static object_t rv;
+	__return_val_if_fail__(self, false);
 
-	if (!binop_evaluate_pop_r(self, &lv, &rv)) {
+	vec_t *sequence = vec_create(
+		sizeof(object_t), vec_size(self->children), NULL
+	);
+	size_t	 i = 0;
+	object_t object;
+loop:
+	if (!__br_eval((
+		    &__statements__[*(int *)vec_at(self->children, i)]
+	    ))) {
 		return (false);
 	}
 
-	object_sequence_init(
-		self->orig->_depth, &lv, &rv, object
-	);
-	
-	return (true);
+	stack_pop(&object);
+	vec_push(sequence, &object);
+	i++;
+	if (i < vec_size(self->children)) {
+		goto loop;
+	}
+
+	object_sequence_init(sequence, &object);
+	return (__push_r(self, &object));
 }
 
 XRE_API(oper_sequence)
 {
 	__trigger_bug_if(self == NULL);
-	static object_t _result = { 0 };
-
-	bool ret = _oper_sequence(self, &_result);
-	return (ret ? __push_r(self, &_result) : false);
+	return (_oper_sequence(self));
 }

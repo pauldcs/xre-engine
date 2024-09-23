@@ -4,7 +4,7 @@
 #include "xre_operations.h"
 #include <stdbool.h>
 
-static inline bool _oper_separator(ast_stmt_t *self)
+static inline bool _oper_separator(struct statement *self)
 {
 	if (!__br_eval(__left_branch)) {
 		return (false);

@@ -5,7 +5,7 @@
 #include "xre_runtime.h"
 #include <stdbool.h>
 
-typedef bool (*builtin_func_ptr)(ast_stmt_t *self);
+typedef bool (*builtin_func_ptr)(struct statement *self);
 
 typedef enum {
 	BUILTIN_TYPE_VALUE,
@@ -27,7 +27,7 @@ const char	*get_builtin_name_ptr(const char *ptr, size_t size);
 
 xre_expr_type_t get_builtin_type(const char *ptr, size_t size);
 
-#define XRE_BUILTIN_FUNCTION(name) bool name(ast_stmt_t *self)
+#define XRE_BUILTIN_FUNCTION(name) bool name(struct statement *self)
 
 XRE_BUILTIN_FUNCTION(builtin_print);
 XRE_BUILTIN_FUNCTION(builtin_typeof);

@@ -4,7 +4,7 @@
 #include "xre_operations.h"
 #include <stdbool.h>
 
-static inline bool _oper_not(ast_stmt_t *self, object_t *object)
+static inline bool _oper_not(struct statement *self, object_t *object)
 {
 	static object_t v;
 

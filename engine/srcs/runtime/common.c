@@ -12,12 +12,12 @@ static void set_error_type(error_type_e type)
 	_error.type  = type;
 }
 
-static void set_error_orig(ast_stmt_t *origin)
+static void set_error_orig(struct statement *origin)
 {
 	_error.orig = origin->orig;
 }
 
-void set_current_error(ast_stmt_t *self, error_type_e type)
+void set_current_error(struct statement *self, error_type_e type)
 {
 	set_error_type(type);
 	set_error_orig(self);
@@ -61,11 +61,6 @@ void object_attrs_repr(int32_t attrs)
 		separator = "-";
 	}
 
-	if (attrs & ATTR_SYMBOL) {
-		fprintf(stderr, "%ssymbol", separator);
-		separator = "-";
-	}
-
 	if (attrs & ATTR_REFERENCE) {
 		fprintf(stderr, "%sreference", separator);
 		separator = "-";
@@ -91,7 +86,7 @@ void object_drop(void *ptr)
 	}
 }
 
-bool stack_pop_r(object_t *ptr, ast_stmt_t *stmts)
+bool stack_pop_r(object_t *ptr, struct statement *stmts)
 {
 	stack_pop(ptr);
 	if (!__object_has_attr(ptr, ATTR_READABLE)) {
@@ -105,9 +100,9 @@ bool stack_pop_r(object_t *ptr, ast_stmt_t *stmts)
 }
 
 bool stack_pop_r_binop(
-	ast_stmt_t *self,
-	object_t   *left_buffer,
-	object_t   *right_buffer
+	struct statement *self,
+	object_t	 *left_buffer,
+	object_t	 *right_buffer
 )
 {
 	return (likely(stack_pop_r(right_buffer, __right_branch)) &&
@@ -115,9 +110,9 @@ bool stack_pop_r_binop(
 }
 
 bool binop_evaluate_pop_r(
-	ast_stmt_t *self,
-	object_t   *left_buffer,
-	object_t   *right_buffer
+	struct statement *self,
+	object_t	 *left_buffer,
+	object_t	 *right_buffer
 )
 {
 	if (unlikely(!__br_eval(__left_branch)) ||
@@ -132,7 +127,7 @@ bool binop_evaluate_pop_r(
 }
 
 bool stack_push_enable_attrs(
-	ast_stmt_t *self, object_t *object, int32_t attrs
+	struct statement *self, object_t *object, int32_t attrs
 )
 {
 	__object_set_attr(object, attrs);

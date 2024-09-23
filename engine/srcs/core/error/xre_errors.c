@@ -45,7 +45,7 @@ error_class_e error_type_to_class(error_type_e type)
 	case XRE_UNEXPECTED_OPERATOR_ERROR:
 	case XRE_ARGUMENTS_ERROR:
 	case XRE_UNEXPECTED_OPERAND_ERROR:
-	case XRE_UNMATCHED_PARENTHESIS_ERROR:
+	case XRE_UNMATCHED_BRACKETS_ERROR:
 	case XRE_UNTERMINATED_STRING_ERROR:
 		return XRE_SYNTAX_ERROR_C;
 	}
@@ -138,7 +138,7 @@ const char *error_type_str(error_type_e type)
 		return "unexpected operator";
 	case XRE_UNEXPECTED_OPERAND_ERROR:
 		return "unexpected operand";
-	case XRE_UNMATCHED_PARENTHESIS_ERROR:
+	case XRE_UNMATCHED_BRACKETS_ERROR:
 		return "unmatched parenthesis";
 	case XRE_UNTERMINATED_STRING_ERROR:
 		return "unterminated string";

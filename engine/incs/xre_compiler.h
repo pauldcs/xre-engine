@@ -11,16 +11,15 @@
 
 extern int __trace_depth;
 
-#define __trace_in(func_name)                                 \
-	do {                                           \
+#define __trace_in(func_name)                                \
+	do {                                                 \
 		for (size_t i = __trace_depth; i > 0; i--) { \
-			(void)fprintf(stderr, "    "); \
-		} \
-		__trace_depth++; \
+			(void)fprintf(stderr, "    ");       \
+		}                                            \
+		__trace_depth++;                             \
 		(void)fprintf(stderr, " %s\n", (func_name)); \
 	} while (0)
 #define __trace_out() __trace_depth--;
-
 
 #ifdef DISABLE_CHECKS
 

@@ -5,31 +5,14 @@
 #include <stdbool.h>
 #include <string.h>
 
-static inline bool _oper_assign(ast_stmt_t *self, object_t *object)
+static inline bool _oper_assign(struct statement *self)
 {
-	static object_t lv;
-	static object_t rv;
-
-	if (!oper_symbol_addr(__left_branch) ||
-	    !__br_eval(__right_branch) ||
-	    !stack_pop_r_binop(self, &lv, &rv)) {
-		return (false);
-	}
-
-	if (!unwrap_symbol_write(
-		    self, __object_get_data_as_symbol(&lv), &object
-	    )) {
-		return (false);
-	}
-
-	(void)memmove(object, &rv, sizeof(object_t));
-	return (__push_r_as_ref(self, &rv));
+	return (set_current_error(self, XRE_NOT_IMPLEMENTED_ERROR),
+		false);
 }
 
 XRE_API(oper_assign)
 {
 	__trigger_bug_if(self == NULL);
-	static object_t _result = { 0 };
-
-	return (_oper_assign(self, &_result));
+	return (_oper_assign(self));
 }

@@ -12,6 +12,7 @@ CFLAGS_RELEASE := \
 	-D XRE_DISABLE_ASSERTS=1
 
 CFLAGS := \
+	-g3 \
 	-Wall   \
 	-Wextra \
 	-Werror \
@@ -95,7 +96,7 @@ SRCS := \
 	runtime/operations/separator.c \
 	runtime/operations/closure.c \
 	runtime/operations/sequence.c \
-	runtime/operations/method.c \
+	runtime/operations/attribute.c \
 	runtime/operations/symbol.c \
 	runtime/operations/mul.c \
 	runtime/operations/rshift.c \
@@ -117,7 +118,6 @@ SRCS := \
 	runtime/memory/object/number.c \
 	runtime/memory/object/sequence.c \
 	runtime/memory/object/string.c \
-	runtime/memory/object/symbol.c \
 	runtime/memory/object/buffer.c \
 	runtime/memory/object/undefined.c \
 \

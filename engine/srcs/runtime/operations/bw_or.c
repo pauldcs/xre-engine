@@ -4,7 +4,8 @@
 #include "xre_operations.h"
 #include <stdbool.h>
 
-static inline bool _oper_bw_or(ast_stmt_t *self, object_t *result)
+static inline bool
+_oper_bw_or(struct statement *self, object_t *result)
 {
 	static object_t lbuf;
 	static object_t rbuf;
@@ -30,7 +31,7 @@ XRE_API(oper_bw_or)
 {
 	__trigger_bug_if(self == NULL);
 	static object_t _result = { 0 };
-	
+
 	bool ret = _oper_bw_or(self, &_result);
 	return (ret ? __push_rw(self, &_result) : false);
 }

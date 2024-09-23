@@ -8,7 +8,7 @@
 static void number_repr(void *ptr)
 {
 #if defined(__linux__)
-	(void)fprintf(stderr, "%ld", (int64_t)ptr);
+	(void)fprintf(stdout, "%ld", (int64_t)ptr);
 #else
 	(void)fprintf(stdout, "%lld", (int64_t)ptr);
 #endif
@@ -58,7 +58,7 @@ extract_number_object_value(object_t *object, int64_t *data)
 }
 
 bool unwrap_number_object(
-	ast_stmt_t *self, object_t *object, int64_t *data
+	struct statement *self, object_t *object, int64_t *data
 )
 {
 	if (!extract_number_object_value(object, data)) {

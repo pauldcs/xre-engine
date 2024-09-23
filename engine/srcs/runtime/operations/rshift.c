@@ -4,7 +4,8 @@
 #include "xre_operations.h"
 #include <stdbool.h>
 
-static inline bool _oper_rshift(ast_stmt_t *self, object_t *object)
+static inline bool
+_oper_rshift(struct statement *self, object_t *object)
 {
 	static object_t lbuf;
 	static object_t rbuf;
@@ -43,7 +44,7 @@ XRE_API(oper_rshift)
 {
 	__trigger_bug_if(self == NULL);
 	static object_t _result = { 0 };
-	
+
 	bool ret = _oper_rshift(self, &_result);
 	return (ret ? __push_rw(self, &_result) : false);
 }

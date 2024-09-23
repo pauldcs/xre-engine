@@ -5,28 +5,24 @@
 #include "xre_parse.h"
 #include <stdbool.h>
 
-/*    The parsed AST is tranformed into this 'struct statement'
- *    which is essencially the same except that the tree is
- *    in an array.
- */
 
-typedef int statement_name_t;
+struct frame {
+	vec_t *locals; /* object_t */
+};
 
 struct statement {
-	bool (*eval)(struct statement *);
+	bool (*op)(struct statement *);
 	xre_token_t *orig;
-	vec_t	    *local;
+	struct frame frame;
 	//vec_t *frame;
 	union {
 		int64_t value; // the value that the token represents
 		char *string;  // the string that the token represents
-		vec_t /* <statement_name_t> */ *children;
+		vec_t *children;
 		struct {
-			statement_name_t
-				left; // index of the left child branch
-			statement_name_t
-				right; // index of the right child branch
-		} br; // the operator that the token represents
+			struct statement *left;
+			struct statement *right;
+		} br;
 	};
 };
 

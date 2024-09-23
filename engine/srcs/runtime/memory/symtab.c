@@ -5,65 +5,98 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <string.h>
 
-typedef struct {
-	int32_t id;
-	int	offset;
-} cache_entry_t;
+vec_t *g_symbols = NULL;
+struct symbol {
+	const char *name;
+	object_t    object;
+};
 
-vec_t *g_symtab	  = NULL;
-vec_t *g_symcache = NULL;
-
-int symtab_entry_create(const char *sym)
+static inline bool symbol_offset_get(const char *name, size_t *offset)
 {
-	size_t cache_size = vec_size(g_symcache);
-	size_t i	  = 0;
-	int    id	  = hash_string(sym);
-
-	for (; i < cache_size; i++) {
-		cache_entry_t *entry =
-			(cache_entry_t *)vec_at(g_symcache, i);
-		if (!entry) {
-			return (-1);
-		}
-
-		if (id == (int)entry->id) {
-			return entry->offset;
+	size_t	       size = vec_size(g_symbols);
+	struct symbol *s;
+	while (size--) {
+		s = (struct symbol *)vec_at(g_symbols, size);
+		if (strcmp(s->name, name) == 0) {
+			*offset = size;
+			return (true);
 		}
 	}
+	return (false);
+}
 
-	cache_entry_t e = { .id = id, .offset = vec_size(g_symtab) };
-	
-	object_t obj = { 0 };
-	object_undefined_init(&obj);
-
-	if (!vec_push(g_symtab, &obj) ||
-	    !vec_push(g_symcache, &e)) {
-		return (-1);
+bool symbol_access(const char *name, struct symbol **symbol)
+{
+	size_t offset = 0;
+	if (!symbol_offset_get(name, &offset)) {
+		return (false);
 	}
 
-	return (e.offset);
+	*symbol = vec_access(g_symbols, offset);
+	return (true);
+}
+
+void symbol_get_unsafe(size_t offset, struct symbol **symbol)
+{
+	*symbol = vec_access(g_symbols, offset);
+}
+
+bool symbol_register(const char *name, size_t *position)
+{
+	struct symbol sym;
+
+	if (!symbol_offset_get(name, position)) {
+		return (false);
+	}
+
+	sym.name = name;
+	object_undefined_init(&sym.object);
+
+	*position = vec_size(g_symbols);
+
+	return (vec_push(g_symbols, &sym));
+}
+
+// bool symbols_allocate(size_t count)
+// {
+// 	size_t size = count;
+// 	object_t object = { 0 };
+
+// 	if (vec_uninitialized_size(g_symbols) >= count) {
+// 		goto copy;
+// 	} else {
+// 		if (unlikely(!vec_adjust(g_symbols, count))) {
+// 			return (false);
+// 		}
+// 	}
+
+// copy:
+// 	while (size--) {
+// 		object_undefined_init(&object);
+// 		(void)vec_push(g_symbols, &object);
+// 	}
+
+// 	return (unlikely(!vec_append_from_capacity(g_symbols, count)));
+// }
+
+void symbols_deallocate(size_t count)
+{
+	while (count--) {
+		(void)vec_pop(g_symbols, NULL);
+	}
 }
 
 bool symtab_init(void)
 {
-	if (g_symtab) {
+	if (g_symbols) {
 		return (true);
 	}
 
-	g_symtab = vec_create(sizeof(object_t), STACK_SIZE, NULL);
-	if (!g_symtab) {
-		return (false);
-	}
-
-	g_symcache =
-		vec_create(sizeof(cache_entry_t), STACK_SIZE, NULL);
-	if (!g_symcache) {
-		vec_kill(g_symtab);
-
-		g_symtab   = NULL;
-		g_symcache = NULL;
-
+	g_symbols =
+		vec_create(sizeof(struct symbol), STACK_SIZE, NULL);
+	if (!g_symbols) {
 		return (false);
 	}
 
@@ -72,13 +105,10 @@ bool symtab_init(void)
 
 void symtab_fini(void)
 {
-	if (!g_symtab || !g_symcache) {
+	if (!g_symbols) {
 		return;
 	}
 
-	vec_kill(g_symtab);
-	vec_kill(g_symcache);
-
-	g_symtab   = NULL;
-	g_symcache = NULL;
+	vec_kill(g_symbols);
+	g_symbols = NULL;
 }

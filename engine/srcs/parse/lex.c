@@ -183,12 +183,7 @@ not_a_constant_value:
 
 				break;
 			case ',':
-				_token._kind = __SEQUENCE__;
-				tf	     = 1;
-
-				break;
-			case '.':
-				_token._kind = __METHOD__;
+				_token._kind = __SEQUENCE_POINT__;
 				tf	     = 1;
 
 				break;
@@ -248,8 +243,12 @@ not_a_constant_value:
 						__SCOPE_RESOLUTION__;
 					tf = 2;
 					break;
+				} else {
+					_token._kind = __ATTRIBUTE__;
+					tf	     = 1;
+
+					break;
 				}
-				goto __default__;
 
 			case '|':
 				if (*(ptr + 1) == '|') {
@@ -322,7 +321,6 @@ not_a_constant_value:
 
 				break;
 			default:
-__default__:
 				/* handle comments
 TODO
 */
@@ -350,8 +348,9 @@ TODO
 					_token._kind = __VARIABLE__;
 					tmp	     = ptr;
 					tf++;
-					while (*tmp && (isalnum(*(tmp + 1)) ||
-							*(tmp + 1) == '_')) {
+					while (*tmp &&
+					       (isalnum(*(tmp + 1)) ||
+						*(tmp + 1) == '_')) {
 						tf++;
 						tmp++;
 					}
