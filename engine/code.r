@@ -3,7 +3,9 @@
     "is",
     "a",
     "test"
-} map (this, i => {
-    print (i, this)
+} do (this, i => {
+ (i, this) => this == 1 do {
+        print + a
+    }
 })
 

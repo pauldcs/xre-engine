@@ -1,6 +1,6 @@
 #include "vec.h"
 #include "xre_compiler.h"
-#include "xre_builtin.h"
+#include "xre_runtime.h"
 #include "xre_errors.h"
 #include "xre_parse.h"
 #include "xre_utils.h"
@@ -66,9 +66,8 @@ static xre_ast_t *ast_new_node(xre_token_t *token)
 	}
 
 	if (node->kind == __BUILTIN_CALL__) {
-		node->string = get_builtin_name_ptr(
-			token->_ptr, token->_len
-		);
+		node->string =
+			builtin_get_name(token->_ptr, token->_len);
 	}
 
 	return (node);
@@ -111,7 +110,8 @@ bool sequence_node(
 			    !vec_append(sequence, rval, 1)) {
 				goto prison;
 			}
-		} else if (!unfold_sequence_ast(lval, sequence) || !unfold_sequence_ast(rval, sequence)) {
+		} else if (!unfold_sequence_ast(lval, sequence) ||
+			   !unfold_sequence_ast(rval, sequence)) {
 			goto prison;
 		}
 	}

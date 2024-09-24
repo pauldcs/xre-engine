@@ -37,7 +37,7 @@ static bool block_process(const char *block)
 
 	xre_ast_t *ast = xre_ast_compose(block);
 	if (ast) {
-		(void)xre_runtime(ast);
+		(void)runtime(ast);
 
 		ast_free(ast);
 		return (true);

@@ -13,6 +13,8 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./engine:/root/engine
+      - ./pp:/root/pp
+      - ./tools:/root/tools
     ports:
       - '0.0.0.0:8000:3000'
     expose:

@@ -1,7 +1,7 @@
 #include "vec.h"
 #include "xre_compiler.h"
-#include "xre_builtin.h"
 #include "xre_errors.h"
+#include "xre_runtime.h"
 #include "xre_parse.h"
 #include "xre_utils.h"
 #include <ctype.h>
@@ -45,7 +45,7 @@ static bool accept_token(vec_t *tokens, size_t len)
 	_token._len = len;
 	if (_token._kind == __BUILTIN_CALL__) {
 		_token._type =
-			get_builtin_type(_token._ptr, _token._len);
+			builtin_get_type(_token._ptr, _token._len);
 	} else {
 		_token._type = expr_type_by_kind(_token._kind);
 	}

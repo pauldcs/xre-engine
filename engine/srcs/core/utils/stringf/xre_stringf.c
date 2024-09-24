@@ -214,8 +214,8 @@ size_t slcpyf(char *dst, size_t dstsize, const char *format, ...)
 	va_end(ap);
 
 	if (dstsize)
-		*(char *)((char *)iob.data + iob.len - (iob.len == dstsize)) =
-			'\0';
+		*(char *)((char *)iob.data + iob.len -
+			  (iob.len == dstsize)) = '\0';
 	return (iob.len + iob.disc);
 }
 

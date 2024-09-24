@@ -7,7 +7,7 @@
 typedef enum {
 	/* <word> */ __VARIABLE__,
 	/* .<word> */ __BUILTIN_CALL__,
-	/*     && */ __SCOPE_RESOLUTION__,
+	/*     :: */ __SCOPE_RESOLUTION__,
 	/*   <n>  */ __VAL__,
 	/*  "str" */ __STRING_LITERAL__,
 	/*      { */ __LBRACK__,
@@ -96,7 +96,7 @@ int get_precedence_by_kind(xre_expr_kind_t kind);
 /*---      UTILS      ---*/
 xre_expr_type_t expr_type_by_kind(xre_expr_kind_t kind);
 const char     *expr_kind_to_string(xre_expr_kind_t kind);
-const char *expr_type_to_string (xre_expr_type_t type);
+const char     *expr_type_to_string(xre_expr_type_t type);
 void		ast_show(xre_ast_t *ast);
 void		ast_free(xre_ast_t *ast);
 

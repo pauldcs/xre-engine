@@ -28,4 +28,6 @@ bool timespec_to_string(
 
 bool st_mode_to_string(mode_t st_mode, char *dest, size_t dest_size);
 
+char *format_string(const char *format, ...);
+
 #endif /* __XRE_UTILS_H__ */

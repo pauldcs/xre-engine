@@ -46,6 +46,7 @@ SRCS := \
 	core/utils/timespec_to_string.c \
 	core/utils/stresc2chr.c \
 	core/utils/hash_string.c \
+	core/utils/format_string.c \
 	core/utils/str_to_int32.c \
 	core/error/xre_errors.c \
 	core/error/xre_print_error.c \
@@ -74,43 +75,45 @@ SRCS := \
 	repl/readline/rl_buffer.c \
 \
 	runtime/xre_runtime.c \
-	runtime/common.c \
-	runtime/trace.c \
-\
-	runtime/operations/scope_resolution.c \
-	runtime/operations/eq.c \
-	runtime/operations/gt.c \
-	runtime/operations/le.c \
-	runtime/operations/ge.c \
-	runtime/operations/lt.c \
-	runtime/operations/ne.c \
-	runtime/operations/not.c \
-	runtime/operations/value.c \
-	runtime/operations/string.c \
-	runtime/operations/assign.c \
-	runtime/operations/or.c \
-	runtime/operations/loop.c \
-	runtime/operations/and.c \
-	runtime/operations/do.c \
-	runtime/operations/else.c \
-	runtime/operations/separator.c \
-	runtime/operations/closure.c \
-	runtime/operations/sequence.c \
-	runtime/operations/attribute.c \
-	runtime/operations/symbol.c \
-	runtime/operations/mul.c \
-	runtime/operations/rshift.c \
-	runtime/operations/mod.c \
-	runtime/operations/lshift.c \
-	runtime/operations/div.c \
-	runtime/operations/bw_xor.c \
-	runtime/operations/pow.c \
-	runtime/operations/bw_and.c \
-	runtime/operations/add.c \
-	runtime/operations/sub.c \
-	runtime/operations/bw_or.c \
-	runtime/operations/symbol.c \
-\
+	runtime/xre_tree.c \
+	runtime/print_tree.c \
+	runtime/builtins.c \
+
+#\
+#	runtime/operations/scope_resolution.c \
+#	runtime/operations/eq.c \
+#	runtime/operations/gt.c \
+#	runtime/operations/le.c \
+#	runtime/operations/ge.c \
+#	runtime/operations/lt.c \
+#	runtime/operations/ne.c \
+#	runtime/operations/not.c \
+#	runtime/operations/value.c \
+#	runtime/operations/string.c \
+#	runtime/operations/assign.c \
+#	runtime/operations/or.c \
+#	runtime/operations/loop.c \
+#	runtime/operations/and.c \
+#	runtime/operations/do.c \
+#	runtime/operations/else.c \
+#	runtime/operations/separator.c \
+#	runtime/operations/closure.c \
+#	runtime/operations/sequence.c \
+#	runtime/operations/attribute.c \
+#	runtime/operations/symbol.c \
+#	runtime/operations/mul.c \
+#	runtime/operations/rshift.c \
+#	runtime/operations/mod.c \
+#	runtime/operations/lshift.c \
+#	runtime/operations/div.c \
+#	runtime/operations/bw_xor.c \
+#	runtime/operations/pow.c \
+#	runtime/operations/bw_and.c \
+#	runtime/operations/add.c \
+#	runtime/operations/sub.c \
+#	runtime/operations/bw_or.c \
+#	runtime/operations/symbol.c \
+#\
 	runtime/memory/heap.c \
 	runtime/memory/stack.c \
 	runtime/memory/symtab.c \

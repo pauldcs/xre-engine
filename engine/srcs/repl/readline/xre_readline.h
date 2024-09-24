@@ -8,7 +8,7 @@
 #include <termios.h>
 #include <unistd.h>
 
-#define CTRL_KEY(k)	  ((k)&0x1f)
+#define CTRL_KEY(k)	  ((k) & 0x1f)
 #define DEFAULT_LINE_SIZE 64
 
 extern bool __terminal_in_raw_mode__;

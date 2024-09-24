@@ -3,72 +3,108 @@
 
 #include "xre_errors.h"
 #include "xre_parse.h"
+#include "dstr.h"
 #include <stdbool.h>
 
-/*    The parsed AST is tranformed into this 'struct statement'
- *    which is essencially the same except that the tree is
- *    in an array.
- */
-
-typedef int statement_name_t;
-
-struct statement {
-	bool (*eval)(struct statement *);
-	xre_token_t *orig;
-	vec_t	    *local;
-	//vec_t *frame;
-	union {
-		int64_t value; // the value that the token represents
-		char *string;  // the string that the token represents
-		vec_t /* <statement_name_t> */ *children;
-		struct {
-			statement_name_t
-				left; // index of the left child branch
-			statement_name_t
-				right; // index of the right child branch
-		} br; // the operator that the token represents
-	};
+struct frame {
+	vec_t	 *variables /* object_t */;
+	uintptr_t pointer;
 };
 
+struct meta {
+	const char  *iden;
+	xre_token_t *source;
+};
 
-extern struct statement *__statements__;
+#define __binop_unfold_left(__statement_ptr) \
+	((__statement_ptr)->self.left)
+#define __binop_unfold_right(__statement_ptr) \
+	((__statement_ptr)->self.right)
+struct statements {
+	bool (*_op)(struct statements *);
 
-// struct frame {
-// 	statement_name_t statement;
-// 	object_t *args[8];
-// 	struct {
-// 		size_t r;
-// 		size_t w;
-// 	} segments;
-// };
+	struct meta meta;
+	//struct frame frame;
+	vec_t *frame;
 
-#define __br_eval(obj_ptr) obj_ptr->eval(obj_ptr)
+	union {
+		int64_t offset; // variable offset
+		vec_t *children; // in the case of a sequence operation,
+			// this i a verctor of children statements
+		struct {
+			struct statements *left;
+			struct statements *right;
+		};
+	} self;
+};
 
-#define __push_r_as_ref(self_ptr, obj_ptr)                        \
-	stack_push_enable_attrs(                                  \
-		self_ptr, obj_ptr, ATTR_READABLE | ATTR_REFERENCE \
-	)
+// struct xre_pp {
 
-#define __push_r(self_ptr, obj_ptr) \
-	stack_push_enable_attrs(self_ptr, obj_ptr, ATTR_READABLE)
+// }
 
-#define __push_w(self_ptr, obj_ptr) \
-	stack_push_enable_attrs(self_ptr, obj_ptr, ATTR_MUTABLE)
+#define OBJ_ATTR_MUTABLE   1 << 1
+#define OBJ_ATTR_READABLE  1 << 2
+#define OBJ_ATTR_REFERENCE 1 << 3
+#define OBJ_ATTR_CONSTANT  1 << 4
 
-#define __push_rw(self_ptr, obj_ptr)                            \
-	stack_push_enable_attrs(                                \
-		self_ptr, obj_ptr, ATTR_READABLE | ATTR_MUTABLE \
-	)
+#define OBJ_TYPE_NUMBER	   1 << 31
+#define OBJ_TYPE_SEQUENCE  1 << 32
+#define OBJ_TYPE_BUFFER	   1 << 33
+#define OBJ_TYPE_STRING	   1 << 34
+#define OBJ_TYPE_UNDEFINED 1 << 35
+
+#define OBJ_ATTR_MASK 0x00000000ffffffff
+#define OBJ_TYPE_MASK 0xffffffff00000000
+
+typedef struct {
+	int64_t objattrs;
+	union {
+		void		     *any;
+		dstr_t		     *string;
+		vec_t /* uint8_t  */ *buffer;
+		vec_t /* object_t */ *sequence;
+		int64_t		      number;
+		//xre_bytes_t  bytes;
+	};
+
+	void (*_drop)(void *);
+	void (*_str)(void *);
+	bool (*_test)(void *);
+} object_t;
+
+struct runtime {
+	struct statements *start;
+	const char	  *name;
+};
 
 /*    Execute the ast
  */
-bool xre_runtime(xre_ast_t *ast);
+bool runtime(xre_ast_t *ast);
 
-extern err_notif_t _error;
-
-/*    sets the '_error' global struct with the appropriate info
- *    given a 'error_type_e'.
+/* 
+ *    Initialises the main data structure used at runtime.
+ *    It contains the instructions as well as frame info such
+ *    as local variables.
  */
-void set_current_error(struct statement *self, error_type_e type);
+bool runtime_tree_init(xre_ast_t *ast, struct runtime *runtime);
+void runtime_tree_put(struct statements *node);
+
+enum builtin_type {
+	BUILTIN_VALUE,
+	BUILTIN_BINOP,
+	BUILTIN_UNIOP,
+};
+
+struct builtin {
+	const char	 *iden;
+	enum builtin_type type;
+	void		 *func;
+};
+
+extern struct builtin builtin_lookup[7];
+
+bool		is_defined_builtin(const char *ptr, size_t size);
+const char     *builtin_get_name(const char *ptr, size_t size);
+xre_expr_type_t builtin_get_type(const char *ptr, size_t size);
 
 #endif

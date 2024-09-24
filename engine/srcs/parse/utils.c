@@ -97,14 +97,19 @@ void ast_free(xre_ast_t *ast)
 	free(ast);
 }
 
-const char *expr_type_to_string (xre_expr_type_t type)
+const char *expr_type_to_string(xre_expr_type_t type)
 {
 	switch (type) {
-		case EXPR_TYPE_VALUE: return ("value");
-		case EXPR_OP_TYPE_SEQUENCE: return ("sequence");
-		case EXPR_OP_TYPE_BINOP: return ("binop");
-		case EXPR_OP_TYPE_UNIOP: return ("uniop");
-		case EXPR_TYPE_OTHER: return ("other");
+	case EXPR_TYPE_VALUE:
+		return ("value");
+	case EXPR_OP_TYPE_SEQUENCE:
+		return ("sequence");
+	case EXPR_OP_TYPE_BINOP:
+		return ("binop");
+	case EXPR_OP_TYPE_UNIOP:
+		return ("uniop");
+	case EXPR_TYPE_OTHER:
+		return ("other");
 	}
 
 	__builtin_unreachable();
@@ -148,7 +153,7 @@ const char *expr_kind_to_string(xre_expr_kind_t kind)
 	case __GT__:
 		return "Greater than";
 	case __LE__:
-		return "Less or eaqual";
+		return "Less or equal";
 	case __GE__:
 		return "Greater than or equal";
 	case __LBRACK__:
@@ -178,7 +183,7 @@ const char *expr_kind_to_string(xre_expr_kind_t kind)
 	case __NE__:
 		return "Not equal";
 	case __SEQUENCE_POINT__:
-		return "Sequence point";
+		return "Sequence";
 	case __SEQUENCE__:
 		return "Sequence";
 	case __ATTRIBUTE__:

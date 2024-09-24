@@ -1,4 +1,3 @@
-#include "xre_memory.h"
 #include "xre_alloc.h"
 #include "xre_args.h"
 #include "xre_compiler.h"
@@ -89,7 +88,7 @@ club:
 		goto prison;
 	}
 
-	if (!xre_runtime(ast)) {
+	if (!runtime(ast)) {
 		ast_free(ast);
 		goto prison;
 	}
@@ -138,14 +137,11 @@ int main(int ac, char *av[])
 					goto prison;
 				}
 
-				if (!xre_runtime(ast)) {
+				if (!runtime(ast)) {
 					ast_free(ast);
 					goto prison;
 				}
 
-				symtab_fini();
-				stack_fini();
-				//heap_fini();
 				ast_free(ast);
 				free(args);
 
