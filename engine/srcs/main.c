@@ -83,7 +83,7 @@ club:
 		goto prison;
 	}
 
-	xre_ast_t *ast = xre_ast_compose(buffer);
+	struct ast *ast = xre_ast_compose(buffer);
 	if (!ast) {
 		goto prison;
 	}
@@ -105,7 +105,7 @@ prison:
 int main(int ac, char *av[])
 {
 	t_xre_args *args;
-	xre_ast_t  *ast;
+	struct ast *ast;
 	char	   *file;
 
 	if (!(args = xre_args_parse(ac, av)))

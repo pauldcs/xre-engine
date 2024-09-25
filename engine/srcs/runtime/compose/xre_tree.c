@@ -8,6 +8,11 @@
 
 static vec_t *_local_cache = NULL;
 
+struct cache {
+	const char *key;
+	int64_t *attrs;
+};
+
 static bool tree_node_alloc(struct statements **statement)
 {
 	*statement = malloc(sizeof(struct statements));
@@ -26,22 +31,21 @@ void tree_node_dealloc(struct statements **statement)
 
 static bool local_cache_alloc(void)
 {
-	_local_cache = vec_create(sizeof(char *), 64, NULL);
+	_local_cache = vec_create(sizeof(const char *), 64, NULL);
 	if (!_local_cache) {
 		return (false);
 	}
 	return (true);
 }
 
-static bool local_cache_push(const char *str)
+static bool local_cache_push(const char *key)
 {
-	return (vec_push(_local_cache, &str));
+	return (vec_push(_local_cache, &key));
 }
 
 static void local_cache_pop(void)
 {
-	const char *str;
-	vec_pop(_local_cache, &str);
+	vec_pop(_local_cache, NULL);
 }
 
 static void local_cache_dealloc(void)
@@ -50,17 +54,29 @@ static void local_cache_dealloc(void)
 	_local_cache = NULL;
 }
 
-static ssize_t is_cached(const char *str)
+static ssize_t is_cached(const char *key)
 {
 	size_t size = vec_size(_local_cache);
 	while (size--) {
-		const char *s = *(char **)vec_at(_local_cache, size);
-		if (!strcmp(s, str)) {
+		const char *str = *(char **)vec_at(_local_cache, size);
+		if (!strcmp(str, key)) {
 			return (size);
 		}
 	}
 	return (-1);
 }
+
+// static struct cache *object_cache_get(const char *key)
+// {
+// 	size_t size = vec_size(_local_cache);
+// 	while (size--) {
+// 		struct cache *entry = (struct cache *)vec_at(_local_cache, size);
+// 		if (!strcmp(entry->key, key)) {
+// 			return (entry);
+// 		}
+// 	}
+// 	return (NULL);
+// }
 
 static bool statement_is_scope_modifier(struct statements *statement)
 {
@@ -87,7 +103,7 @@ static bool _is_scope_change(struct statements *parent)
 	return (statement_is_scope_modifier(parent));
 }
 
-static const char *format_value(xre_ast_t *ast)
+static const char *format_value(struct ast *ast)
 {
 	switch (ast->kind) {
 	case __VARIABLE__:
@@ -96,8 +112,6 @@ static const char *format_value(xre_ast_t *ast)
 		return (format_string("%d", ast->value));
 	case __STRING_LITERAL__:
 		return (format_string("'%s'", ast->string));
-	case __SEQUENCE__:
-		return (format_string("A"));
 	default:
 		return (format_string("_"));
 	}
@@ -107,13 +121,12 @@ vec_t *_frame	 = NULL;
 size_t _n_frames = 0;
 
 static bool runtime_tree_create(
-	xre_ast_t	   *ast,
+	struct ast	   *ast,
 	struct statements **statements,
 	bool		    is_scope_change
 )
 {
 	const char *format = NULL;
-	const char *fmt	   = NULL;
 	ssize_t	    pos	   = -1;
 	size_t	    npos   = 0;
 	size_t	    n;
@@ -125,8 +138,8 @@ static bool runtime_tree_create(
 	struct statements *node = *statements;
 
 	node->meta.iden	  = expr_kind_to_string(ast->kind);
-	node->meta.source = (xre_token_t *)&ast->token;
-	node->frame	  = vec_create(sizeof(char *), 4, NULL);
+	node->meta.source = (struct token *)&ast->token;
+	node->frame	  = vec_create(sizeof(object_t), 64, NULL);
 	node->_op	  = NULL;
 
 	if (_frame == NULL) {
@@ -167,39 +180,60 @@ static bool runtime_tree_create(
 		npos   = 0;
 
 		if (pos == -1) {
-			npos = vec_size(save_frame);
+			npos = _n_frames + vec_size(save_frame);
 		} else {
 			npos = pos;
 		}
 
-		switch (ast->kind) {
-		case __VARIABLE__:
-			fmt = format_string(
-				"local: '%s'", ast->string
-			);
-			break;
-
-		case __VAL__:
-			fmt = format_string("static: %d", ast->value);
-			break;
-
-		case __STRING_LITERAL__:
-			fmt = format_string(
-				"static string: '%s'", ast->string
-			);
-			break;
-
-		default:
-			fmt = format_string("_");
-			break;
-		}
-
 		node->meta.iden	  = format;
-		node->self.offset = _n_frames + npos;
-
+		node->self.offset = npos;
+	
 		if (pos == -1) {
+
+			object_t *object = NULL;
+
+			switch (ast->kind) {
+			case __VARIABLE__:
+				(void)object_init(
+					&object,
+						OBJ_TYPE_UNDEFINED | OBJ_ATTR_MUTABLE,
+						(uint64_t)NULL
+				);
+				break;
+
+			case __VAL__:
+				(void)object_init(
+					&object,
+					OBJ_ATTR_READABLE | OBJ_TYPE_NUMBER,
+					(uint64_t)ast->value
+				);
+				break;
+
+			case __STRING_LITERAL__:
+				(void)object_init(
+					&object,
+					OBJ_ATTR_READABLE | OBJ_TYPE_STRING,
+					(uint64_t)ast->string
+				);
+				break;
+
+			case __SEQUENCE__:
+				(void)object_init(
+					&object,
+					OBJ_ATTR_READABLE | OBJ_TYPE_SEQUENCE,
+					(uint64_t)ast->seq
+				);
+
+			default:
+				(void
+				)object_init(&object, OBJ_TYPE_UNDEFINED | OBJ_ATTR_MUTABLE, 0);
+				break;
+			}
+			
+			object->str = format;
+			
 			local_cache_push(format);
-			vec_push(_frame, &fmt);
+			vec_push(_frame, object);
 		}
 
 		break;
@@ -216,6 +250,7 @@ static bool runtime_tree_create(
 		break;
 
 	case EXPR_OP_TYPE_BINOP:
+	
 		if (!runtime_tree_create(
 			    ast->_binop.left,
 			    &__binop_unfold_left(node),
@@ -250,15 +285,13 @@ end:
 	return (true);
 }
 
-bool runtime_tree_init(xre_ast_t *ast, struct runtime *runtime)
+bool runtime_tree_init(struct ast *ast, struct runtime *runtime)
 {
-	if (!local_cache_alloc()) {
-		return (false);
+	bool ret = false;
+
+	if (local_cache_alloc()) {
+		ret = runtime_tree_create(ast, &runtime->start, true);
+		local_cache_dealloc();
 	}
-
-	bool ret = runtime_tree_create(ast, &runtime->start, true);
-
-	local_cache_dealloc();
-
 	return (ret);
 }

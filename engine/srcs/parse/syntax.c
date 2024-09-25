@@ -6,9 +6,9 @@
 #include <sys/types.h>
 
 #define PREV_TOKEN_KIND \
-	((xre_token_t *)vec_at(tokens, idx - 2))->_kind
+	((struct token *)vec_at(tokens, idx - 2))->_kind
 #define PREV_TOKEN_TYPE \
-	((xre_token_t *)vec_at(tokens, idx - 2))->_type
+	((struct token *)vec_at(tokens, idx - 2))->_type
 
 err_notif_t syntax_error_g;
 
@@ -16,17 +16,17 @@ bool xre_expr_syntax(vec_t *tokens)
 {
 	__return_val_if_fail__(tokens, false);
 
-	xre_token_t *token  = NULL;
-	size_t	     size   = tokens->_nmemb;
-	size_t	     idx    = 0;
-	int	     p_open = 0;
-	int	     p_save = 0;
-	int	     b_open = 0;
+	struct token *token  = NULL;
+	size_t	      size   = tokens->_nmemb;
+	size_t	      idx    = 0;
+	int	      p_open = 0;
+	int	      p_save = 0;
+	int	      b_open = 0;
 
 	(void)memset(&syntax_error_g, 0, sizeof(syntax_error_g));
 
 	while (size--) {
-		token	      = (xre_token_t *)vec_at(tokens, idx++);
+		token	      = (struct token *)vec_at(tokens, idx++);
 		token->_depth = p_open + b_open;
 
 		if (!token)
@@ -95,18 +95,6 @@ as_uniop:
 				XRE_UNEXPECTED_OPERATOR_ERROR;
 			goto syntax_error;
 
-		case __ASSIGN__:
-			if (PREV_TOKEN_KIND == __VARIABLE__)
-				continue;
-
-			syntax_error_g.class = error_type_to_class(
-				XRE_INVALID_ASSIGMENT_ERROR
-			);
-			syntax_error_g.type =
-				XRE_INVALID_ASSIGMENT_ERROR;
-
-			goto syntax_error;
-
 		case __RPAREN__:
 			if (p_open == 0 || b_open > p_save) {
 				syntax_error_g.class =
@@ -165,6 +153,7 @@ as_uniop:
 		case __SCOPE_RESOLUTION__:
 		case __END__:
 		case __CLOSURE__:
+		case __ASSIGN__:
 as_binop:
 			if (PREV_TOKEN_TYPE & EXPR_TYPE_VALUE ||
 			    PREV_TOKEN_KIND == __RBRACK__ ||

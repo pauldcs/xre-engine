@@ -62,7 +62,7 @@ alloc_zeroed_stmt_tree(size_t size, struct statements **buffer)
 	return (true);
 }
 
-static size_t get_tree_size(xre_ast_t *ast)
+static size_t get_tree_size(struct ast *ast)
 {
 	size_t size = 1;
 
@@ -98,7 +98,7 @@ static size_t get_tree_size(xre_ast_t *ast)
 }
 
 static int stmt_tree_init(
-	struct statements *stmt, xre_ast_t *ast, bool reset_index
+	struct statements *stmt, struct ast *ast, bool reset_index
 )
 {
 	static int index = 0;
@@ -111,7 +111,7 @@ static int stmt_tree_init(
 	int		   tmp		 = 0;
 	int		   initial_index = index++;
 
-	current->orig  = (xre_token_t *)&ast->token;
+	current->orig  = (struct token *)&ast->token;
 	current->local = vec_create(sizeof(char *), 3, NULL);
 
 	if (ast->kind == __BUILTIN_CALL__) {
@@ -139,8 +139,8 @@ static int stmt_tree_init(
 		n		  = vec_size(ast->seq);
 		current->children = vec_create(sizeof(int), n, NULL);
 		for (int i = 0; i < n; i++) {
-			xre_ast_t *a = vec_access(ast->seq, i);
-			tmp	     = stmt_tree_init(stmt, a, false);
+			struct ast *a = vec_access(ast->seq, i);
+			tmp = stmt_tree_init(stmt, a, false);
 			vec_push(current->children, &tmp);
 		}
 		break;
@@ -183,7 +183,7 @@ binop:
 }
 
 static bool
-stmt_tree_create(xre_ast_t *ast, struct statements **buffer)
+stmt_tree_create(struct ast *ast, struct statements **buffer)
 {
 	if (!alloc_zeroed_stmt_tree(
 		    get_tree_size(ast) * sizeof(struct statements),
@@ -209,7 +209,7 @@ inner(struct statements *stmt,
       bool		 is_scope_change,
       size_t		 ret);
 
-bool is_scope_modifier_kind(xre_expr_kind_t kind)
+bool is_scope_modifier_kind(enum expr_kind kind)
 {
 	switch (kind) {
 	case __DO__:
@@ -508,7 +508,7 @@ void scoper(struct statements *tree)
 	inner2(tree, 0, cache, 0);
 }
 
-bool xre_runtime(xre_ast_t *ast)
+bool xre_runtime(struct ast *ast)
 {
 	__return_val_if_fail__(ast, false);
 

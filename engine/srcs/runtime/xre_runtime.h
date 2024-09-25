@@ -2,7 +2,7 @@
 #define __XRE_RUNTIME_H__
 
 #include "xre_errors.h"
-#include "xre_parse.h"
+#include "xre_nodes.h"
 #include "dstr.h"
 #include <stdbool.h>
 
@@ -12,14 +12,15 @@ struct frame {
 };
 
 struct meta {
-	const char  *iden;
-	xre_token_t *source;
+	const char   *iden;
+	struct token *source;
 };
 
 #define __binop_unfold_left(__statement_ptr) \
 	((__statement_ptr)->self.left)
 #define __binop_unfold_right(__statement_ptr) \
 	((__statement_ptr)->self.right)
+
 struct statements {
 	bool (*_op)(struct statements *);
 
@@ -28,7 +29,10 @@ struct statements {
 	vec_t *frame;
 
 	union {
-		int64_t offset; // variable offset
+		struct {
+			int64_t offset; // variable offset
+			int64_t attrs;
+		};
 		vec_t *children; // in the case of a sequence operation,
 			// this i a verctor of children statements
 		struct {
@@ -42,24 +46,26 @@ struct statements {
 
 // }
 
-#define OBJ_ATTR_MUTABLE   1 << 1
-#define OBJ_ATTR_READABLE  1 << 2
-#define OBJ_ATTR_REFERENCE 1 << 3
-#define OBJ_ATTR_CONSTANT  1 << 4
+#define OBJ_ATTR_MUTABLE   (1ULL << 1)
+#define OBJ_ATTR_READABLE  (1ULL << 2)
+#define OBJ_ATTR_REFERENCE (1ULL << 3)
 
-#define OBJ_TYPE_NUMBER	   1 << 31
-#define OBJ_TYPE_SEQUENCE  1 << 32
-#define OBJ_TYPE_BUFFER	   1 << 33
-#define OBJ_TYPE_STRING	   1 << 34
-#define OBJ_TYPE_UNDEFINED 1 << 35
+// Type flags (upper 32 bits)
+#define OBJ_TYPE_NUMBER    (1ULL << 33)
+#define OBJ_TYPE_SEQUENCE  (1ULL << 34)
+#define OBJ_TYPE_BUFFER    (1ULL << 35)
+#define OBJ_TYPE_STRING    (1ULL << 36)
+#define OBJ_TYPE_UNDEFINED (1ULL << 37)
 
-#define OBJ_ATTR_MASK 0x00000000ffffffff
-#define OBJ_TYPE_MASK 0xffffffff00000000
+// Masks
+#define OBJ_ATTR_MASK 0x00000000FFFFFFFFULL
+#define OBJ_TYPE_MASK 0xFFFFFFFF00000000ULL
 
 typedef struct {
 	int64_t objattrs;
+	const char *str;
 	union {
-		void		     *any;
+		uint64_t              any;
 		dstr_t		     *string;
 		vec_t /* uint8_t  */ *buffer;
 		vec_t /* object_t */ *sequence;
@@ -72,6 +78,9 @@ typedef struct {
 	bool (*_test)(void *);
 } object_t;
 
+bool object_init(object_t **dest, int64_t objattrs, uint64_t default_value);
+const char *object_to_str(object_t *object);
+const char *object_attr_to_str(int64_t obj_attrs);
 struct runtime {
 	struct statements *start;
 	const char	  *name;
@@ -79,32 +88,14 @@ struct runtime {
 
 /*    Execute the ast
  */
-bool runtime(xre_ast_t *ast);
+bool runtime(struct ast *ast);
 
 /* 
  *    Initialises the main data structure used at runtime.
  *    It contains the instructions as well as frame info such
  *    as local variables.
  */
-bool runtime_tree_init(xre_ast_t *ast, struct runtime *runtime);
-void runtime_tree_put(struct statements *node);
-
-enum builtin_type {
-	BUILTIN_VALUE,
-	BUILTIN_BINOP,
-	BUILTIN_UNIOP,
-};
-
-struct builtin {
-	const char	 *iden;
-	enum builtin_type type;
-	void		 *func;
-};
-
-extern struct builtin builtin_lookup[7];
-
-bool		is_defined_builtin(const char *ptr, size_t size);
-const char     *builtin_get_name(const char *ptr, size_t size);
-xre_expr_type_t builtin_get_type(const char *ptr, size_t size);
+bool runtime_tree_init(struct ast *ast, struct runtime *runtime);
+void runtime_tree_debug(struct statements *node);
 
 #endif

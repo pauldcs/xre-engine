@@ -1,8 +1,8 @@
 #include "vec.h"
 #include "xre_compiler.h"
 #include "xre_errors.h"
-#include "xre_runtime.h"
-#include "xre_parse.h"
+#include "xre_builtin.h"
+#include "xre_nodes.h"
 #include "xre_utils.h"
 #include <ctype.h>
 #include <string.h>
@@ -10,12 +10,12 @@
 
 err_notif_t lexer_error_g;
 
-xre_token_t _token;
-size_t	    _line;
-size_t	    _cols;
-char	   *_token_ptr;
-char	   *_line_ptr;
-size_t	    _line_len;
+struct token _token;
+size_t	     _line;
+size_t	     _cols;
+char	    *_token_ptr;
+char	    *_line_ptr;
+size_t	     _line_len;
 
 static size_t get_cur_line_len(void)
 {
@@ -44,8 +44,19 @@ static bool accept_token(vec_t *tokens, size_t len)
 
 	_token._len = len;
 	if (_token._kind == __BUILTIN_CALL__) {
-		_token._type =
-			builtin_get_type(_token._ptr, _token._len);
+		switch (builtin_get_type(_token._ptr, _token._len)) {
+		case BUILTIN_BINOP:
+			_token._type = EXPR_OP_TYPE_BINOP;
+			break;
+
+		case BUILTIN_UNIOP:
+			_token._type = EXPR_OP_TYPE_UNIOP;
+			break;
+
+		default:
+			_token._type = EXPR_TYPE_VALUE;
+			break;
+		}
 	} else {
 		_token._type = expr_type_by_kind(_token._kind);
 	}

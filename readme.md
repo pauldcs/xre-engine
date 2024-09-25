@@ -7,56 +7,59 @@ languages design
 i = 0;
 
 (i = i + 1) <= 50 loop {
-    print ({1, 2, (3, 4), 5} map {
+    out ({1, 2, (3, 4), 5} map {
 		@ => buf @
 	})
 }
 ```
 
 ```r
-$binop "Separator" 	# 01:05:01:00
- reserve +0000 	# __local: 'i'
- reserve +0001 	# __static: 0
- reserve +0002 	# __static: 1
- reserve +0003 	# __static: 50
-    $binop "Assign" 	# 01:02:01:00
-        ref &0000
-        ref &0001
-    $binop "Loop" 	# 03:18:04:00
-        $binop "Less or equal" 	# 03:12:02:00
-            $binop "Assign" 	# 03:03:01:01
-                ref &0000
-                $binop "Addition" 	# 03:07:01:01
-                    ref &0000
-                    ref &0002
-            ref &0003
-        $uniop "Builtin call" 	# 04:04:05:01
-         reserve +0004 	# __static: 5
-         reserve +0005 	# __static: 4
-         reserve +0006 	# __static: 3
-         reserve +0007 	# __static: 2
-         reserve +0008 	# __local: '@'
-            $binop "Builtin call" 	# 04:29:03:02
-                $binop "Sequence" 	# 04:24:01:03
-                    ref &0004
-                    $binop "Sequence" 	# 04:20:01:04
-                        ref &0005
-                        ref &0006
-                    ref &0007
-                    ref &0006
-                $binop "Closure" 	# 05:04:02:03
-                    ref &0008
-                    $uniop "Builtin call" 	# 05:07:03:03
-                        ref &0017
-         drop +0008
-         drop +0007
-         drop +0006
-         drop +0005
-         drop +0004
- drop +0003
+$binop "Loop"   # 02:18:04:00
+  # @var_i, raw: 0x0000000000000000, attrs: -W- undefined
+ alloc +0000
+  # @var_1, raw: 0x0000000000000001, attrs: R-- static_int
+ alloc +0001
+  # @var_50, raw: 0x0000000000000032, attrs: R-- static_int
+ alloc +0002
+    $binop "Less or equal"      # 02:12:02:00
+        $binop "Assign"         # 02:03:01:01
+            ref &0000 # attrs: ---
+            $binop "Addition"   # 02:07:01:01
+                ref &0000 # attrs: ---
+                ref &0001 # attrs: ---
+        ref &0002 # attrs: ---
+    $uniop "Builtin call"       # 03:04:03:01
+      # @var_5, raw: 0x0000000000000005, attrs: R-- static_int
+     alloc +0003
+      # @var_4, raw: 0x0000000000000004, attrs: R-- static_int
+     alloc +0004
+      # @var_3, raw: 0x0000000000000003, attrs: R-- static_int
+     alloc +0005
+      # @var_2, raw: 0x0000000000000002, attrs: R-- static_int
+     alloc +0006
+      # @var_@, raw: 0x0000000000000000, attrs: -W- undefined
+     alloc +0007
+        $binop "Builtin call"   # 03:27:03:02
+            $binop "Sequence"   # 03:22:01:03
+                ref &0003 # attrs: ---
+                $binop "Sequence"       # 03:18:01:04
+                    ref &0004 # attrs: ---
+                    ref &0005 # attrs: ---
+                ref &0006 # attrs: ---
+                ref &0001 # attrs: ---
+            $binop "Closure"    # 04:04:02:03
+                ref &0007 # attrs: ---
+                $uniop "Builtin call"   # 04:07:03:03
+                    ref &0007 # attrs: ---
+     drop +0007
+     drop +0006
+     drop +0005
+     drop +0004
+     drop +0003
  drop +0002
  drop +0001
  drop +0000
+
 ```
 
 ## Installation

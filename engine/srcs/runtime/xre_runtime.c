@@ -21,7 +21,7 @@ void runtime_dealloc(struct runtime **rt)
 	*rt = NULL;
 }
 
-static bool runtime_init(xre_ast_t *ast, struct runtime **rt)
+static bool runtime_init(struct ast *ast, struct runtime **rt)
 {
 	(void)ast;
 	if (!runtime_alloc(rt)) {
@@ -32,22 +32,13 @@ static bool runtime_init(xre_ast_t *ast, struct runtime **rt)
 		goto prison;
 	}
 
-	// return (true);
-	// if (!alloc_zeroed_stmt_tree(
-	// 	    get_tree_size(ast) * sizeof(struct statements),
-	// 	    buffer
-	//     )) {
-	// 	return (false);
-	// }
-
-	// (void)stmt_tree_init(*buffer, ast, true);
 	return (true);
 prison:
 	runtime_dealloc(rt);
 	return (false);
 }
 
-bool runtime(xre_ast_t *ast)
+bool runtime(struct ast *ast)
 {
 	__trigger_bug_if(ast == false);
 
@@ -57,7 +48,7 @@ bool runtime(xre_ast_t *ast)
 		return (false);
 	}
 
-	runtime_tree_put(rt->start);
+	runtime_tree_debug(rt->start);
 
 	return (true);
 	// 	if (!stack_init()) {

@@ -3,28 +3,28 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-static void inner(xre_ast_t *ast, size_t depth);
+static void inner(struct ast *ast, size_t depth);
 
-static void put_binop(xre_ast_t *ast, size_t depth)
+static void put_binop(struct ast *ast, size_t depth)
 {
 	inner(ast->_binop.left, depth + 1);
 	inner(ast->_binop.right, depth + 1);
 }
 
-static void put_sequence(xre_ast_t *ast, size_t depth)
+static void put_sequence(struct ast *ast, size_t depth)
 {
 	for (size_t c = 0; c < vec_size(ast->seq); c++) {
-		inner((xre_ast_t *)vec_access(ast->seq, c),
+		inner((struct ast *)vec_access(ast->seq, c),
 		      depth + 1);
 	}
 }
 
-static void put_uniop(xre_ast_t *ast, size_t depth)
+static void put_uniop(struct ast *ast, size_t depth)
 {
 	inner(ast->uniop, depth + 1);
 }
 
-static void inner(xre_ast_t *ast, size_t depth)
+static void inner(struct ast *ast, size_t depth)
 {
 	size_t i;
 
@@ -59,12 +59,12 @@ static void inner(xre_ast_t *ast, size_t depth)
 		put_uniop(ast, depth);
 }
 
-void ast_show(xre_ast_t *ast)
+void ast_show(struct ast *ast)
 {
 	inner(ast, 0);
 }
 
-void ast_free(xre_ast_t *ast)
+void ast_free(struct ast *ast)
 {
 	if (!ast)
 		return;
@@ -97,7 +97,7 @@ void ast_free(xre_ast_t *ast)
 	free(ast);
 }
 
-const char *expr_type_to_string(xre_expr_type_t type)
+const char *expr_type_to_string(enum expr_type type)
 {
 	switch (type) {
 	case EXPR_TYPE_VALUE:
@@ -115,7 +115,7 @@ const char *expr_type_to_string(xre_expr_type_t type)
 	__builtin_unreachable();
 }
 
-const char *expr_kind_to_string(xre_expr_kind_t kind)
+const char *expr_kind_to_string(enum expr_kind kind)
 {
 	switch (kind) {
 	case __START__:
@@ -206,7 +206,7 @@ const char *expr_kind_to_string(xre_expr_kind_t kind)
 	__builtin_unreachable();
 }
 
-xre_expr_type_t expr_type_by_kind(xre_expr_kind_t kind)
+enum expr_type expr_type_by_kind(enum expr_kind kind)
 {
 	switch (kind) {
 	case __VAL__:

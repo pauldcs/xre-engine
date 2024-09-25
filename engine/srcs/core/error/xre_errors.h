@@ -1,7 +1,7 @@
 #ifndef __XRE_REPL_ERROR_H__
 #define __XRE_REPL_ERROR_H__
 
-#include "xre_parse.h"
+#include "xre_nodes.h"
 
 typedef enum {
 	XRE_ARITHMETIC_ERROR_C,
@@ -49,7 +49,7 @@ typedef enum {
 } error_type_e;
 
 typedef struct {
-	xre_token_t *orig;
+	struct token *orig;
 	error_class_e class;
 	error_type_e type;
 } err_notif_t;

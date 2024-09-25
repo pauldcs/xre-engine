@@ -14,8 +14,8 @@ typedef int statement_name_t;
 
 struct statements {
 	bool (*eval)(struct statements *);
-	xre_token_t *orig;
-	vec_t	    *local;
+	struct token *orig;
+	vec_t	     *local;
 	//vec_t *frame;
 	union {
 		int64_t value; // the value that the token represents
@@ -61,7 +61,7 @@ extern struct statements *__statements__;
 
 /*    Execute the ast
  */
-bool xre_runtime(xre_ast_t *ast);
+bool xre_runtime(struct ast *ast);
 
 extern err_notif_t _error;
 

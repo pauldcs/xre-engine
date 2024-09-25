@@ -1,8 +1,9 @@
 #include "vec.h"
 #include "xre_compiler.h"
-#include "xre_runtime.h"
+#include "xre_builtin.h"
 #include "xre_errors.h"
 #include "xre_parse.h"
+#include "xre_nodes.h"
 #include "xre_utils.h"
 #include <assert.h>
 #include <string.h>
@@ -15,15 +16,15 @@ static const void *__stack_b[MICROSTACK_SIZE];
 static size_t	   __top_a;
 static size_t	   __top_b;
 
-#define TOP_A_KIND ((xre_ast_t *)__stack_a[__top_a])->kind
-#define TOP_B_KIND ((xre_ast_t *)__stack_b[__top_b])->kind
+#define TOP_A_KIND ((struct ast *)__stack_a[__top_a])->kind
+#define TOP_B_KIND ((struct ast *)__stack_b[__top_b])->kind
 
-static void __push_a(xre_ast_t *node)
+static void __push_a(struct ast *node)
 {
 	if (__top_a < MICROSTACK_SIZE - 1)
 		__stack_a[++__top_a] = node;
 }
-static void __push_b(xre_ast_t *node)
+static void __push_b(struct ast *node)
 {
 	if (__top_b < MICROSTACK_SIZE - 1)
 		__stack_b[++__top_b] = node;
@@ -41,16 +42,16 @@ static void *__pop_b(void)
 	return ((void *)0);
 }
 
-static xre_ast_t *ast_new_node(xre_token_t *token)
+static struct ast *ast_new_node(struct token *token)
 {
-	xre_ast_t *node = malloc(sizeof(xre_ast_t));
+	struct ast *node = malloc(sizeof(struct ast));
 
-	bzero(node, sizeof(xre_ast_t));
+	bzero(node, sizeof(struct ast));
 	node->kind = token->_kind;
 	node->type = token->_type;
 
 	(void
-	)memcpy((void *)&node->token, token, sizeof(xre_token_t));
+	)memcpy((void *)&node->token, token, sizeof(struct token));
 
 	if (node->kind == __VAL__)
 		node->value = token->_value;
@@ -73,7 +74,7 @@ static xre_ast_t *ast_new_node(xre_token_t *token)
 	return (node);
 }
 
-static bool unfold_sequence_ast(xre_ast_t *ast, vec_t *buffer)
+static bool unfold_sequence_ast(struct ast *ast, vec_t *buffer)
 {
 	if (ast->kind == __SEQUENCE__) {
 		if (!vec_concat(buffer, ast->seq)) {
@@ -91,13 +92,16 @@ static bool unfold_sequence_ast(xre_ast_t *ast, vec_t *buffer)
 }
 
 bool sequence_node(
-	xre_ast_t *node, size_t depth, xre_ast_t *lval, xre_ast_t *rval
+	struct ast *node,
+	size_t	    depth,
+	struct ast *lval,
+	struct ast *rval
 )
 {
 	__return_val_if_fail__(lval, NULL);
 	__return_val_if_fail__(rval, NULL);
 
-	vec_t *sequence = vec_create(sizeof(xre_ast_t), 8, free);
+	vec_t *sequence = vec_create(sizeof(struct ast), 8, free);
 
 	if (lval->token._depth > rval->token._depth) {
 		if (!vec_append(sequence, lval, 1) ||
@@ -128,9 +132,9 @@ prison:
 
 static void __make_value_to_b(void)
 {
-	xre_ast_t *node = __pop_a();
-	void	  *a;
-	void	  *b;
+	struct ast *node = __pop_a();
+	void	   *a;
+	void	   *b;
 	assert(node);
 
 	if (node->type & EXPR_OP_TYPE_UNIOP) {
@@ -152,12 +156,12 @@ static void __make_value_to_b(void)
 	__push_b(node);
 }
 
-xre_ast_t *xre_expr_parse(vec_t *tokens)
+struct ast *xre_expr_parse(vec_t *tokens)
 {
 	__return_val_if_fail__(tokens, NULL);
 
-	xre_token_t *token = NULL;
-	size_t	     idx   = 0;
+	struct token *token = NULL;
+	size_t	      idx   = 0;
 
 	__top_a = 0;
 	__top_b = 0;
@@ -166,7 +170,7 @@ xre_ast_t *xre_expr_parse(vec_t *tokens)
 	(void)memset(__stack_b, 0, MICROSTACK_SIZE * sizeof(void *));
 
 	while (true) {
-		token = (xre_token_t *)vec_unsafe_at(tokens, ++idx);
+		token = (struct token *)vec_unsafe_at(tokens, ++idx);
 		if (!token)
 			break;
 
@@ -225,5 +229,5 @@ xre_ast_t *xre_expr_parse(vec_t *tokens)
 	while (__top_b > 1)
 		__make_value_to_b();
 
-	return ((xre_ast_t *)__stack_b[__top_b]);
+	return ((struct ast *)__stack_b[__top_b]);
 }

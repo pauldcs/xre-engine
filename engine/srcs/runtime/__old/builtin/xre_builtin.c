@@ -52,7 +52,7 @@ const char *get_builtin_name_ptr(const char *ptr, size_t size)
 	return (builtin_func_lookup[offset].name);
 }
 
-xre_expr_type_t get_builtin_type(const char *ptr, size_t size)
+enum expr_type get_builtin_type(const char *ptr, size_t size)
 {
 	size_t offset;
 

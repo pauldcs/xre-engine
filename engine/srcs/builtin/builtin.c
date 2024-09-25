@@ -1,11 +1,13 @@
-#include "xre_runtime.h"
+#include "xre_builtin.h"
+#include <string.h>
 
 struct builtin builtin_lookup[] = {
+	{ "dbg", BUILTIN_UNIOP, NULL },
 	{ "buf", BUILTIN_UNIOP, NULL },
 	{ "str", BUILTIN_UNIOP, NULL },
 	{ "map", BUILTIN_BINOP, NULL },
-	{ "print", BUILTIN_UNIOP, NULL },
-	{ "foreach", BUILTIN_BINOP, NULL },
+	{ "out", BUILTIN_UNIOP, NULL },
+	{ "each", BUILTIN_BINOP, NULL },
 	{ "filter", BUILTIN_BINOP, NULL },
 	{ "typeof", BUILTIN_UNIOP, NULL }
 };
@@ -46,26 +48,12 @@ const char *builtin_get_name(const char *ptr, size_t size)
 	return (builtin_lookup[offset].iden);
 }
 
-xre_expr_type_t builtin_get_type(const char *ptr, size_t size)
+enum builtin_type builtin_get_type(const char *ptr, size_t size)
 {
 	size_t offset;
 
 	if (!builtin_find(ptr, size, &offset)) {
 		return (0);
 	}
-	const enum builtin_type type = builtin_lookup[offset].type;
-	switch (type) {
-	case BUILTIN_BINOP:
-		return EXPR_OP_TYPE_BINOP;
-
-	case BUILTIN_UNIOP:
-		return EXPR_OP_TYPE_UNIOP;
-
-	case BUILTIN_VALUE:
-		/* fallthrough */
-
-	default:
-		return EXPR_TYPE_VALUE;
-	}
-	return (0);
+	return (builtin_lookup[offset].type);
 }

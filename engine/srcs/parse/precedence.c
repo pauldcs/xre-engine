@@ -1,7 +1,7 @@
 #include "xre_compiler.h"
-#include "xre_parse.h"
+#include "xre_nodes.h"
 
-int get_precedence_by_kind(xre_expr_kind_t kind)
+int get_precedence_by_kind(enum expr_kind kind)
 {
 	// if (kind == __BUILTIN_CALL__) {
 	// 	switch (expr_type_by_kind(kind)) {
@@ -20,10 +20,10 @@ int get_precedence_by_kind(xre_expr_kind_t kind)
 	case __SCOPE_RESOLUTION__:
 	case __START__:
 	case __END__:
+	case __ATTRIBUTE__:
 		return (0);
 
 	case __NOT__:
-	case __ATTRIBUTE__:
 	case __BUILTIN_CALL__:
 		return (-1);
 

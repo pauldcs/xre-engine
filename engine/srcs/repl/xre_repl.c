@@ -35,7 +35,7 @@ static bool block_process(const char *block)
 	if (!block || !*block)
 		return (true);
 
-	xre_ast_t *ast = xre_ast_compose(block);
+	struct ast *ast = xre_ast_compose(block);
 	if (ast) {
 		(void)runtime(ast);
 

@@ -1,6 +1,6 @@
 #include "xre_args.h"
 #include "xre_errors.h"
-#include "xre_parse.h"
+#include "xre_nodes.h"
 #include "xre_stringf.h"
 #include <stdio.h>
 #include <string.h>
@@ -13,7 +13,7 @@ void xre_error(err_notif_t *notification)
 	static char err_buff[4096];
 	size_t	    i = 0;
 
-	const xre_token_t *token = notification->orig;
+	const struct token *token = notification->orig;
 
 	if (!(__xre_args__.flags & SHOW_ERRORS)) {
 		i += cpyf(&err_buff[i], 4096 - i, "Exception: ");

@@ -74,11 +74,14 @@ SRCS := \
 	repl/readline/rl_editor_mode.c \
 	repl/readline/rl_buffer.c \
 \
+	builtin/builtin.c \
+\
 	runtime/xre_runtime.c \
-	runtime/xre_tree.c \
-	runtime/print_tree.c \
-	runtime/builtins.c \
-
+\
+	runtime/compose/xre_tree.c \
+	runtime/compose/tree_debug.c \
+\
+	runtime/memory/object.c \
 #\
 #	runtime/operations/scope_resolution.c \
 #	runtime/operations/eq.c \

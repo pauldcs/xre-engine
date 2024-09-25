@@ -8,7 +8,6 @@
 typedef bool (*builtin_func_ptr)(struct statements *self);
 
 enum {
-	BUILTIN_VALUE,
 	BUILTIN_BINOP,
 	BUILTIN_UNIOP,
 } builtin_type;
@@ -25,7 +24,7 @@ bool		 is_defined_builtin(const char *ptr, size_t size);
 builtin_func_ptr get_builtin_ptr(const char *ptr, size_t size);
 const char	*get_builtin_name_ptr(const char *ptr, size_t size);
 
-xre_expr_type_t get_builtin_type(const char *ptr, size_t size);
+enum expr_type get_builtin_type(const char *ptr, size_t size);
 
 #define XRE_BUILTIN_FUNCTION(name) bool name(struct statements *self)
 
