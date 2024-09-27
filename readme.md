@@ -14,51 +14,91 @@ i = 0;
 ```
 
 ```r
-$binop "Loop"   # 02:18:04:00
-  # @var_i, raw: 0x0000000000000000, attrs: -W- undefined
- alloc +0000
-  # @var_1, raw: 0x0000000000000001, attrs: R-- static_int
- alloc +0001
-  # @var_50, raw: 0x0000000000000032, attrs: R-- static_int
- alloc +0002
-    $binop "Less or equal"      # 02:12:02:00
-        $binop "Assign"         # 02:03:01:01
-            ref &0000 # attrs: ---
-            $binop "Addition"   # 02:07:01:01
-                ref &0000 # attrs: ---
-                ref &0001 # attrs: ---
-        ref &0002 # attrs: ---
-    $uniop "Builtin call"       # 03:04:03:01
-      # @var_5, raw: 0x0000000000000005, attrs: R-- static_int
-     alloc +0003
-      # @var_4, raw: 0x0000000000000004, attrs: R-- static_int
-     alloc +0004
-      # @var_3, raw: 0x0000000000000003, attrs: R-- static_int
-     alloc +0005
-      # @var_2, raw: 0x0000000000000002, attrs: R-- static_int
-     alloc +0006
-      # @var_@, raw: 0x0000000000000000, attrs: -W- undefined
-     alloc +0007
-        $binop "Builtin call"   # 03:27:03:02
-            $binop "Sequence"   # 03:22:01:03
-                ref &0003 # attrs: ---
-                $binop "Sequence"       # 03:18:01:04
-                    ref &0004 # attrs: ---
-                    ref &0005 # attrs: ---
-                ref &0006 # attrs: ---
-                ref &0001 # attrs: ---
-            $binop "Closure"    # 04:04:02:03
-                ref &0007 # attrs: ---
-                $uniop "Builtin call"   # 04:07:03:03
-                    ref &0007 # attrs: ---
-     drop +0007
-     drop +0006
-     drop +0005
-     drop +0004
-     drop +0003
- drop +0002
- drop +0001
- drop +0000
+$binop "Separator" `15:00:01:00` +0008 # r- int
+ (+) alloc +0000 # @var_i (0x0) rw int
+ (+) alloc +0001 # @var_0 (0x0) r- int
+ (+) alloc +0002 # @var_1 (0x1) r- int
+ (+) alloc +0003 # @var_50 (0x32) r- int
+ (+) alloc +0004 # @var_salut (0x0) rw int
+ (+) alloc +0005 # @var_bite (0x0) rw int
+ (+) alloc +0006 # @var_2 (0x2) r- int
+ (+) alloc +0007 # @var_pute (0x0) rw int
+ (+) alloc +0008 # @var_3 (0x3) r- int
+    $binop "Separator" `14:00:01:00` +0006 # r- int
+        $binop "Separator" `13:00:01:00` +0002 # r- int
+            $binop "Separator" `03:00:01:00` # r- ???
+                $binop "Assign" `02:02:01:00` +0001 # rw int
+                    ref &0000 # rw int
+                    ref &0001 # r- int
+                $binop "Loop" `03:20:04:00` # r- ???
+                    $binop "Less or equal" `03:14:02:00` # r- int
+                        $binop "Assign" `03:05:01:01` # rw int
+                            ref &0000 # rw int
+                            $binop "Addition" `03:09:01:01` # r- int
+                                ref &0000 # rw int
+                                ref &0002 # r- int
+                        ref &0003 # r- int
+                    $binop "Separator" `06:04:01:01` # r- ???
+                     (+) alloc +0009 # @var_b (0x0) rw string
+                     (+) alloc +0010 # @var_'hello' (0x602000000190) r- string
+                     (+) alloc +0011 # @var_j (0x0) -w ???
+                     (+) alloc +0012 # @var_5 (0x5) r- int
+                     (+) alloc +0013 # @var_4 (0x4) r- int
+                     (+) alloc +0014 # @var_3 (0x3) r- int
+                     (+) alloc +0015 # @var_2 (0x2) r- int
+                     (+) alloc +0016 # @var_@ (0x0) -w ???
+                     (+) alloc +0017 # @var_a (0x0) -w ???
+                        $binop "Separator" `05:04:01:01` # r- int
+                            $binop "Assign" `04:08:01:01` +0010 # rw string
+                                ref &0009 # rw string
+                                ref &0010 # r- string
+                            $binop "Assign" `05:09:01:02` # rw int
+                                ref &0011 # -w ???
+                                $binop "Addition" `05:13:01:02` # r- int
+                                    ref &0011 # -w ???
+                                    ref &0002 # r- int
+                        $uniop "Builtin call" `06:06:03:01` # r- ???
+                            $binop "Separator" `10:08:01:02` +0017 # r- ???
+                                $binop "Builtin call" `07:28:03:02` # r- ???
+                                    $binop "Sequence" `07:23:01:03` +0000 # r- ???
+                                        ref &0012 # r- int
+                                        $binop "Sequence" `07:19:01:04` +0000 # r- ???
+                                            ref &0013 # r- int
+                                            ref &0014 # r- int
+                                        ref &0015 # r- int
+                                        ref &0002 # r- int
+                                    $binop "Closure" `08:09:02:03` # rw ???
+                                        ref &0016 # -w ???
+                                        $uniop "Builtin call" `08:12:03:03` # r- ???
+                                            ref &0016 # -w ???
+                                ref &0017 # -w ???
+                     (-) drop +0017
+                     (-) drop +0016
+                     (-) drop +0015
+                     (-) drop +0014
+                     (-) drop +0013
+                     (-) drop +0012
+                     (-) drop +0011
+                     (-) drop +0010
+                     (-) drop +0009
+            $binop "Assign" `13:08:01:00` +0002 # rw int
+                ref &0004 # rw int
+                ref &0002 # r- int
+        $binop "Assign" `14:07:01:00` +0006 # rw int
+            ref &0005 # rw int
+            ref &0006 # r- int
+    $binop "Assign" `15:07:01:00` +0008 # rw int
+        ref &0007 # rw int
+        ref &0008 # r- int
+ (-) drop +0008
+ (-) drop +0007
+ (-) drop +0006
+ (-) drop +0005
+ (-) drop +0004
+ (-) drop +0003
+ (-) drop +0002
+ (-) drop +0001
+ (-) drop +0000
 
 ```
 

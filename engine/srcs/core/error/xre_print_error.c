@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <ctype.h>
 
 int __fdout__ = STDERR_FILENO;
 
@@ -66,9 +67,14 @@ void xre_error(err_notif_t *notification)
 		     token->_line,
 		     token->_cols);
 	i += cpyf(&err_buff[i], 4096 - i, "\n  |  ");
-	i += cpyf(
-		&err_buff[i], token->_line_len, "%s", token->_line_ptr
-	);
+
+	size_t ii = 0;
+	while (ii < token->_line_len && isprint(token->_line_ptr[ii])
+	) {
+		err_buff[i + ii] = token->_line_ptr[ii];
+		ii++;
+	}
+	i += ii;
 	i += cpyf(&err_buff[i], 4096 - i, " \n  |  ");
 
 	size_t size = token->_cols;
@@ -83,6 +89,7 @@ void xre_error(err_notif_t *notification)
 		     4096 - i,
 		     "%s) \033[0m",
 		     error_type_str(notification->type));
+
 	i += cpyf(&err_buff[i], 4096 - i, "\n  |\n");
 
 	(void)write(STDERR_FILENO, err_buff, i);

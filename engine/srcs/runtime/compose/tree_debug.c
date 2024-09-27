@@ -21,7 +21,7 @@ static void print_info(const char *info)
 static const char *format_token(struct token *token)
 {
 	return (format_string(
-		"$%s \"%s\" \t# %02d:%02d:%02d:%02d",
+		"$%s \"%s\" `%02d:%02d:%02d:%02d`",
 		expr_type_to_string(token->_type),
 		expr_kind_to_string(token->_kind),
 		token->_line,
@@ -36,37 +36,43 @@ static int sp	   = 0;
 
 void runtime_tree_debug(struct statements *node)
 {
-	if (node->meta.source->_type != EXPR_TYPE_VALUE) {
-		print_info(format_string(
-			"%s", format_token(node->meta.source)
-		));
+	if (__statement_type(node) != EXPR_TYPE_VALUE) {
+		if (node->return_offset != -1) {
+			print_info(format_string(
+				"%s +%04d # %s", format_token(node->meta.source), node->return_offset, object_attr_to_str(node->return_type)
+			));
+		} else {
+			print_info(format_string(
+				"%s # %s", format_token(node->meta.source), object_attr_to_str(node->return_type)
+			));
+		}
 	}
 
-	if (vec_size(node->frame)) {
-		sp += vec_size(node->frame);
+	if (vec_size(__statement_frame(node))) {
+		sp += vec_size(__statement_frame(node));
 	}
+
 	size_t i = 0;
-	while (i < vec_size(node->frame)) {
-		object_t *o = (object_t *)vec_at(node->frame, i++);
-		const char *str = object_to_str(o);
+	while (i < vec_size(__statement_frame(node))) {
+		object_t *o = (object_t *)vec_at(
+			__statement_frame(node), i++
+		);
+		const char *str = object_attr_to_str(o->objattrs);
 		print_info(format_string(
-			"  # @var_%s, raw: 0x%016llx, %s",
+			" (+) alloc +%04zu # @var_%s (0x%llx) %s",
+			++counter - 1,
 			o->str,
 			o->any,
 			str
 		));
-		print_info(format_string(
-			" alloc +%04zu",
-			++counter - 1
-		));
 	}
 
 	i = 0;
-	if (node->meta.source->_kind == __SEQUENCE_POINT__) {
+	if (__statement_kind(node) == __SEQUENCE_POINT__) {
 		d++;
-		while (i < vec_size(node->self.children)) {
+		while (i < vec_size(__statement_children(node))) {
 			runtime_tree_debug((struct statements *)vec_at(
-				node->self.children, i++
+				__statement_children(node), i++
 			));
 		}
 		d--;
@@ -75,22 +81,24 @@ void runtime_tree_debug(struct statements *node)
 
 	switch (node->meta.source->_type) {
 	case EXPR_TYPE_VALUE:
-		print_info(
-			format_string("ref &%04zu # %s", node->self.offset, object_attr_to_str(node->self.attrs))
-		);
+		print_info(format_string(
+			"ref &%04d # %s",
+			__statement_offset(node),
+			object_attr_to_str(node->ref_attrs)
+		));
 		break;
 
 	case EXPR_OP_TYPE_UNIOP:
 		d++;
-		(void)runtime_tree_debug(__binop_unfold_left(node));
+		(void)runtime_tree_debug(__statement_left(node));
 		d--;
 
 		break;
 
 	case EXPR_OP_TYPE_BINOP:
 		d++;
-		(void)runtime_tree_debug(__binop_unfold_left(node));
-		(void)runtime_tree_debug(__binop_unfold_right(node));
+		(void)runtime_tree_debug(__statement_left(node));
+		(void)runtime_tree_debug(__statement_right(node));
 		d--;
 
 		break;
@@ -102,13 +110,13 @@ void runtime_tree_debug(struct statements *node)
 
 end:
 	i = 0;
-	while (i++ < vec_size(node->frame)) {
-		print_info(
-			format_string(" drop +%04zu", counter-- - 1)
-		);
+	while (i++ < vec_size(__statement_frame(node))) {
+		print_info(format_string(
+			" (-) drop +%04zu", counter-- - 1
+		));
 	}
 
-	if (vec_size(node->frame)) {
-		sp -= vec_size(node->frame);
+	if (vec_size(__statement_frame(node))) {
+		sp -= vec_size(__statement_frame(node));
 	}
 }

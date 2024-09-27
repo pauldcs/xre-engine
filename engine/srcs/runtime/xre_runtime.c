@@ -32,7 +32,16 @@ static bool runtime_init(struct ast *ast, struct runtime **rt)
 		goto prison;
 	}
 
+	// if (!runtime_borrow_check((*rt)->start)) {
+	// 	goto prison;
+	// }
+
+	(void)eval_return_offsets((*rt)->start);
+	(void)eval_return_types((*rt)->start);
+	(void)eval_variable_flow((*rt)->start);
+
 	return (true);
+
 prison:
 	runtime_dealloc(rt);
 	return (false);

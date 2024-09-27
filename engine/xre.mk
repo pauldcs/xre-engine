@@ -78,7 +78,11 @@ SRCS := \
 \
 	runtime/xre_runtime.c \
 \
-	runtime/compose/xre_tree.c \
+	runtime/compose/1_statement-tree.c \
+	runtime/compose/2_stack-returns.c \
+	runtime/compose/3_return-types.c \
+	runtime/compose/4_variable-flow.c \
+	runtime/compose/op-rules.c \
 	runtime/compose/tree_debug.c \
 \
 	runtime/memory/object.c \

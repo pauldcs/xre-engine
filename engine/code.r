@@ -3,9 +3,10 @@
     "is",
     "a",
     "test"
-} do (this, i => {
- (i, this) => this == 1 do {
-        print + a
-    }
-})
+} do (this, i) => {
+ (this, i) => {
+    (this_a == this_b) do {
+        out (this_a, this_b)
+    }}
+}
 

@@ -8,11 +8,6 @@
 
 static vec_t *_local_cache = NULL;
 
-struct cache {
-	const char *key;
-	int64_t *attrs;
-};
-
 static bool tree_node_alloc(struct statements **statement)
 {
 	*statement = malloc(sizeof(struct statements));
@@ -58,7 +53,8 @@ static ssize_t is_cached(const char *key)
 {
 	size_t size = vec_size(_local_cache);
 	while (size--) {
-		const char *str = *(char **)vec_at(_local_cache, size);
+		const char *str =
+			*(char **)vec_at(_local_cache, size);
 		if (!strcmp(str, key)) {
 			return (size);
 		}
@@ -120,6 +116,62 @@ static const char *format_value(struct ast *ast)
 vec_t *_frame	 = NULL;
 size_t _n_frames = 0;
 
+static void frame_push(object_t *object)
+{
+	vec_push(_frame, object);
+}
+
+int __frame_changed = -1;
+void frame_propagate_diff(struct statements *n, size_t guard, int diff)
+{
+	enum expr_type type = n->meta.source->_type;
+
+	if (__frame_changed == -1) {
+		__frame_changed = 0;
+	}
+
+	if (vec_size(n->frame)) {
+		__frame_changed++;
+	}
+
+	if (n->meta.source->_kind == __SEQUENCE_POINT__) {
+		size_t size = vec_size(n->self.children);
+
+		for (size_t i = 0; i < size; i++) {
+			frame_propagate_diff(
+				vec_access(n->self.children, i),
+				guard,
+				diff
+			);
+		}
+		return;
+	}
+
+	switch (type) {
+	case EXPR_TYPE_VALUE:
+
+		if (__frame_changed &&
+		    n->self.offset >= (int64_t)guard) {
+			n->self.offset += diff;
+		}
+		break;
+
+	case EXPR_OP_TYPE_UNIOP:
+		frame_propagate_diff(__statement_left(n), guard, diff);
+		break;
+
+	case EXPR_OP_TYPE_BINOP:
+		frame_propagate_diff(__statement_left(n), guard, diff);
+		frame_propagate_diff(
+			__statement_right(n), guard, diff
+		);
+		break;
+
+	default:
+		break;
+	}
+}
+
 static bool runtime_tree_create(
 	struct ast	   *ast,
 	struct statements **statements,
@@ -146,7 +198,8 @@ static bool runtime_tree_create(
 		_frame = node->frame;
 	}
 
-	vec_t *save_frame = _frame;
+	vec_t *save_frame  = _frame;
+	size_t save_nframe = _n_frames;
 
 	if (is_scope_change) {
 		_n_frames += vec_size(_frame);
@@ -173,6 +226,7 @@ static bool runtime_tree_create(
 		goto end;
 	}
 
+	size_t frame_size_guard = 0;
 	switch (ast->type) {
 	case EXPR_TYPE_VALUE:
 		format = format_value(ast);
@@ -185,26 +239,28 @@ static bool runtime_tree_create(
 			npos = pos;
 		}
 
+		//printf("%zu %s %zu %zu\n", npos, format, _n_frames, vec_size(save_frame));
 		node->meta.iden	  = format;
 		node->self.offset = npos;
-	
-		if (pos == -1) {
 
+		if (pos == -1) {
 			object_t *object = NULL;
 
 			switch (ast->kind) {
 			case __VARIABLE__:
 				(void)object_init(
 					&object,
-						OBJ_TYPE_UNDEFINED | OBJ_ATTR_MUTABLE,
-						(uint64_t)NULL
+					O_TYPE_UNDEFINED |
+						O_ATTR_MUTABLE,
+					(uint64_t)NULL
 				);
 				break;
 
 			case __VAL__:
 				(void)object_init(
 					&object,
-					OBJ_ATTR_READABLE | OBJ_TYPE_NUMBER,
+					O_ATTR_READABLE |
+						O_TYPE_NUMBER,
 					(uint64_t)ast->value
 				);
 				break;
@@ -212,7 +268,8 @@ static bool runtime_tree_create(
 			case __STRING_LITERAL__:
 				(void)object_init(
 					&object,
-					OBJ_ATTR_READABLE | OBJ_TYPE_STRING,
+					O_ATTR_READABLE |
+						O_TYPE_STRING,
 					(uint64_t)ast->string
 				);
 				break;
@@ -220,20 +277,25 @@ static bool runtime_tree_create(
 			case __SEQUENCE__:
 				(void)object_init(
 					&object,
-					OBJ_ATTR_READABLE | OBJ_TYPE_SEQUENCE,
+					O_ATTR_READABLE |
+						O_TYPE_SEQUENCE,
 					(uint64_t)ast->seq
 				);
 
 			default:
-				(void
-				)object_init(&object, OBJ_TYPE_UNDEFINED | OBJ_ATTR_MUTABLE, 0);
+				(void)object_init(
+					&object,
+					O_TYPE_UNDEFINED |
+						O_ATTR_MUTABLE,
+					0
+				);
 				break;
 			}
-			
+
 			object->str = format;
-			
 			local_cache_push(format);
-			vec_push(_frame, object);
+			frame_push(object);
+		} else {
 		}
 
 		break;
@@ -241,7 +303,7 @@ static bool runtime_tree_create(
 	case EXPR_OP_TYPE_UNIOP:
 		if (!runtime_tree_create(
 			    ast->_binop.left,
-			    &__binop_unfold_left(node),
+			    &__statement_left(node),
 			    false
 		    )) {
 			return (false);
@@ -250,22 +312,35 @@ static bool runtime_tree_create(
 		break;
 
 	case EXPR_OP_TYPE_BINOP:
-	
+
 		if (!runtime_tree_create(
 			    ast->_binop.left,
-			    &__binop_unfold_left(node),
+			    &__statement_left(node),
 			    false
 		    )) {
 			return (false);
 		}
 
+		frame_size_guard = vec_size(_frame);
+
 		if (!runtime_tree_create(
 			    ast->_binop.right,
-			    &__binop_unfold_right(node),
+			    &__statement_right(node),
 			    _is_scope_change(node)
 		    )) {
 			return (false);
 		}
+
+		int diff = vec_size(_frame) - frame_size_guard;
+		if (diff) {
+			frame_propagate_diff(
+				__statement_left(node),
+				frame_size_guard,
+				diff
+			);
+			__frame_changed = -1;
+		}
+
 		break;
 
 	default:
@@ -274,8 +349,9 @@ static bool runtime_tree_create(
 
 end:
 	if (is_scope_change) {
-		_n_frames -= vec_size(node->frame);
-		size_t n = vec_size(node->frame);
+		_frame	  = save_frame;
+		_n_frames = save_nframe;
+		size_t n  = vec_size(node->frame);
 		while (n--) {
 			local_cache_pop();
 		}
