@@ -12,7 +12,7 @@
 
 err_notif_t syntax_error_g;
 
-bool xre_expr_syntax(vec_t *tokens)
+bool xre_expr_syntax(struct vector *tokens)
 {
 	__return_val_if_fail__(tokens, false);
 

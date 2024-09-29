@@ -1,27 +1,29 @@
 #include "xre_runtime.h"
+#include "xre_compiler.h"
 #include "xre_parse.h"
+#include "xre_builtin.h"
 #include "xre_utils.h"
 #include <stdlib.h>
 #include <stdbool.h>
 #include <unistd.h>
 #include <stdio.h>
 
-static vec_t *_local_cache = NULL;
+static struct vector *_local_cache = NULL;
 
-static bool tree_node_alloc(struct statements **statement)
+static bool tree_node_alloc(struct expression **expression)
 {
-	*statement = malloc(sizeof(struct statements));
-	if (!*statement) {
+	*expression = malloc(sizeof(struct expression));
+	if (!*expression) {
 		return (false);
 	}
-	(void)memset(*statement, 0x00, sizeof(struct statements));
+	(void)memset(*expression, 0x00, sizeof(struct expression));
 	return (true);
 }
 
-void tree_node_dealloc(struct statements **statement)
+void tree_node_dealloc(struct expression **expression)
 {
-	(void)free((void *)*statement);
-	*statement = NULL;
+	(void)free((void *)*expression);
+	*expression = NULL;
 }
 
 static bool local_cache_alloc(void)
@@ -52,37 +54,27 @@ static void local_cache_dealloc(void)
 static ssize_t is_cached(const char *key)
 {
 	size_t size = vec_size(_local_cache);
+
 	while (size--) {
 		const char *str =
 			*(char **)vec_at(_local_cache, size);
-		if (!strcmp(str, key)) {
+		if (strcmp(str, key) == 0) {
 			return (size);
 		}
 	}
 	return (-1);
 }
 
-// static struct cache *object_cache_get(const char *key)
-// {
-// 	size_t size = vec_size(_local_cache);
-// 	while (size--) {
-// 		struct cache *entry = (struct cache *)vec_at(_local_cache, size);
-// 		if (!strcmp(entry->key, key)) {
-// 			return (entry);
-// 		}
-// 	}
-// 	return (NULL);
-// }
-
-static bool statement_is_scope_modifier(struct statements *statement)
+static bool
+expression_is_scope_modifier(const struct expression *expression)
 {
-	switch (statement->meta.source->_kind) {
+	switch (__expression_kind(expression)) {
 	case __DO__:
 	case __ELSE__:
 	case __AND__:
 	case __OR__:
-	case __CLOSURE__:
 	case __LOOP__:
+	case __CLOSURE__:
 		return (true);
 
 	default:
@@ -90,80 +82,101 @@ static bool statement_is_scope_modifier(struct statements *statement)
 	}
 }
 
-static bool _is_scope_change(struct statements *parent)
+static bool _is_scope_change(const struct expression *parent)
 {
 	if (!parent) {
 		return (true);
 	}
 
-	return (statement_is_scope_modifier(parent));
+	return (expression_is_scope_modifier(parent));
 }
 
-static const char *format_value(struct ast *ast)
+static const char *format_value(const struct ast *ast)
 {
 	switch (ast->kind) {
 	case __VARIABLE__:
 		return (format_string("%s", ast->string));
+
 	case __VAL__:
 		return (format_string("%d", ast->value));
+
 	case __STRING_LITERAL__:
 		return (format_string("'%s'", ast->string));
+
 	default:
 		return (format_string("_"));
 	}
 }
 
-vec_t *_frame	 = NULL;
-size_t _n_frames = 0;
+struct vector *global_scope_vector	 = NULL;
+size_t	       global_scope_vector_index = 0;
 
-static void frame_push(object_t *object)
+static void frame_push(const object_t *object)
 {
-	vec_push(_frame, object);
+	vec_push(global_scope_vector, object);
 }
 
-int __frame_changed = -1;
-void frame_propagate_diff(struct statements *n, size_t guard, int diff)
+int64_t global_frame_index = -1;
+void	frame_propagate_diff(
+	   struct expression *expression,
+	   int64_t	      frame_index_guard,
+	   int		      diff
+   )
 {
-	enum expr_type type = n->meta.source->_type;
-
-	if (__frame_changed == -1) {
-		__frame_changed = 0;
+	if (global_frame_index == -1) {
+		global_frame_index = 0;
 	}
 
-	if (vec_size(n->frame)) {
-		__frame_changed++;
+	if (vec_size(__expression_locals(expression))) {
+		global_frame_index++;
 	}
 
-	if (n->meta.source->_kind == __SEQUENCE_POINT__) {
-		size_t size = vec_size(n->self.children);
+	if (__expression_kind(expression) == __SEQUENCE_POINT__) {
+		size_t sequence_size =
+			vec_size(__expression_sequence(expression));
 
-		for (size_t i = 0; i < size; i++) {
+		for (size_t i = 0; i < sequence_size; i++) {
 			frame_propagate_diff(
-				vec_access(n->self.children, i),
-				guard,
+				vec_access(
+					__expression_sequence(
+						expression
+					),
+					i
+				),
+				frame_index_guard,
 				diff
 			);
 		}
 		return;
 	}
 
-	switch (type) {
+	switch (__expression_type(expression)) {
 	case EXPR_TYPE_VALUE:
-
-		if (__frame_changed &&
-		    n->self.offset >= (int64_t)guard) {
-			n->self.offset += diff;
+		if (global_frame_index &&
+		    __expression_ref_offset(expression) >=
+			    frame_index_guard) {
+			__expression_ref_offset(expression) += diff;
 		}
 		break;
 
 	case EXPR_OP_TYPE_UNIOP:
-		frame_propagate_diff(__statement_left(n), guard, diff);
+		frame_propagate_diff(
+			__expression_binop_left(expression),
+			frame_index_guard,
+			diff
+		);
 		break;
 
 	case EXPR_OP_TYPE_BINOP:
-		frame_propagate_diff(__statement_left(n), guard, diff);
 		frame_propagate_diff(
-			__statement_right(n), guard, diff
+			__expression_binop_left(expression),
+			frame_index_guard,
+			diff
+		);
+		frame_propagate_diff(
+			__expression_binop_right(expression),
+			frame_index_guard,
+			diff
 		);
 		break;
 
@@ -174,54 +187,65 @@ void frame_propagate_diff(struct statements *n, size_t guard, int diff)
 
 static bool runtime_tree_create(
 	struct ast	   *ast,
-	struct statements **statements,
+	struct expression **statements,
 	bool		    is_scope_change
 )
 {
-	const char *format = NULL;
-	ssize_t	    pos	   = -1;
-	size_t	    npos   = 0;
+	const char *format	       = NULL;
+	ssize_t	    self_cached_offset = -1;
+	size_t	    self_offset	       = 0;
 	size_t	    n;
+	struct port port = { .offset	  = -1,
+			     .access_mask = O_TYPE_UNDEFINED };
 
 	if (!tree_node_alloc(statements)) {
 		return (false);
 	}
 
-	struct statements *node = *statements;
+	struct expression *expression = *statements;
 
-	node->meta.iden	  = expr_kind_to_string(ast->kind);
-	node->meta.source = (struct token *)&ast->token;
-	node->frame	  = vec_create(sizeof(object_t), 64, NULL);
-	node->_op	  = NULL;
+	__expression_origin(expression) = (struct token *)&ast->token;
+	__expression_locals(expression) =
+		vec_create(sizeof(object_t), 64, NULL);
+	__expression_dest(expression) = port;
 
-	if (_frame == NULL) {
-		_frame = node->frame;
+	if (global_scope_vector == NULL) {
+		global_scope_vector = __expression_locals(expression);
 	}
 
-	vec_t *save_frame  = _frame;
-	size_t save_nframe = _n_frames;
+	struct vector *scope_vector_save = global_scope_vector;
+	size_t scope_vector_index_save	 = global_scope_vector_index;
 
 	if (is_scope_change) {
-		_n_frames += vec_size(_frame);
-		_frame = node->frame;
+		global_scope_vector_index +=
+			vec_size(global_scope_vector);
+		global_scope_vector = __expression_locals(expression);
 	}
 
-	if (node->meta.source->_kind == __SEQUENCE_POINT__) {
-		n		    = vec_size(ast->seq);
-		node->self.children = vec_create(
-			sizeof(struct statements), n, NULL
+	if (__expression_kind(expression) == __BUILTIN_CALL__) {
+		__expression_builtin(expression) = builtin_find(
+			__expression_origin(expression)->_ptr,
+			__expression_origin(expression)->_len
 		);
+	}
+
+	else if (__expression_kind(expression) ==
+		 __SEQUENCE_POINT__) {
+		n = vec_size(ast->seq);
+		__expression_sequence(expression
+		) = vec_create(sizeof(struct expression), n, NULL);
 		for (size_t i = 0; i < n; i++) {
-			struct statements *statement;
+			struct expression *exp;
 			if (!runtime_tree_create(
 				    vec_access(ast->seq, i),
-				    &statement,
+				    &exp,
 				    is_scope_change
 			    )) {
 				return (false);
 			}
-
-			vec_push(node->self.children, statement);
+			vec_push(
+				__expression_sequence(expression), exp
+			);
 		}
 		goto end;
 	}
@@ -229,21 +253,22 @@ static bool runtime_tree_create(
 	size_t frame_size_guard = 0;
 	switch (ast->type) {
 	case EXPR_TYPE_VALUE:
-		format = format_value(ast);
-		pos    = is_cached(format);
-		npos   = 0;
+		format		   = format_value(ast);
+		self_cached_offset = is_cached(format);
+		self_offset	   = 0;
 
-		if (pos == -1) {
-			npos = _n_frames + vec_size(save_frame);
+		if (self_cached_offset == -1) {
+			self_offset = global_scope_vector_index +
+				      vec_size(scope_vector_save);
 		} else {
-			npos = pos;
+			self_offset = self_cached_offset;
 		}
 
-		//printf("%zu %s %zu %zu\n", npos, format, _n_frames, vec_size(save_frame));
-		node->meta.iden	  = format;
-		node->self.offset = npos;
+		__expression_ref_offset(expression) = self_offset;
+		__expression_ref_access_mask(expression) =
+			O_TYPE_UNDEFINED;
 
-		if (pos == -1) {
+		if (self_cached_offset == -1) {
 			object_t *object = NULL;
 
 			switch (ast->kind) {
@@ -303,7 +328,7 @@ static bool runtime_tree_create(
 	case EXPR_OP_TYPE_UNIOP:
 		if (!runtime_tree_create(
 			    ast->_binop.left,
-			    &__statement_left(node),
+			    &__expression_binop_left(expression),
 			    false
 		    )) {
 			return (false);
@@ -315,30 +340,31 @@ static bool runtime_tree_create(
 
 		if (!runtime_tree_create(
 			    ast->_binop.left,
-			    &__statement_left(node),
+			    &__expression_binop_left(expression),
 			    false
 		    )) {
 			return (false);
 		}
 
-		frame_size_guard = vec_size(_frame);
+		frame_size_guard = vec_size(global_scope_vector);
 
 		if (!runtime_tree_create(
 			    ast->_binop.right,
-			    &__statement_right(node),
-			    _is_scope_change(node)
+			    &__expression_binop_right(expression),
+			    _is_scope_change(expression)
 		    )) {
 			return (false);
 		}
 
-		int diff = vec_size(_frame) - frame_size_guard;
+		int diff = vec_size(global_scope_vector) -
+			   frame_size_guard;
 		if (diff) {
 			frame_propagate_diff(
-				__statement_left(node),
+				__expression_binop_left(expression),
 				frame_size_guard,
 				diff
 			);
-			__frame_changed = -1;
+			global_frame_index = -1;
 		}
 
 		break;
@@ -349,20 +375,23 @@ static bool runtime_tree_create(
 
 end:
 	if (is_scope_change) {
-		_frame	  = save_frame;
-		_n_frames = save_nframe;
-		size_t n  = vec_size(node->frame);
+		global_scope_vector	  = scope_vector_save;
+		global_scope_vector_index = scope_vector_index_save;
+		size_t n = vec_size(__expression_locals(expression));
 		while (n--) {
 			local_cache_pop();
 		}
 	}
 
-	*statements = node;
+	*statements = expression;
 	return (true);
 }
 
 bool runtime_tree_init(struct ast *ast, struct runtime *runtime)
 {
+	__trigger_bug_if(ast == NULL);
+	__trigger_bug_if(runtime == NULL);
+
 	bool ret = false;
 
 	if (local_cache_alloc()) {

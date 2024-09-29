@@ -20,9 +20,8 @@ typedef struct {
 } t_xre_getopts;
 
 typedef enum {
-	FLAGS_DEBUG	 = 1 << 1,
-	SHOW_ERRORS	 = 1 << 2,
-	SHOW_EXPR_RESULT = 1 << 3,
+	FLAGS_DEBUG	    = 1 << 1,
+	FLAGS_DEBUG_VERBOSE = 1 << 2,
 } t_flags;
 
 typedef struct {

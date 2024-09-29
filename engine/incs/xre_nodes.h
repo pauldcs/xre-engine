@@ -77,10 +77,10 @@ struct ast {
 	enum expr_kind	   kind;
 	const struct token token;
 	union {
-		int64_t	    value;
-		const char *string;
-		vec_t	   *seq;
-		struct ast *uniop;
+		int64_t	       value;
+		const char    *string;
+		struct vector *seq;
+		struct ast    *uniop;
 		struct {
 			struct ast *left;
 			struct ast *right;

@@ -13,14 +13,14 @@ static inline size_t size_align(size_t n)
 	return (n + sizeof(void *) - 1) & ~(sizeof(void *) - 1);
 }
 
-static inline bool vec_init(vec_t **self, size_t size)
+static inline bool vec_init(struct vector **self, size_t size)
 {
 	*self = malloc(sizeof(**self));
 	if (!*self) {
 		return (false);
 	}
 
-	(void)memset(*self, 0x00, sizeof(vec_t));
+	(void)memset(*self, 0x00, sizeof(struct vector));
 	(*self)->_ptr = malloc(size);
 
 	if (!(*self)->_ptr) {
@@ -31,7 +31,8 @@ static inline bool vec_init(vec_t **self, size_t size)
 	return (true);
 }
 
-vec_t *vec_create(size_t elt_size, size_t n, void (*free)(void *))
+struct vector *
+vec_create(size_t elt_size, size_t n, void (*free)(void *))
 {
 	__trigger_bug_if(elt_size == 0);
 
@@ -39,8 +40,8 @@ vec_t *vec_create(size_t elt_size, size_t n, void (*free)(void *))
 		n = 64;
 	}
 
-	vec_t *v	= NULL;
-	size_t init_cap = size_align(elt_size * n);
+	struct vector *v	= NULL;
+	size_t	       init_cap = size_align(elt_size * n);
 
 	if (vec_init(&v, init_cap)) {
 		v->_elt_size = elt_size;
@@ -51,7 +52,7 @@ vec_t *vec_create(size_t elt_size, size_t n, void (*free)(void *))
 	return (v);
 }
 
-void *vec_extract(const vec_t *src, size_t start, size_t end)
+void *vec_extract(const struct vector *src, size_t start, size_t end)
 {
 	__trigger_bug_if(src == NULL);
 	__trigger_bug_if((vec_size(src) - start) < (end - start));
@@ -69,13 +70,14 @@ void *vec_extract(const vec_t *src, size_t start, size_t end)
 	return (ptr);
 }
 
-vec_t *vec_pull(const vec_t *src, int64_t start, int64_t end)
+struct vector *
+vec_pull(const struct vector *src, int64_t start, int64_t end)
 {
 	__trigger_bug_if(src == NULL);
 	__trigger_bug_if(src->_nmemb <= (size_t)llabs(start));
 	__trigger_bug_if(src->_nmemb <= (size_t)llabs(end));
 
-	vec_t *v = NULL;
+	struct vector *v = NULL;
 
 	if (start < 0) {
 		start += src->_nmemb;
@@ -125,7 +127,7 @@ vec_t *vec_pull(const vec_t *src, int64_t start, int64_t end)
 	return (v);
 }
 
-void vec_clear(vec_t *self)
+void vec_clear(struct vector *self)
 {
 	__trigger_bug_if(self == NULL);
 
@@ -141,7 +143,7 @@ void vec_clear(vec_t *self)
 	self->_nmemb = 0;
 }
 
-void vec_kill(vec_t *self)
+void vec_kill(struct vector *self)
 {
 	__trigger_bug_if(self == NULL);
 
@@ -150,7 +152,7 @@ void vec_kill(vec_t *self)
 	free(self);
 }
 
-bool vec_adjust(vec_t *self, size_t n)
+bool vec_adjust(struct vector *self, size_t n)
 {
 	__trigger_bug_if(self == NULL);
 
@@ -190,7 +192,7 @@ bool vec_adjust(vec_t *self, size_t n)
 	return (true);
 }
 
-bool vec_push(vec_t *self, const void *e)
+bool vec_push(struct vector *self, const void *e)
 {
 	__trigger_bug_if(self == NULL);
 	__trigger_bug_if(!e);
@@ -211,7 +213,7 @@ bool vec_push(vec_t *self, const void *e)
 	return (true);
 }
 
-void vec_pop(vec_t *self, void *into)
+void vec_pop(struct vector *self, void *into)
 {
 	__trigger_bug_if(self == NULL);
 	__trigger_bug_if(self->_nmemb == 0);
@@ -231,12 +233,12 @@ void vec_pop(vec_t *self, void *into)
 	}
 }
 
-bool vec_pushf(vec_t *self, void *e)
+bool vec_pushf(struct vector *self, void *e)
 {
 	return (vec_insert(self, 0, e));
 }
 
-void vec_popf(vec_t *self, void *into)
+void vec_popf(struct vector *self, void *into)
 {
 	__trigger_bug_if(self == NULL);
 	__trigger_bug_if(self->_nmemb == 0);
@@ -248,7 +250,7 @@ void vec_popf(vec_t *self, void *into)
 	vec_evict(self, 0);
 }
 
-bool vec_insert(vec_t *self, size_t p, void *e)
+bool vec_insert(struct vector *self, size_t p, void *e)
 {
 	__trigger_bug_if(self == NULL);
 	__trigger_bug_if((p <= self->_nmemb) == false);
@@ -277,7 +279,9 @@ skip:
 	return (true);
 }
 
-void vec_tipex(vec_t *self, size_t off, const void *src, size_t n)
+void vec_tipex(
+	struct vector *self, size_t off, const void *src, size_t n
+)
 {
 	__trigger_bug_if(self == NULL);
 	__trigger_bug_if(src == NULL);
@@ -285,11 +289,11 @@ void vec_tipex(vec_t *self, size_t off, const void *src, size_t n)
 	(void)memmove((char *)self->_ptr + off, src, n);
 }
 
-vec_t *vec_dup(vec_t *self)
+struct vector *vec_dup(struct vector *self)
 {
 	__trigger_bug_if(self == NULL);
 
-	vec_t *v = vec_create(
+	struct vector *v = vec_create(
 		self->_elt_size, self->_nmemb, self->_free
 	);
 	if (!v) {
@@ -304,7 +308,9 @@ vec_t *vec_dup(vec_t *self)
 	return (v);
 }
 
-bool vec_inject(vec_t *self, size_t p, const void *src, size_t n)
+bool vec_inject(
+	struct vector *self, size_t p, const void *src, size_t n
+)
 {
 	__trigger_bug_if(self == NULL);
 	__trigger_bug_if(src == NULL);
@@ -340,7 +346,7 @@ skip_moving:
 	return (true);
 }
 
-bool vec_append(vec_t *self, const void *src, size_t n)
+bool vec_append(struct vector *self, const void *src, size_t n)
 {
 	__trigger_bug_if(self == NULL);
 	__trigger_bug_if(src == NULL);
@@ -361,7 +367,7 @@ bool vec_append(vec_t *self, const void *src, size_t n)
 	return (true);
 }
 
-bool vec_concat(vec_t *self, vec_t *other)
+bool vec_concat(struct vector *self, struct vector *other)
 {
 	__trigger_bug_if(self == NULL);
 	__trigger_bug_if(other == NULL);
@@ -383,7 +389,7 @@ bool vec_concat(vec_t *self, vec_t *other)
 	return (true);
 }
 
-const void *vec_at(const vec_t *self, size_t p)
+const void *vec_at(const struct vector *self, size_t p)
 {
 	__trigger_bug_if(self == NULL);
 	__trigger_bug_if(p >= self->_nmemb);
@@ -395,12 +401,12 @@ const void *vec_at(const vec_t *self, size_t p)
 	return (((char *)(self)->_ptr + (self)->_elt_size * (p)));
 }
 
-const void *vec_unsafe_at(const vec_t *self, size_t p)
+const void *vec_unsafe_at(const struct vector *self, size_t p)
 {
 	return (((char *)(self)->_ptr + (self)->_elt_size * (p)));
 }
 
-void *vec_access(const vec_t *self, size_t p)
+void *vec_access(const struct vector *self, size_t p)
 {
 	__trigger_bug_if(self == NULL);
 	__trigger_bug_if(self->_nmemb <= p);
@@ -412,12 +418,12 @@ void *vec_access(const vec_t *self, size_t p)
 	return (((char *)(self)->_ptr + (self)->_elt_size * (p)));
 }
 
-void *vec_unsafe_access(const vec_t *self, size_t p)
+void *vec_unsafe_access(const struct vector *self, size_t p)
 {
 	return (((char *)(self)->_ptr + (self)->_elt_size * (p)));
 }
 
-void vec_evict(vec_t *self, size_t p)
+void vec_evict(struct vector *self, size_t p)
 {
 	__trigger_bug_if(self == NULL);
 	__trigger_bug_if(p >= self->_nmemb);
@@ -443,7 +449,7 @@ void vec_evict(vec_t *self, size_t p)
 	}
 }
 
-void vec_wipe(vec_t *self, size_t start, size_t end)
+void vec_wipe(struct vector *self, size_t start, size_t end)
 {
 	__trigger_bug_if(self == NULL);
 	__trigger_bug_if(end - start > self->_nmemb);
@@ -471,7 +477,7 @@ void vec_wipe(vec_t *self, size_t start, size_t end)
 	self->_nmemb -= n;
 }
 
-void vec_swap_elems(vec_t *self, size_t a, size_t b)
+void vec_swap_elems(struct vector *self, size_t a, size_t b)
 {
 	__trigger_bug_if(self == NULL);
 	__trigger_bug_if(a >= self->_nmemb);
@@ -488,12 +494,12 @@ void vec_swap_elems(vec_t *self, size_t a, size_t b)
 		*p ^= *q;
 	}
 }
-void *vec_head(const vec_t *self)
+void *vec_head(const struct vector *self)
 {
 	return (vec_access(self, 0));
 }
 
-void *vec_tail(const vec_t *self)
+void *vec_tail(const struct vector *self)
 {
 	__trigger_bug_if(self == NULL);
 
@@ -504,26 +510,26 @@ void *vec_tail(const vec_t *self)
 	return (NULL);
 }
 
-size_t vec_size(const vec_t *self)
+size_t vec_size(const struct vector *self)
 {
 	__trigger_bug_if(self == NULL);
 
 	return (self->_nmemb);
 }
 
-size_t vec_sizeof(const vec_t *self)
+size_t vec_sizeof(const struct vector *self)
 {
 	__trigger_bug_if(self == NULL);
 
 	return (self->_nmemb * self->_elt_size);
 }
 
-void *vec_data(const vec_t *self)
+void *vec_data(const struct vector *self)
 {
 	return vec_head(self);
 }
 
-void *vec_uninitialized_data(const vec_t *self)
+void *vec_uninitialized_data(const struct vector *self)
 {
 	__trigger_bug_if(self == NULL);
 	__trigger_bug_if(self->_ptr == NULL);
@@ -531,7 +537,7 @@ void *vec_uninitialized_data(const vec_t *self)
 	return (vec_unsafe_access(self, self->_nmemb));
 }
 
-size_t vec_uninitialized_size(const vec_t *self)
+size_t vec_uninitialized_size(const struct vector *self)
 {
 	__trigger_bug_if(self == NULL);
 
@@ -544,14 +550,14 @@ size_t vec_uninitialized_size(const vec_t *self)
 	return (size_in_bytes);
 }
 
-size_t vec_cap(const vec_t *self)
+size_t vec_cap(const struct vector *self)
 {
 	__trigger_bug_if(self == NULL);
 
 	return (self->_cap);
 }
 
-bool vec_append_from_capacity(vec_t *self, size_t n)
+bool vec_append_from_capacity(struct vector *self, size_t n)
 {
 	__trigger_bug_if(self == NULL);
 
@@ -564,7 +570,7 @@ bool vec_append_from_capacity(vec_t *self, size_t n)
 	return (true);
 }
 
-bool vec_slimcheck(vec_t *self)
+bool vec_slimcheck(struct vector *self)
 {
 	__trigger_bug_if(self == NULL);
 

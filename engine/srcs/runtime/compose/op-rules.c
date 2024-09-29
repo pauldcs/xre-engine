@@ -1,7 +1,7 @@
 #include "xre_nodes.h"
 #include "xre_runtime.h"
 
-const struct op_meta op_meta_lookup[] = {
+const struct operation_info op_info_lookup[] = {
 	{ __VARIABLE__,
 	  O_TYPE_UNDEFINED | O_ATTR_MUTABLE,
 	  O_TYPE_NONE,
@@ -87,7 +87,7 @@ const struct op_meta op_meta_lookup[] = {
 	  O_TYPE_UNDEFINED | O_ATTR_READABLE,
 	  O_TYPE_UNDEFINED | O_ATTR_READABLE },
 	{ __CLOSURE__,
-	  O_TYPE_UNDEFINED | O_ATTR_READABLE | O_ATTR_MUTABLE,
+	  O_BR_RESULT_RIGHT | O_ATTR_MUTABLE | O_ATTR_READABLE,
 	  O_TYPE_UNDEFINED | O_ATTR_READABLE | O_ATTR_MUTABLE,
 	  O_TYPE_UNDEFINED | O_ATTR_READABLE },
 	{ __NE__,
@@ -147,13 +147,14 @@ const struct op_meta op_meta_lookup[] = {
 };
 
 // Function to get the value associated with an expr_kind
-struct op_meta *get_expr_types(enum expr_kind kind)
+struct operation_info *operation_info_lookup_kind(enum expr_kind kind)
 {
 	for (size_t i = 0;
-	     i < sizeof(op_meta_lookup) / sizeof(op_meta_lookup[0]);
+	     i < sizeof(op_info_lookup) / sizeof(op_info_lookup[0]);
 	     ++i) {
-		if (op_meta_lookup[i].kind == kind) {
-			return ((struct op_meta *)&op_meta_lookup[i]);
+		if (op_info_lookup[i].kind == kind) {
+			return ((struct operation_info
+					 *)&op_info_lookup[i]);
 		}
 	}
 	return (NULL);

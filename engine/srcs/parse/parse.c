@@ -53,28 +53,31 @@ static struct ast *ast_new_node(struct token *token)
 	(void
 	)memcpy((void *)&node->token, token, sizeof(struct token));
 
-	if (node->kind == __VAL__)
+	if (node->kind == __VAL__) {
 		node->value = token->_value;
+	}
 
-	if (node->kind == __STRING_LITERAL__) {
+	else if (node->kind == __STRING_LITERAL__) {
 		char *tmp = strndup(token->_ptr + 1, token->_len - 2);
 		(void)str_unescape(tmp);
 		node->string = tmp;
 	}
 
-	if (node->kind == __VARIABLE__) {
+	else if (node->kind == __VARIABLE__) {
 		node->string = strndup(token->_ptr, token->_len);
 	}
 
-	if (node->kind == __BUILTIN_CALL__) {
-		node->string =
-			builtin_get_name(token->_ptr, token->_len);
+	else if (node->kind == __BUILTIN_CALL__) {
+		struct builtin *builtin =
+			builtin_find(token->_ptr, token->_len);
+		node->string = builtin->iden;
 	}
 
 	return (node);
 }
 
-static bool unfold_sequence_ast(struct ast *ast, vec_t *buffer)
+static bool
+unfold_sequence_ast(struct ast *ast, struct vector *buffer)
 {
 	if (ast->kind == __SEQUENCE__) {
 		if (!vec_concat(buffer, ast->seq)) {
@@ -101,7 +104,8 @@ bool sequence_node(
 	__return_val_if_fail__(lval, NULL);
 	__return_val_if_fail__(rval, NULL);
 
-	vec_t *sequence = vec_create(sizeof(struct ast), 8, free);
+	struct vector *sequence =
+		vec_create(sizeof(struct ast), 8, free);
 
 	if (lval->token._depth > rval->token._depth) {
 		if (!vec_append(sequence, lval, 1) ||
@@ -156,7 +160,7 @@ static void __make_value_to_b(void)
 	__push_b(node);
 }
 
-struct ast *xre_expr_parse(vec_t *tokens)
+struct ast *xre_expr_parse(struct vector *tokens)
 {
 	__return_val_if_fail__(tokens, NULL);
 

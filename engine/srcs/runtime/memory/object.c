@@ -61,36 +61,42 @@ const char *object_attr_to_str(int64_t attr)
 		cpyf(&buffer[i],
 		     BUFFER_SIZE - i,
 		     "%s",
-		     attr & O_ATTR_READABLE ? "r" : "-");
+		     attr & O_ATTR_READABLE ? "public " : "private ");
 	i +=
 		cpyf(&buffer[i],
 		     BUFFER_SIZE - i,
 		     "%s",
-		     attr & O_ATTR_MUTABLE ? "w" : "-");
+		     attr & O_ATTR_MUTABLE ? "mutable" : "constant");
 
 	i += cpyf(&buffer[i], BUFFER_SIZE - i, " ");
 
 	int64_t type = attr & O_TYPE_MASK;
 	switch (type) {
 	case O_TYPE_NUMBER:
-		i += cpyf(&buffer[i], BUFFER_SIZE - i, "int");
+		i += cpyf(&buffer[i], BUFFER_SIZE - i, "int64_t");
 		break;
 
 	case O_TYPE_SEQUENCE:
-		i += cpyf(&buffer[i], BUFFER_SIZE - i, "seq");
+		i +=
+			cpyf(&buffer[i],
+			     BUFFER_SIZE - i,
+			     "vector(object)");
 		break;
 
 	case O_TYPE_BUFFER:
-		i += cpyf(&buffer[i], BUFFER_SIZE - i, "bug");
+		i +=
+			cpyf(&buffer[i],
+			     BUFFER_SIZE - i,
+			     "vector(uint8_t)");
 		break;
 
 	case O_TYPE_STRING:
-		i += cpyf(&buffer[i], BUFFER_SIZE - i, "string");
+		i += cpyf(&buffer[i], BUFFER_SIZE - i, "dynamic_string");
 		break;
 
 	case O_TYPE_UNDEFINED:
 	default:
-		i += cpyf(&buffer[i], BUFFER_SIZE - i, "???");
+		i += cpyf(&buffer[i], BUFFER_SIZE - i, "any");
 		break;
 	}
 	return (strdup(buffer));

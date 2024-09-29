@@ -7,6 +7,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <sys/types.h>
+#include <stdlib.h>
 
 err_notif_t lexer_error_g;
 
@@ -38,25 +39,16 @@ static void init_token(void)
 	_token._line_len = _line_len;
 }
 
-static bool accept_token(vec_t *tokens, size_t len)
+static bool accept_token(struct vector *tokens, size_t len)
 {
 	__return_val_if_fail__(tokens, false);
 
 	_token._len = len;
 	if (_token._kind == __BUILTIN_CALL__) {
-		switch (builtin_get_type(_token._ptr, _token._len)) {
-		case BUILTIN_BINOP:
-			_token._type = EXPR_OP_TYPE_BINOP;
-			break;
+		struct builtin *builtin =
+			builtin_find(_token._ptr, _token._len);
+		_token._type = builtin->type;
 
-		case BUILTIN_UNIOP:
-			_token._type = EXPR_OP_TYPE_UNIOP;
-			break;
-
-		default:
-			_token._type = EXPR_TYPE_VALUE;
-			break;
-		}
 	} else {
 		_token._type = expr_type_by_kind(_token._kind);
 	}
@@ -83,7 +75,7 @@ static void pointer_forward(size_t count, char **ptr)
 	}
 }
 
-bool xre_expr_lex(const char *expr, vec_t *tokens)
+bool xre_expr_lex(const char *expr, struct vector *tokens)
 {
 	__return_val_if_fail__(expr, false);
 	__return_val_if_fail__(tokens, false);
@@ -365,9 +357,8 @@ TODO
 						tf++;
 						tmp++;
 					}
-					if (is_defined_builtin(
-						    ptr, tf
-					    )) {
+
+					if (builtin_find(ptr, tf)) {
 						_token._kind =
 							__BUILTIN_CALL__;
 					}

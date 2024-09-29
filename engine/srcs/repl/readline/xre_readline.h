@@ -28,12 +28,12 @@ typedef struct {
 } t_screen_pt;
 
 typedef struct {
-	vec_t *_v;
-	bool   eof_reached;
-	char  *mode;
-	int    _i;   /* current index */
-	int    _ei;  /* end index */
-	int    _mei; /* mac end index */
+	struct vector *_v;
+	bool	       eof_reached;
+	char	      *mode;
+	int	       _i;   /* current index */
+	int	       _ei;  /* end index */
+	int	       _mei; /* mac end index */
 	t_screen_pt
 		_pt; /* point on the screen were we start printing */
 	t_screen_pt _cc; /* cursor x and cursor y relative to window */

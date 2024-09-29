@@ -6,9 +6,9 @@
 #include <sys/types.h>
 
 struct ast *xre_ast_compose(const char *expr);
-bool	    xre_expr_lex(const char *expr, vec_t *tokens);
-bool	    xre_expr_syntax(vec_t *tokens);
-struct ast *xre_expr_parse(vec_t *tokens);
+bool	    xre_expr_lex(const char *expr, struct vector *tokens);
+bool	    xre_expr_syntax(struct vector *tokens);
+struct ast *xre_expr_parse(struct vector *tokens);
 
 int get_precedence_by_kind(enum expr_kind kind);
 

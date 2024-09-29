@@ -3,7 +3,7 @@
 #include "xre_parse.h"
 #include "xre_nodes.h"
 
-// void fuck_with_tokens(vec_t *tokens) {
+// void fuck_with_tokens(struct vector *tokens) {
 // 	size_t size = vec_size(tokens);
 // 	for (size_t i = 0; i < size; i++) {
 // 		printf("'%s'\n", expr_kind_to_string(((struct token *)vec_at(tokens, i))->_kind));
@@ -15,8 +15,8 @@ struct ast *xre_ast_compose(const char *expr)
 {
 	__return_val_if_fail__(expr, NULL);
 
-	vec_t	   *tokens = NULL;
-	struct ast *ast	   = NULL;
+	struct vector *tokens = NULL;
+	struct ast    *ast    = NULL;
 
 	tokens = vec_create(sizeof(struct token), 16, NULL);
 	if (!tokens) {
@@ -42,9 +42,6 @@ prison:
 	return (NULL);
 
 beach:
-	if (__xre_args__.flags & FLAGS_DEBUG) {
-		ast_show(ast);
-	}
 
 	vec_kill(tokens);
 	return (ast);

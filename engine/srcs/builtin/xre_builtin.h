@@ -1,24 +1,22 @@
 #ifndef __XRE_BUILTIN_H__
 #define __XRE_BUILTIN_H__
 
+#include "xre_nodes.h"
 #include <stdbool.h>
+#include <stdint.h>
 #include <stddef.h>
 
-enum builtin_type {
-	BUILTIN_BINOP,
-	BUILTIN_UNIOP,
-};
-
 struct builtin {
-	const char	 *iden;
-	enum builtin_type type;
-	void		 *func;
+	const char    *iden;
+	enum expr_type type;
+
+	int64_t self_attr;
+	int64_t left_attr;
+	int64_t right_attr;
 };
 
-extern struct builtin builtin_lookup[8];
+extern const struct builtin builtin_lookup[3];
 
-bool		  is_defined_builtin(const char *ptr, size_t size);
-const char	 *builtin_get_name(const char *ptr, size_t size);
-enum builtin_type builtin_get_type(const char *ptr, size_t size);
+struct builtin *builtin_find(const char *lookup_name, size_t size);
 
 #endif /* __XRE_BUILTIN_H__ */

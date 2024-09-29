@@ -3,18 +3,18 @@
 
 int get_precedence_by_kind(enum expr_kind kind)
 {
-	// if (kind == __BUILTIN_CALL__) {
-	// 	switch (expr_type_by_kind(kind)) {
-	// 		case EXPR_OP_TYPE_BINOP:
-	// 			goto builtin_binop;
+	if (kind == __BUILTIN_CALL__) {
+		switch (expr_type_by_kind(kind)) {
+		case EXPR_OP_TYPE_BINOP:
+			goto builtin_binop;
 
-	// 		case EXPR_OP_TYPE_UNIOP:
-	// 			goto uniop;
+		case EXPR_OP_TYPE_UNIOP:
+			goto uniop;
 
-	// 		default:
-	// 			goto prison;
-	// 	}
-	// }
+		default:
+			goto value;
+		}
+	}
 
 	switch (kind) {
 	case __SCOPE_RESOLUTION__:
@@ -24,6 +24,8 @@ int get_precedence_by_kind(enum expr_kind kind)
 		return (0);
 
 	case __NOT__:
+
+uniop:
 	case __BUILTIN_CALL__:
 		return (-1);
 
@@ -59,6 +61,7 @@ int get_precedence_by_kind(enum expr_kind kind)
 	case __BXOR__:
 		return (-10);
 
+builtin_binop:
 	case __BOR__:
 		return (-11);
 
@@ -96,6 +99,7 @@ int get_precedence_by_kind(enum expr_kind kind)
 	case __RPAREN__:
 		return (-1000);
 
+value:
 	case __VAL__:
 	case __STRING_LITERAL__:
 	case __VARIABLE__:

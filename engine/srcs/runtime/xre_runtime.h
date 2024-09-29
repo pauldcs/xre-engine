@@ -2,75 +2,125 @@
 #define __XRE_RUNTIME_H__
 
 #include "xre_errors.h"
+#include "xre_builtin.h"
+#include "xre_args.h"
 #include "xre_nodes.h"
 #include "dstr.h"
 #include <stdbool.h>
 
-struct frame {
-	vec_t	 *variables /* object_t */;
-	uintptr_t pointer;
-};
+// struct frame {
+// 	struct vector *variables /* object_t */;
+// 	uintptr_t      pointer;
+// };
 
 struct meta {
 	const char   *iden;
 	struct token *source;
 };
 
-struct op_meta {
+struct operation_info {
 	enum expr_kind kind;
 	int64_t	       _ret;
 	int64_t	       _p1;
 	int64_t	       _p2;
 };
 
-extern const struct op_meta op_meta_lookup[40];
-struct op_meta		   *get_expr_types(enum expr_kind kind);
+extern const struct operation_info op_info_lookup[40];
 
-struct statements {
-	bool (*_op)(struct statements *);
+struct operation_info *operation_info_lookup_kind(enum expr_kind kind
+);
 
-	struct meta meta;
-	int64_t	    return_offset;
-	int64_t	    return_type;
-	int64_t	    ref_attrs;
-	//struct frame frame;
-	vec_t *frame;
+// enum operand {
+// 	P_REFERENCE,
+// 	P_SEQUENCE,
+// 	P_WEAK_SEQUENCE,
+// 	P_CLOSURE,
+// 	P_USER_UNIOP,
+// 	P_USER_BINOP,
+// 	P_ARITHMETHIC_ADD,
+// 	P_ARITHMETHIC_SUB,
+// 	P_ARITHMETHIC_MUL,
+// 	P_ARITHMETHIC_MOD,
+// 	P_ARITHMETHIC_DIV,
+// 	P_ARITHMETHIC_POW,
+// 	P_LOGIC_AND,
+// 	P_LOGIC_OR,
+// 	P_LOGIC_DO,
+// 	P_LOGIC_ELSE,
+// 	P_LOGIC_LOOP,
+// 	P_LOGIC_NOT,
+// 	P_BIT_AND,
+// 	P_BIT_OR,
+// 	P_BIT_XOR,
+// 	P_LSHIFT,
+// 	P_RSHIFT,
+// 	P_COMPARE_LT,
+// 	P_COMPARE_GT,
+// 	P_COMPARE_LE,
+// 	P_COMPARE_GE,
+// 	P_COMPARE_EQ,
+// 	P_COMPARE_NE,
+// };
 
-	union {
-		int64_t offset; // variable offset
-		vec_t *children; // in the case of a sequence operation,
-			// this i a verctor of children statements
-		struct {
-			struct statements *left;
-			struct statements *right;
-		};
-	} self;
+/*
+ *    Used to access memory at runtime.
+*/
+struct port {
+	int64_t offset;
+	int64_t access_mask;
 };
 
-#define __statement_children(__statement) \
-	((__statement)->self.children)
+struct expression {
+	//enum operand    iden;
+	//enum operand    operand;
+	struct token   *origin;
+	struct vector  *locals;
+	struct builtin *builtin;
+	struct port	dest;
 
-#define __statement_kind(__statement) \
-	((__statement)->meta.source->_kind)
+	union {
+		struct vector	  *sequence;
+		struct expression *uniop;
+		struct port	   reference;
 
-#define __statement_type(__statement) \
-	((__statement)->meta.source->_type)
+		struct {
+			struct expression *left;
+			struct expression *right;
+		} binop;
+	};
+};
 
-#define __statement_left(__statement) ((__statement)->self.left)
+#define __expression_sequence(__expression) ((__expression)->sequence)
 
-#define __statement_right(__statement) ((__statement)->self.right)
+#define __expression_kind(__expression) \
+	((__expression)->origin->_kind)
 
-#define __statement_offset(__statement) ((__statement)->self.offset)
+#define __expression_type(__expression) \
+	((__expression)->origin->_type)
+#define __expression_operand(__expression) ((__expression)->operand)
 
-#define __statement_frame(__statement) ((__statement)->frame)
+#define __expression_builtin(__expression) ((__expression)->builtin)
+#define __expression_origin(__expression)  ((__expression)->origin)
+#define __expression_dest(__expression)	   ((__expression)->dest)
+#define __expression_binop_left(__expression) \
+	((__expression)->binop.left)
+#define __expression_binop_right(__expression) \
+	((__expression)->binop.right)
+#define __expression_locals(__expression) ((__expression)->locals)
 
+#define __expression_dest_offset(__expression) \
+	((__expression)->dest.offset)
+#define __expression_dest_access_mask(__expression) \
+	((__expression)->dest.access_mask)
+#define __expression_ref_offset(__expression) \
+	((__expression)->reference.offset)
+#define __expression_ref_access_mask(__expression) \
+	((__expression)->reference.access_mask)
 
-int64_t eval_return_offsets(struct statements *node);
-int64_t eval_return_types(struct statements *node);
-void eval_variable_flow(struct statements *node);
-// struct xre_pp {
-
-// }
+int64_t eval_return_offsets(struct expression *node);
+int64_t eval_return_attrs(struct expression *node);
+void	eval_variable_flow(struct expression *node);
+void	emit_ir(struct expression *node, bool verbose, bool is_left);
 
 // Attribute flags (bits 0-15)
 #define O_ATTR_MUTABLE	(1ULL << 1)
@@ -99,11 +149,11 @@ typedef struct {
 	int64_t	    objattrs;
 	const char *str;
 	union {
-		uint64_t	      any;
-		dstr_t		     *string;
-		vec_t /* uint8_t  */ *buffer;
-		vec_t /* object_t */ *sequence;
-		int64_t		      number;
+		uint64_t		      any;
+		dstr_t			     *string;
+		struct vector /* uint8_t  */ *buffer;
+		struct vector /* object_t */ *sequence;
+		int64_t			      number;
 		//xre_bytes_t  bytes;
 	};
 
@@ -132,7 +182,7 @@ bool object_init(
 const char *object_attr_to_str(int64_t attr);
 
 struct runtime {
-	struct statements *start;
+	struct expression *start;
 	const char	  *name;
 };
 
@@ -145,8 +195,6 @@ bool runtime(struct ast *ast);
  *    It contains the instructions as well as frame info such
  *    as local variables.
  */
-bool	runtime_tree_init(struct ast *ast, struct runtime *runtime);
-int64_t runtime_borrow_check(struct statements *node);
-void	runtime_tree_debug(struct statements *node);
+bool runtime_tree_init(struct ast *ast, struct runtime *runtime);
 
 #endif

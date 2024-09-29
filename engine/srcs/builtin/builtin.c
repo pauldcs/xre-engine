@@ -1,59 +1,40 @@
+#include "xre_nodes.h"
 #include "xre_builtin.h"
-#include <string.h>
+#include "xre_runtime.h"
 
-struct builtin builtin_lookup[] = {
-	{ "dbg", BUILTIN_UNIOP, NULL },
-	{ "buf", BUILTIN_UNIOP, NULL },
-	{ "str", BUILTIN_UNIOP, NULL },
-	{ "map", BUILTIN_BINOP, NULL },
-	{ "out", BUILTIN_UNIOP, NULL },
-	{ "each", BUILTIN_BINOP, NULL },
-	{ "filter", BUILTIN_BINOP, NULL },
-	{ "typeof", BUILTIN_UNIOP, NULL }
+const struct builtin builtin_lookup[] = {
+	{ "std_map",
+	  EXPR_OP_TYPE_BINOP,
+	  O_TYPE_SEQUENCE | O_ATTR_READABLE | O_ATTR_MUTABLE,
+	  O_TYPE_SEQUENCE | O_TYPE_UNDEFINED,
+	  O_TYPE_UNDEFINED },
+
+	{ "std_out",
+	  EXPR_OP_TYPE_UNIOP,
+	  O_TYPE_UNDEFINED,
+	  O_ATTR_READABLE,
+	  O_TYPE_UNDEFINED },
+	{ "std_buf",
+	  EXPR_OP_TYPE_UNIOP,
+	  O_TYPE_BUFFER | O_ATTR_READABLE | O_ATTR_MUTABLE,
+	  O_ATTR_READABLE,
+	  O_TYPE_UNDEFINED }
 };
 
-static bool builtin_find(const char *ptr, size_t size, size_t *offset)
+struct builtin *builtin_find(const char *lookup_name, size_t size)
 {
-	size_t lookup_size =
-		sizeof(builtin_lookup) / sizeof(struct builtin);
 	size_t i = 0;
+	size_t lookup_size =
+		sizeof(builtin_lookup) / sizeof(builtin_lookup[0]);
 
 	while (i < lookup_size) {
 		const char *name = builtin_lookup[i].iden;
 		if (strlen(name) == size &&
-		    !memcmp(name, ptr, size)) {
-			*offset = i;
-			return (true);
+		    !memcmp(name, lookup_name, size)) {
+			return ((struct builtin *)&builtin_lookup[i]);
 		}
 		i++;
 	}
 
-	return (false);
-}
-
-bool is_defined_builtin(const char *ptr, size_t size)
-{
-	size_t offset;
-	return (builtin_find(ptr, size, &offset));
-}
-
-const char *builtin_get_name(const char *ptr, size_t size)
-{
-	size_t offset;
-
-	if (!builtin_find(ptr, size, &offset)) {
-		return (NULL);
-	}
-
-	return (builtin_lookup[offset].iden);
-}
-
-enum builtin_type builtin_get_type(const char *ptr, size_t size)
-{
-	size_t offset;
-
-	if (!builtin_find(ptr, size, &offset)) {
-		return (0);
-	}
-	return (builtin_lookup[offset].type);
+	return (NULL);
 }

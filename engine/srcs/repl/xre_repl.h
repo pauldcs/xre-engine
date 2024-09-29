@@ -4,7 +4,7 @@
 #include "vec.h"
 #include <stdbool.h>
 
-typedef vec_t history_vec_t;
+typedef struct vector history_vec_t;
 
 bool xre_repl_entrypoint(void);
 bool xre_read_block(void **block, const history_vec_t *history);

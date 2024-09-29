@@ -1,4 +1,5 @@
 #include "xre_parse.h"
+#include "xre_args.h"
 #include "xre_compiler.h"
 #include "xre_runtime.h"
 #include <stdbool.h>
@@ -32,13 +33,18 @@ static bool runtime_init(struct ast *ast, struct runtime **rt)
 		goto prison;
 	}
 
-	// if (!runtime_borrow_check((*rt)->start)) {
-	// 	goto prison;
-	// }
-
 	(void)eval_return_offsets((*rt)->start);
-	(void)eval_return_types((*rt)->start);
+	(void)eval_return_attrs((*rt)->start);
 	(void)eval_variable_flow((*rt)->start);
+
+	if (__xre_args__.flags & FLAGS_DEBUG ||
+	    __xre_args__.flags & FLAGS_DEBUG_VERBOSE) {
+		(void)emit_ir(
+			(*rt)->start,
+			__xre_args__.flags & FLAGS_DEBUG_VERBOSE,
+			true
+		);
+	}
 
 	return (true);
 
@@ -57,7 +63,7 @@ bool runtime(struct ast *ast)
 		return (false);
 	}
 
-	runtime_tree_debug(rt->start);
+	//runtime_tree_debug(rt->start);
 
 	return (true);
 	// 	if (!stack_init()) {
