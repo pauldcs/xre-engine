@@ -145,7 +145,11 @@ static void __make_value_to_b(void)
 		node->uniop = __pop_b();
 
 	} else {
-		if (node->kind == __SEQUENCE_POINT__) {
+		if (node->kind == __ASSIGN__) {
+			node->_binop.left  = __pop_b();
+			node->_binop.right = __pop_b();
+		}
+		else if (node->kind == __SEQUENCE_POINT__) {
 			a = __pop_b();
 			b = __pop_b();
 			(void)sequence_node(

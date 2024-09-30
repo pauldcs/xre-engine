@@ -2,60 +2,107 @@
 #include "xre_runtime.h"
 #include "xre_utils.h"
 #include <stdbool.h>
+#include <limits.h>
 
 static size_t stack_size = 0;
+bool	      is_leaf = false;
 
-static int64_t create_returned_offset(
+int __registers[64] = {
+	1,1,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+}; 
+
+static int assign_register(void) {
+	size_t i = 2;
+	while (i < 64 - 2) {
+		if (__registers[i] == 0) {
+			__registers[i] = 1;
+			return (i);
+		}
+		i++;
+	}
+	return (-1);
+}
+
+static void release_register(int reg) {
+	__registers[reg] = 0;
+}
+
+static size_t alloc_register(
 	struct operation_info *operation_info,
 	int64_t		       left_offset,
-	int64_t		       right_offset
-)
+	int64_t		       right_offset)
 {
 	if (operation_info->_ret & O_BR_RESULT_LEFT) {
+		if (left_offset == -1) {
+			return (-assign_register());
+		}
 		return (left_offset);
 
-	} else if (operation_info->_ret & O_BR_RESULT_RIGHT) {
+	} 
+	if (operation_info->_ret & O_BR_RESULT_RIGHT) {
+		if (right_offset == -1) {
+			return (-assign_register());
+		}
+		return (right_offset);
+
+	}
+
+	if (operation_info->_ret & O_BR_RESULT_ANY) {
+		return (-1);
+	}
+
+	if (left_offset != -1 && left_offset < 0) {
+		return (left_offset);
+	}
+
+	if (right_offset != -1 && right_offset < 0) {
 		return (right_offset);
 	}
 
-	return (-1);
+	return (-assign_register());
 }
+
 
 int64_t eval_return_offsets(struct expression *node)
 {
 	int64_t left_offset  = -1;
 	int64_t right_offset = -1;
 
-	struct operation_info *operation_info =
-		operation_info_lookup_kind(__expression_kind(node));
-
 	size_t i = 0;
-	while (i < vec_size(__expression_locals(node))) {
+	while (i < vec_size(__expression_frame_locals(node))) {
 		stack_size++;
 		i++;
 	}
 
-	__expression_dest_offset(node) = -1;
-
 	if (__expression_type(node) == EXPR_TYPE_VALUE) {
+		is_leaf = true;
 		return (__expression_ref_offset(node));
 	}
 
 	if (__expression_kind(node) == __SEQUENCE_POINT__) {
 		i = 0;
 		while (i < vec_size(__expression_sequence(node))) {
-			left_offset = eval_return_offsets(
+			eval_return_offsets(
 				(struct expression *)vec_at(
 					__expression_sequence(node),
 					i++
 				)
 			);
+
 		}
 		goto end;
 	}
 
 	switch (__expression_type(node)) {
 	case EXPR_OP_TYPE_UNIOP:
+		is_leaf = false;
 		left_offset = eval_return_offsets(
 			__expression_binop_left(node)
 		);
@@ -63,6 +110,7 @@ int64_t eval_return_offsets(struct expression *node)
 		break;
 
 	case EXPR_OP_TYPE_BINOP:
+		is_leaf = false;
 		left_offset = eval_return_offsets(
 			__expression_binop_left(node)
 		);
@@ -70,7 +118,7 @@ int64_t eval_return_offsets(struct expression *node)
 		right_offset = eval_return_offsets(
 			__expression_binop_right(node)
 		);
-
+	
 		break;
 
 	default:
@@ -79,14 +127,24 @@ int64_t eval_return_offsets(struct expression *node)
 	}
 end:
 
-	if (vec_size(__expression_locals(node))) {
-		stack_size -= vec_size(__expression_locals(node));
+	if (vec_size(__expression_frame_locals(node))) {
+		stack_size -=
+			vec_size(__expression_frame_locals(node));
 	}
 
-	int64_t offset = create_returned_offset(
-		operation_info, left_offset, right_offset
-	);
-	__expression_dest_offset(node) = offset;
+	struct operation_info *operation_info =
+		operation_info_lookup_kind(__expression_kind(node));
 
+	int64_t offset = alloc_register(operation_info, left_offset, right_offset);
+	
+	if (left_offset != -1 && offset != left_offset) {
+		release_register(-left_offset);
+	}
+	
+	if (right_offset != -1 && offset != right_offset) {
+		release_register(-right_offset);
+	}
+	__expression_dest_offset(node) = offset;
+	
 	return (offset);
 }

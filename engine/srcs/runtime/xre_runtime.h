@@ -67,15 +67,21 @@ struct operation_info *operation_info_lookup_kind(enum expr_kind kind
 */
 struct port {
 	int64_t offset;
-	int64_t access_mask;
+	int64_t pmask;
+};
+
+struct frame {
+	struct vector *locals;
+	// size_t	       alive_size;
+	// size_t	       hidden_size;
 };
 
 struct expression {
 	//enum operand    iden;
 	//enum operand    operand;
 	struct token   *origin;
-	struct vector  *locals;
 	struct builtin *builtin;
+	struct frame	frame;
 	struct port	dest;
 
 	union {
@@ -106,20 +112,27 @@ struct expression {
 	((__expression)->binop.left)
 #define __expression_binop_right(__expression) \
 	((__expression)->binop.right)
-#define __expression_locals(__expression) ((__expression)->locals)
+
+#define __expression_frame_locals(__expression) \
+	((__expression)->frame.locals)
+#define __expression_frame_user(__expression) \
+	((__expression)->frame.total_user)
+#define __expression_frame_meta(__expression) \
+	((__expression)->frame.total_meta)
 
 #define __expression_dest_offset(__expression) \
 	((__expression)->dest.offset)
-#define __expression_dest_access_mask(__expression) \
-	((__expression)->dest.access_mask)
+#define __expression_dest_pmask(__expression) \
+	((__expression)->dest.pmask)
 #define __expression_ref_offset(__expression) \
 	((__expression)->reference.offset)
-#define __expression_ref_access_mask(__expression) \
-	((__expression)->reference.access_mask)
+#define __expression_ref_pmask(__expression) \
+	((__expression)->reference.pmask)
 
 int64_t eval_return_offsets(struct expression *node);
 int64_t eval_return_attrs(struct expression *node);
 void	eval_variable_flow(struct expression *node);
+void	operation_size_count(struct expression *node);
 void	emit_ir(struct expression *node, bool verbose, bool is_left);
 
 // Attribute flags (bits 0-15)

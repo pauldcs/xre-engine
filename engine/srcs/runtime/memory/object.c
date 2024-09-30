@@ -61,12 +61,12 @@ const char *object_attr_to_str(int64_t attr)
 		cpyf(&buffer[i],
 		     BUFFER_SIZE - i,
 		     "%s",
-		     attr & O_ATTR_READABLE ? "public " : "private ");
+		     attr & O_ATTR_READABLE ? "r" : "-");
 	i +=
 		cpyf(&buffer[i],
 		     BUFFER_SIZE - i,
 		     "%s",
-		     attr & O_ATTR_MUTABLE ? "mutable" : "constant");
+		     attr & O_ATTR_MUTABLE ? "w" : "-");
 
 	i += cpyf(&buffer[i], BUFFER_SIZE - i, " ");
 
@@ -77,21 +77,21 @@ const char *object_attr_to_str(int64_t attr)
 		break;
 
 	case O_TYPE_SEQUENCE:
-		i +=
-			cpyf(&buffer[i],
-			     BUFFER_SIZE - i,
-			     "vector(object)");
+		i += cpyf(
+			&buffer[i], BUFFER_SIZE - i, "vector(object)"
+		);
 		break;
 
 	case O_TYPE_BUFFER:
-		i +=
-			cpyf(&buffer[i],
-			     BUFFER_SIZE - i,
-			     "vector(uint8_t)");
+		i += cpyf(
+			&buffer[i], BUFFER_SIZE - i, "vector(uint8_t)"
+		);
 		break;
 
 	case O_TYPE_STRING:
-		i += cpyf(&buffer[i], BUFFER_SIZE - i, "dynamic_string");
+		i += cpyf(
+			&buffer[i], BUFFER_SIZE - i, "dynamic_string"
+		);
 		break;
 
 	case O_TYPE_UNDEFINED:

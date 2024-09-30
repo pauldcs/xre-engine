@@ -1,4 +1,0 @@
-#!/bin/sh
-
-set -ex
-./xre -e -d -x "$(./preprocessor code.r)"

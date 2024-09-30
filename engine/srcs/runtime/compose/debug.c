@@ -14,9 +14,8 @@ static int    __sp	= 0;
 static size_t d		= 0;
 
 static int __states[] = {
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 };
 
 // enum operand {
@@ -75,16 +74,16 @@ static int __states[] = {
 
 void emit_ir(struct expression *node, bool verbose, bool is_left);
 
-const char *tab[] = {
-	"|-- ",
-	"`-- ",
-	"|   ",
-	"    "
-};
+const char *tab[] = { "|-- ", "`-- ", "|   ", "    " };
 
-bool with_skip = false;
+bool	    with_skip = false;
 static void emit_code_internal(
-	const char *code, bool lineno, bool indent, bool verbose, bool active, bool is_left
+	const char *code,
+	bool	    lineno,
+	bool	    indent,
+	bool	    verbose,
+	bool	    active,
+	bool	    is_left
 )
 {
 	(void)verbose;
@@ -99,103 +98,79 @@ static void emit_code_internal(
 	}
 
 	size_t i = 0;
-		while (i < d + !active) {
-			if (__states[i] == 1) {
-				if (i + 1 == d + !active) {
-					if (active) {
-						if (__states[i] == 1) {
-							printf("├── ");
-						} else {
-							if (with_skip) {
-								printf("├── ");	
-							} else {
-								printf("└── ");
-							}
-						} 
+	while (i < d + !active) {
+		if (__states[i] == 1) {
+			if (i + 1 == d + !active) {
+				if (active) {
+					if (__states[i] == 1) {
+						printf("├── ");
 					} else {
+						if (with_skip) {
+							printf("├── "
+							);
+						} else {
+							printf("└── "
+							);
+						}
 					}
 				} else {
-					printf("│   ");
 				}
 			} else {
-				if (i + 1 == d + !active) {
-					if (active) {
-						if (__states[i] == 1) {
-							printf("├── ");
-						} else {
-							if (with_skip) {
-								printf("├── ");	
-							} else {
-								printf("└── ");
-							}
-						}  
+				printf("│   ");
+			}
+		} else {
+			if (i + 1 == d + !active) {
+				if (active) {
+					if (__states[i] == 1) {
+						printf("├── ");
 					} else {
-						printf("    ");	
+						if (with_skip) {
+							printf("├── "
+							);
+						} else {
+							printf("└── "
+							);
+						}
 					}
 				} else {
 					printf("    ");
 				}
+			} else {
+				printf("    ");
 			}
-			i++;
 		}
+		i++;
+	}
 
 	(void)fprintf(stdout, "%s\n", code);
 	fflush(stdout);
 }
 
-static size_t frame_count_total_size(struct expression *node)
-{
-	size_t size = vec_size(__expression_locals(node));
-
-	switch (__expression_type(node)) {
-	case EXPR_OP_TYPE_UNIOP:
-		return (size + frame_count_total_size(
-				       __expression_binop_left(node)
-			       ));
-
-	case EXPR_OP_TYPE_BINOP:
-		if (__expression_kind(node) == __SEQUENCE_POINT__) {
-			size_t	       i = 0;
-			struct vector *children =
-				__expression_locals(node);
-			while (i < vec_size(children)) {
-				size += frame_count_total_size(
-					vec_access(children, i++)
-				);
-			}
-			return (size);
-		}
-
-		size += frame_count_total_size(
-			__expression_binop_left(node)
-		);
-		size += frame_count_total_size(
-			__expression_binop_right(node)
-		);
-
-		break;
-
-	default:
-		break;
-	}
-
-	return (size);
-}
-
-static void emit_builtin_call(struct expression *node, bool verbose, bool is_left)
+static void
+emit_builtin_call(struct expression *node, bool verbose, bool is_left)
 {
 	if (verbose) {
 		emit_code_internal(
 			format_string(
-				"\"%s\" `%s` #%02d:%02d:%02d:%02d",
+				"'%s' `%s` %s # as %s",
 				expr_kind_to_string(
 					__expression_kind(node)
 				),
 				node->builtin->iden,
-				__expression_origin(node)->_line,
-				__expression_origin(node)->_cols,
-				__expression_origin(node)->_len,
-				__expression_origin(node)->_depth
+				node->dest.offset < 0 ?
+					format_string(
+						"[local_%04d]",
+						node->dest.offset == -1 ? INT_MIN : -(node->dest.offset) - 2
+					) :
+					format_string(
+						"[var_%04d]",
+						node->dest.offset
+					),
+				object_attr_to_str(
+					__expression_dest_pmask(
+						node
+					)
+				)
 			),
 			false,
 			true,
@@ -205,7 +180,7 @@ static void emit_builtin_call(struct expression *node, bool verbose, bool is_lef
 		);
 	} else {
 		emit_code_internal(
-			format_string("\"%s\"", node->builtin->iden),
+			format_string("'%s'", node->builtin->iden),
 			false,
 			true,
 			verbose,
@@ -215,20 +190,31 @@ static void emit_builtin_call(struct expression *node, bool verbose, bool is_lef
 	}
 }
 
-static void
-emit_basic_operation(struct expression *node, bool verbose, bool is_left)
+static void emit_basic_operation(
+	struct expression *node, bool verbose, bool is_left
+)
 {
 	if (verbose) {
 		emit_code_internal(
 			format_string(
-				"\"%s\" #%02d:%02d:%02d:%02d",
+				"'%s' %s # as %s",
 				expr_kind_to_string(
 					__expression_kind(node)
 				),
-				__expression_origin(node)->_line,
-				__expression_origin(node)->_cols,
-				__expression_origin(node)->_len,
-				__expression_origin(node)->_depth
+				node->dest.offset < 0 ?
+					format_string(
+						"[local_%04d]",
+						node->dest.offset == -1 ? INT_MIN : -(node->dest.offset) - 2
+					) :
+					format_string(
+						"[var_%04d]",
+						node->dest.offset
+					),
+				object_attr_to_str(
+					__expression_dest_pmask(
+						node
+					)
+				)
 			),
 			false,
 			true,
@@ -253,7 +239,8 @@ emit_basic_operation(struct expression *node, bool verbose, bool is_left)
 	}
 }
 
-static void emit_operation(struct expression *node, bool verbose, bool is_left)
+static void
+emit_operation(struct expression *node, bool verbose, bool is_left)
 {
 	if (__expression_kind(node) == __BUILTIN_CALL__) {
 		emit_builtin_call(node, verbose, is_left);
@@ -263,7 +250,10 @@ static void emit_operation(struct expression *node, bool verbose, bool is_left)
 }
 
 static void emit_static_object(
-	struct expression *node, object_t *object, bool verbose, bool is_left
+	struct expression *node,
+	object_t	  *object,
+	bool		   verbose,
+	bool		   is_left
 )
 {
 	(void)node;
@@ -271,7 +261,7 @@ static void emit_static_object(
 	if (verbose) {
 		emit_code_internal(
 			format_string(
-				"ALLOCATE [var_%04zu] as %s (0x%llx) #%s",
+				"Alloc [var_%04zu] # as %s (0x%llx) token: '%s'",
 				++__counter - 1,
 				object_attr_to_str(object->objattrs),
 				__object_as_data(object),
@@ -287,15 +277,14 @@ static void emit_static_object(
 	with_skip = false;
 }
 
-static void emit_stack_free(struct expression *node, bool verbose, bool is_left)
+static void
+emit_stack_free(struct expression *node, bool verbose, bool is_left)
 {
-
 	(void)node;
 	if (verbose) {
 		emit_code_internal(
 			format_string(
-				"DROP [var_%04zu]",
-				__counter-- - 1
+				"Drop [var_%04zu]", __counter-- - 1
 			),
 			false,
 			true,
@@ -306,8 +295,9 @@ static void emit_stack_free(struct expression *node, bool verbose, bool is_left)
 	}
 }
 
-static void
-emit_expression_sequence(struct expression *node, bool verbose, bool is_left)
+static void emit_expression_sequence(
+	struct expression *node, bool verbose, bool is_left
+)
 {
 	size_t	       i	= 0;
 	struct vector *children = __expression_sequence(node);
@@ -320,15 +310,16 @@ emit_expression_sequence(struct expression *node, bool verbose, bool is_left)
 	}
 }
 
-static void emit_reference(struct expression *node, bool verbose, bool is_left)
+static void
+emit_reference(struct expression *node, bool verbose, bool is_left)
 {
 	if (verbose) {
 		emit_code_internal(
 			format_string(
-				"reference var_%04d as %s",
+				"*var_%04d # as %s",
 				__expression_ref_offset(node),
 				object_attr_to_str(
-					__expression_ref_access_mask(
+					__expression_ref_pmask(
 						node
 					)
 				)
@@ -342,8 +333,7 @@ static void emit_reference(struct expression *node, bool verbose, bool is_left)
 	} else {
 		emit_code_internal(
 			format_string(
-				"&%04d",
-				__expression_ref_offset(node)
+				"&%04d", __expression_ref_offset(node)
 			),
 			false,
 			true,
@@ -354,39 +344,16 @@ static void emit_reference(struct expression *node, bool verbose, bool is_left)
 	}
 }
 
-static void emit_frame_init(struct expression *node, bool verbose, bool is_left)
+static void handle_frame_change(
+	struct expression *node, bool in, bool verbose, bool is_left
+)
 {
-	with_skip = true;
-	if (verbose) {
-		emit_code_internal(
-			format_string(
-				"# VM space: %zu object(s) %02d:%02d:%02d:%02d",
-				frame_count_total_size(node),
-				__expression_origin(node)->_line,
-				__expression_origin(node)->_cols,
-				__expression_origin(node)->_len,
-				__expression_origin(node)->_depth
-			),
-			false,
-			true,
-			verbose,
-			true,
-			is_left
-		);
-	}
-	with_skip = false;
-}
-
-static void
-handle_frame_change(struct expression *node, bool in, bool verbose, bool is_left)
-{
-	struct vector *frame	  = __expression_locals(node);
+	struct vector *frame	  = __expression_frame_locals(node);
 	size_t	       frame_size = vec_size(frame);
 	size_t	       i	  = 0;
 
 	if (in) {
 		if (frame_size) {
-			emit_frame_init(node, verbose, is_left);
 			__sp += frame_size;
 
 			while (i < frame_size) {
@@ -421,7 +388,8 @@ void emit_ir(struct expression *node, bool verbose, bool is_left)
 		__states[d] = 2;
 		d++;
 		handle_frame_change(node, true, verbose, false);
-		emit_ir(__expression_binop_left(node), verbose, false);
+		emit_ir(__expression_binop_left(node), verbose, false
+		);
 		d--;
 		__states[d] = 1;
 		break;
@@ -433,15 +401,20 @@ void emit_ir(struct expression *node, bool verbose, bool is_left)
 		handle_frame_change(node, true, verbose, is_left);
 
 		if (__expression_kind(node) == __SEQUENCE_POINT__) {
-			emit_expression_sequence(node, verbose, is_left);
+			emit_expression_sequence(
+				node, verbose, is_left
+			);
 			d--;
-			handle_frame_change(node, false, verbose, is_left);
+			handle_frame_change(
+				node, false, verbose, is_left
+			);
 			break;
 		}
 
 		emit_ir(__expression_binop_left(node), verbose, true);
 		__states[d - 1] = 2;
-		emit_ir(__expression_binop_right(node), verbose, false);
+		emit_ir(__expression_binop_right(node), verbose, false
+		);
 
 		d--;
 		__states[d] = 1;
@@ -452,41 +425,5 @@ void emit_ir(struct expression *node, bool verbose, bool is_left)
 		break;
 	}
 
-	with_skip = true;
-	if (__expression_type(node) != EXPR_TYPE_VALUE) {
-		if (__expression_dest_offset(node) != -1 && verbose) {
-			emit_code_internal(
-				format_string(
-					"# Return offset [var_%04d]",
-					__expression_dest_offset(node)
-				),
-				false,
-				true,
-				verbose,
-				false,
-				is_left
-			);
-		}
-		if (__expression_dest_access_mask(node) !=
-			    O_TYPE_UNDEFINED &&
-		    verbose) {
-			emit_code_internal(
-				format_string(
-					"# as %s",
-					object_attr_to_str(
-						__expression_dest_access_mask(
-							node
-						)
-					)
-				),
-				false,
-				true,
-				verbose,
-				false,
-				is_left
-			);	
-		}
-	}
-	with_skip = false;
-		handle_frame_change(node, false, verbose, is_left);
+	handle_frame_change(node, false, verbose, is_left);
 }

@@ -127,7 +127,7 @@ void	frame_propagate_diff(
 		global_frame_index = 0;
 	}
 
-	if (vec_size(__expression_locals(expression))) {
+	if (vec_size(__expression_frame_locals(expression))) {
 		global_frame_index++;
 	}
 
@@ -196,7 +196,7 @@ static bool runtime_tree_create(
 	size_t	    self_offset	       = 0;
 	size_t	    n;
 	struct port port = { .offset	  = -1,
-			     .access_mask = O_TYPE_UNDEFINED };
+			     .pmask = O_TYPE_UNDEFINED };
 
 	if (!tree_node_alloc(statements)) {
 		return (false);
@@ -205,12 +205,13 @@ static bool runtime_tree_create(
 	struct expression *expression = *statements;
 
 	__expression_origin(expression) = (struct token *)&ast->token;
-	__expression_locals(expression) =
+	__expression_frame_locals(expression) =
 		vec_create(sizeof(object_t), 64, NULL);
 	__expression_dest(expression) = port;
 
 	if (global_scope_vector == NULL) {
-		global_scope_vector = __expression_locals(expression);
+		global_scope_vector =
+			__expression_frame_locals(expression);
 	}
 
 	struct vector *scope_vector_save = global_scope_vector;
@@ -219,7 +220,8 @@ static bool runtime_tree_create(
 	if (is_scope_change) {
 		global_scope_vector_index +=
 			vec_size(global_scope_vector);
-		global_scope_vector = __expression_locals(expression);
+		global_scope_vector =
+			__expression_frame_locals(expression);
 	}
 
 	if (__expression_kind(expression) == __BUILTIN_CALL__) {
@@ -255,7 +257,7 @@ static bool runtime_tree_create(
 	case EXPR_TYPE_VALUE:
 		format		   = format_value(ast);
 		self_cached_offset = is_cached(format);
-		self_offset	   = 0;
+		self_offset	   = -1;
 
 		if (self_cached_offset == -1) {
 			self_offset = global_scope_vector_index +
@@ -265,7 +267,7 @@ static bool runtime_tree_create(
 		}
 
 		__expression_ref_offset(expression) = self_offset;
-		__expression_ref_access_mask(expression) =
+		__expression_ref_pmask(expression) =
 			O_TYPE_UNDEFINED;
 
 		if (self_cached_offset == -1) {
@@ -377,7 +379,9 @@ end:
 	if (is_scope_change) {
 		global_scope_vector	  = scope_vector_save;
 		global_scope_vector_index = scope_vector_index_save;
-		size_t n = vec_size(__expression_locals(expression));
+		size_t n =
+			vec_size(__expression_frame_locals(expression)
+			);
 		while (n--) {
 			local_cache_pop();
 		}

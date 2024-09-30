@@ -37,7 +37,7 @@ int64_t	      eval_return_attrs(struct expression *node)
 		operation_info_lookup_kind(__expression_kind(node));
 
 	size_t i = 0;
-	while (i < vec_size(__expression_locals(node))) {
+	while (i < vec_size(__expression_frame_locals(node))) {
 		stack_size++;
 		i++;
 	}
@@ -47,15 +47,35 @@ int64_t	      eval_return_attrs(struct expression *node)
 	}
 
 	if (__expression_kind(node) == __SEQUENCE_POINT__) {
-		i = 0;
-		while (i < vec_size(__expression_locals(node))) {
-			left_attrs = eval_return_attrs(
-				(struct expression *)vec_at(
-					__expression_locals(node), i++
-				)
-			);
+		i		      = 0;
+		int64_t initial_attrs = O_TYPE_UNDEFINED;
+
+		bool all_read  = true;
+		bool all_const = true;
+
+		while (i < vec_size(__expression_sequence(node))) {
+			struct expression *exp = (struct expression *)
+				vec_at(__expression_sequence(node),
+				       i++);
+
+			right_attrs = eval_return_attrs(exp);
+			if (!(right_attrs & O_ATTR_READABLE)) {
+				all_read = false;
+			}
+
+			if (right_attrs & O_ATTR_MUTABLE) {
+				all_const = false;
+			}
 		}
-		goto end;
+		if (all_read) {
+			initial_attrs |= O_ATTR_READABLE;
+		}
+		if (!all_const) {
+			initial_attrs |= O_ATTR_MUTABLE;
+		}
+
+		__expression_dest_pmask(node) = initial_attrs;
+		return (initial_attrs);
 	}
 
 	switch (__expression_type(node)) {
@@ -81,10 +101,10 @@ int64_t	      eval_return_attrs(struct expression *node)
 
 		break;
 	}
-end:
 
-	if (vec_size(__expression_locals(node))) {
-		stack_size -= vec_size(__expression_locals(node));
+	if (vec_size(__expression_frame_locals(node))) {
+		stack_size -=
+			vec_size(__expression_frame_locals(node));
 	}
 
 	struct operation_info o;
@@ -97,13 +117,13 @@ end:
 			&o, left_attrs, right_attrs
 		);
 
-		__expression_dest_access_mask(node) = ret;
+		__expression_dest_pmask(node) = ret;
 		return (ret);
 	}
 
 	int64_t attrs = create_return_attrs(
 		operation_info, left_attrs, right_attrs
 	);
-	__expression_dest_access_mask(node) = attrs;
+	__expression_dest_pmask(node) = attrs;
 	return (attrs);
 }
