@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #include <stdlib.h>
 
-err_notif_t lexer_error_g;
+struct error lexer_error_g;
 
 struct token _token;
 size_t	     _line;
@@ -393,7 +393,7 @@ TODO
 	return (true);
 
 lexer_error:
-	lexer_error_g.orig = &_token;
+	lexer_error_g.source = &_token;
 	xre_error(&lexer_error_g);
 
 	return (false);

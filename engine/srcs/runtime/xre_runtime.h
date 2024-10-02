@@ -70,11 +70,37 @@ struct port {
 	int64_t pmask;
 };
 
+/*  If the unknown return value was known at compile time,
+ *  it could be replaced by it.
+ */
+#define F_ATTR_PURE  (1ULL << 1)
+
+/*  The return value is known at compile time.
+ */
+#define F_ATTR_CONSTEXPR  (1ULL << 2)
+
+/*  Does not modify any variable.
+ */
+#define F_ATTR_READONLY (1ULL << 3)
+
+/*  Does not interact with any mutable variable.
+ */
+#define F_ATTR_CONST (1ULL << 4)
+
+/*  Its return type is the same as its input
+ *  parameter(s).
+ */
+#define F_ATTR_LINK (1ULL << 5)
+
+
 struct frame {
 	struct vector *locals;
+	int64_t        fmask;
 	// size_t	       alive_size;
 	// size_t	       hidden_size;
 };
+
+#define __ast_node struct expression
 
 struct expression {
 	//enum operand    iden;
@@ -85,13 +111,13 @@ struct expression {
 	struct port	dest;
 
 	union {
-		struct vector	  *sequence;
-		struct expression *uniop;
-		struct port	   reference;
+		struct vector *sequence;
+		__ast_node    *uniop;
+		struct port    reference;
 
 		struct {
-			struct expression *left;
-			struct expression *right;
+			__ast_node *left;
+			__ast_node *right;
 		} binop;
 	};
 };
@@ -128,12 +154,6 @@ struct expression {
 	((__expression)->reference.offset)
 #define __expression_ref_pmask(__expression) \
 	((__expression)->reference.pmask)
-
-int64_t eval_return_offsets(struct expression *node);
-int64_t eval_return_attrs(struct expression *node);
-void	eval_variable_flow(struct expression *node);
-void	operation_size_count(struct expression *node);
-void	emit_ir(struct expression *node, bool verbose, bool is_left);
 
 // Attribute flags (bits 0-15)
 #define O_ATTR_MUTABLE	(1ULL << 1)
@@ -195,8 +215,8 @@ bool object_init(
 const char *object_attr_to_str(int64_t attr);
 
 struct runtime {
-	struct expression *start;
-	const char	  *name;
+	__ast_node *start;
+	const char *name;
 };
 
 /*    Execute the ast
@@ -209,5 +229,11 @@ bool runtime(struct ast *ast);
  *    as local variables.
  */
 bool runtime_tree_init(struct ast *ast, struct runtime *runtime);
+
+void emit_ir(__ast_node *node, bool is_left);
+
+bool determine_variable_properties(__ast_node *node);
+bool resolve_return_locations(__ast_node *node);
+bool resolve_return_types(__ast_node *node);
 
 #endif

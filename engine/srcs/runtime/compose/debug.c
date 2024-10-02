@@ -8,6 +8,27 @@
 #include <unistd.h>
 #include <stdio.h>
 
+#define BLK "\033[0;30m"
+#define RED "\033[0;31m"
+#define GRN "\033[0;32m"
+#define YEL "\033[0;33m"
+#define BLU "\033[0;34m"
+#define MAG "\033[0;35m"
+#define CYN "\033[0;36m"
+#define WHT "\033[0;37m"
+
+//Regular bold text
+#define BBLK "\033[1;30m"
+#define BRED "\033[1;31m"
+#define BGRN "\033[1;32m"
+#define BYEL "\033[1;33m"
+#define BBLU "\033[1;34m"
+#define BMAG "\033[1;35m"
+#define BCYN "\033[1;36m"
+#define BWHT "\033[1;37m"
+
+#define CRESET "\033[0m"
+
 static size_t __line	= 1;
 static int    __counter = 0;
 static int    __sp	= 0;
@@ -72,21 +93,17 @@ static int __states[] = {
 //         };
 // };
 
-void emit_ir(struct expression *node, bool verbose, bool is_left);
-
-const char *tab[] = { "|-- ", "`-- ", "|   ", "    " };
+void emit_ir(__ast_node *node, bool is_left);
 
 bool	    with_skip = false;
 static void emit_code_internal(
 	const char *code,
 	bool	    lineno,
 	bool	    indent,
-	bool	    verbose,
 	bool	    active,
 	bool	    is_left
 )
 {
-	(void)verbose;
 	(void)is_left;
 	(void)indent;
 	if (lineno) {
@@ -103,32 +120,38 @@ static void emit_code_internal(
 			if (i + 1 == d + !active) {
 				if (active) {
 					if (__states[i] == 1) {
-						printf("├── ");
+						printf(BLU
+						       "├── " CRESET);
 					} else {
 						if (with_skip) {
-							printf("├── "
+							printf(BLU
+							       "├── " CRESET
 							);
 						} else {
-							printf("└── "
+							printf(BLU
+							       "└── " CRESET
 							);
 						}
 					}
 				} else {
 				}
 			} else {
-				printf("│   ");
+				printf(BLU "│   " CRESET);
 			}
 		} else {
 			if (i + 1 == d + !active) {
 				if (active) {
 					if (__states[i] == 1) {
-						printf("├── ");
+						printf(BLU
+						       "├── " CRESET);
 					} else {
 						if (with_skip) {
-							printf("├── "
+							printf(BLU
+							       "├── " CRESET
 							);
 						} else {
-							printf("└── "
+							printf(BLU
+							       "└── " CRESET
 							);
 						}
 					}
@@ -146,158 +169,121 @@ static void emit_code_internal(
 	fflush(stdout);
 }
 
-static void
-emit_builtin_call(struct expression *node, bool verbose, bool is_left)
+static void emit_builtin_call(__ast_node *node, bool is_left)
 {
-	if (verbose) {
-		emit_code_internal(
-			format_string(
-				"'%s' `%s` %s # as %s",
-				expr_kind_to_string(
-					__expression_kind(node)
-				),
-				node->builtin->iden,
-				node->dest.offset < 0 ?
-					format_string(
-						"[local_%04d]",
-						node->dest.offset == -1 ? INT_MIN : -(node->dest.offset) - 2
-					) :
-					format_string(
-						"[var_%04d]",
-						node->dest.offset
-					),
-				object_attr_to_str(
-					__expression_dest_pmask(
-						node
-					)
-				)
+	emit_code_internal(
+		format_string(
+			"%s-%s%s `%s` %s %s%s%s",
+			BGRN,
+			expr_kind_to_string(__expression_kind(node)),
+			CRESET,
+			node->builtin->iden,
+			object_attr_to_str(
+				__expression_dest_pmask(node)
 			),
-			false,
-			true,
-			verbose,
-			true,
-			is_left
-		);
-	} else {
-		emit_code_internal(
-			format_string("'%s'", node->builtin->iden),
-			false,
-			true,
-			verbose,
-			true,
-			is_left
-		);
-	}
+			MAG,
+			node->dest.offset < 0 ?
+				format_string(
+					"local_%04d",
+					node->dest.offset == -1 ?
+						INT_MIN :
+						-(node->dest.offset) -
+							2
+				) :
+				format_string(
+					"var_%04d", node->dest.offset
+				),
+			CRESET
+		),
+		false,
+		true,
+		true,
+		is_left
+	);
 }
 
-static void emit_basic_operation(
-	struct expression *node, bool verbose, bool is_left
-)
+static void emit_basic_operation(__ast_node *node, bool is_left)
 {
-	if (verbose) {
-		emit_code_internal(
-			format_string(
-				"'%s' %s # as %s",
-				expr_kind_to_string(
-					__expression_kind(node)
+	emit_code_internal(
+		format_string(
+			"%s-%s%s %s %s%s%s",
+			BGRN,
+			expr_kind_to_string(__expression_kind(node)),
+			CRESET,
+			object_attr_to_str(
+				__expression_dest_pmask(node)
+			),
+			MAG,
+			node->dest.offset < 0 ?
+				format_string(
+					"local_%04d",
+					node->dest.offset == -1 ?
+						INT_MIN :
+						-(node->dest.offset) -
+							2
+				) :
+				format_string(
+					"var_%04d", node->dest.offset
 				),
-				node->dest.offset < 0 ?
-					format_string(
-						"[local_%04d]",
-						node->dest.offset == -1 ? INT_MIN : -(node->dest.offset) - 2
-					) :
-					format_string(
-						"[var_%04d]",
-						node->dest.offset
-					),
-				object_attr_to_str(
-					__expression_dest_pmask(
-						node
-					)
-				)
-			),
-			false,
-			true,
-			verbose,
-			true,
-			is_left
-		);
-	} else {
-		emit_code_internal(
-			format_string(
-				"\"%s\"",
-				expr_kind_to_string(
-					__expression_kind(node)
-				)
-			),
-			false,
-			true,
-			verbose,
-			true,
-			is_left
-		);
-	}
+			CRESET
+		),
+		false,
+		true,
+		true,
+		is_left
+	);
 }
 
-static void
-emit_operation(struct expression *node, bool verbose, bool is_left)
+static void emit_operation(__ast_node *node, bool is_left)
 {
 	if (__expression_kind(node) == __BUILTIN_CALL__) {
-		emit_builtin_call(node, verbose, is_left);
+		emit_builtin_call(node, is_left);
 	} else {
-		emit_basic_operation(node, verbose, is_left);
+		emit_basic_operation(node, is_left);
 	}
 }
 
-static void emit_static_object(
-	struct expression *node,
-	object_t	  *object,
-	bool		   verbose,
-	bool		   is_left
-)
+static void
+emit_static_object(__ast_node *node, object_t *object, bool is_left)
 {
 	(void)node;
 	with_skip = true;
-	if (verbose) {
-		emit_code_internal(
-			format_string(
-				"Alloc [var_%04zu] # as %s (0x%llx) token: '%s'",
-				++__counter - 1,
-				object_attr_to_str(object->objattrs),
-				__object_as_data(object),
-				object->str
-			),
-			false,
-			true,
-			verbose,
-			true,
-			is_left
-		);
-	}
+	emit_code_internal(
+		format_string(
+			"Alloc %s %svar_%04zu%s # (0x%llx) token: '%s'",
+			object_attr_to_str(object->objattrs),
+			BMAG,
+			++__counter - 1,
+			CRESET,
+			__object_as_data(object),
+			object->str
+		),
+		false,
+		true,
+		true,
+		is_left
+	);
 	with_skip = false;
 }
 
-static void
-emit_stack_free(struct expression *node, bool verbose, bool is_left)
+static void emit_stack_free(__ast_node *node, bool is_left)
 {
 	(void)node;
-	if (verbose) {
-		emit_code_internal(
-			format_string(
-				"Drop [var_%04zu]", __counter-- - 1
-			),
-			false,
-			true,
-			verbose,
-			false,
-			is_left
-		);
-	}
+	emit_code_internal(
+		format_string(
+			"Drop %svar_%04zu%s",
+			BMAG,
+			__counter-- - 1,
+			CRESET
+		),
+		false,
+		true,
+		false,
+		is_left
+	);
 }
 
-static void emit_expression_sequence(
-	struct expression *node, bool verbose, bool is_left
-)
+static void emit_expression_sequence(__ast_node *node, bool is_left)
 {
 	size_t	       i	= 0;
 	struct vector *children = __expression_sequence(node);
@@ -306,47 +292,32 @@ static void emit_expression_sequence(
 		if (i + 1 == vec_size(children)) {
 			__states[d - 1] = 2;
 		}
-		emit_ir(vec_access(children, i++), verbose, is_left);
+		emit_ir(vec_access(children, i++), is_left);
 	}
+}
+
+static void emit_reference(__ast_node *node, bool is_left)
+{
+	emit_code_internal(
+		format_string(
+			"%s*%s%s %svar_%04d %s",
+			CYN,
+			CRESET,
+			object_attr_to_str(__expression_ref_pmask(node
+			)),
+			BMAG,
+			__expression_ref_offset(node),
+			CRESET
+		),
+		false,
+		true,
+		true,
+		is_left
+	);
 }
 
 static void
-emit_reference(struct expression *node, bool verbose, bool is_left)
-{
-	if (verbose) {
-		emit_code_internal(
-			format_string(
-				"*var_%04d # as %s",
-				__expression_ref_offset(node),
-				object_attr_to_str(
-					__expression_ref_pmask(
-						node
-					)
-				)
-			),
-			false,
-			true,
-			verbose,
-			true,
-			is_left
-		);
-	} else {
-		emit_code_internal(
-			format_string(
-				"&%04d", __expression_ref_offset(node)
-			),
-			false,
-			true,
-			verbose,
-			true,
-			is_left
-		);
-	}
-}
-
-static void handle_frame_change(
-	struct expression *node, bool in, bool verbose, bool is_left
-)
+handle_frame_change(__ast_node *node, bool in, bool is_left)
 {
 	struct vector *frame	  = __expression_frame_locals(node);
 	size_t	       frame_size = vec_size(frame);
@@ -360,7 +331,6 @@ static void handle_frame_change(
 				emit_static_object(
 					node,
 					vec_access(frame, i++),
-					verbose,
 					is_left
 				);
 			}
@@ -371,50 +341,44 @@ static void handle_frame_change(
 	} else {
 		__sp -= frame_size;
 		while (i++ < frame_size) {
-			emit_stack_free(node, verbose, is_left);
+			emit_stack_free(node, is_left);
 		}
 	}
 }
 
-void emit_ir(struct expression *node, bool verbose, bool is_left)
+void emit_ir(__ast_node *node, bool is_left)
 {
 	switch (__expression_type(node)) {
 	case EXPR_TYPE_VALUE:
-		emit_reference(node, verbose, is_left);
+		emit_reference(node, is_left);
 		return;
 
 	case EXPR_OP_TYPE_UNIOP:
-		emit_operation(node, verbose, is_left);
+		emit_operation(node, is_left);
 		__states[d] = 2;
 		d++;
-		handle_frame_change(node, true, verbose, false);
-		emit_ir(__expression_binop_left(node), verbose, false
-		);
+		handle_frame_change(node, true, false);
+		emit_ir(__expression_binop_left(node), false);
 		d--;
 		__states[d] = 1;
 		break;
 
 	case EXPR_OP_TYPE_BINOP:
-		emit_operation(node, verbose, is_left);
+		emit_operation(node, is_left);
 		__states[d] = 1;
 		d++;
-		handle_frame_change(node, true, verbose, is_left);
+		handle_frame_change(node, true, is_left);
 
 		if (__expression_kind(node) == __SEQUENCE_POINT__) {
-			emit_expression_sequence(
-				node, verbose, is_left
-			);
+			emit_expression_sequence(node, is_left);
 			d--;
-			handle_frame_change(
-				node, false, verbose, is_left
-			);
+			handle_frame_change(node, false, is_left);
 			break;
 		}
 
-		emit_ir(__expression_binop_left(node), verbose, true);
+		emit_ir(__expression_binop_left(node), true);
 		__states[d - 1] = 2;
-		emit_ir(__expression_binop_right(node), verbose, false
-		);
+		emit_ir(__expression_binop_right(node), false);
 
 		d--;
 		__states[d] = 1;
@@ -425,5 +389,5 @@ void emit_ir(struct expression *node, bool verbose, bool is_left)
 		break;
 	}
 
-	handle_frame_change(node, false, verbose, is_left);
+	handle_frame_change(node, false, is_left);
 }

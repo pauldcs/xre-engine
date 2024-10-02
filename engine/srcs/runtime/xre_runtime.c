@@ -33,17 +33,12 @@ static bool runtime_init(struct ast *ast, struct runtime **rt)
 		goto prison;
 	}
 
-	(void)eval_return_offsets((*rt)->start);
-	(void)eval_return_attrs((*rt)->start);
-	(void)eval_variable_flow((*rt)->start);
+	(void)resolve_return_locations((*rt)->start);
+	(void)resolve_return_types((*rt)->start);
+	(void)determine_variable_properties((*rt)->start);
 
-	if (__xre_args__.flags & FLAGS_DEBUG ||
-	    __xre_args__.flags & FLAGS_DEBUG_VERBOSE) {
-		(void)emit_ir(
-			(*rt)->start,
-			__xre_args__.flags & FLAGS_DEBUG_VERBOSE,
-			true
-		);
+	if (__xre_args__.flags & FLAGS_DEBUG) {
+		(void)emit_ir((*rt)->start, true);
 	}
 
 	return (true);

@@ -8,19 +8,20 @@
 #include <unistd.h>
 #include <stdio.h>
 
+/* DEFINE GLOBAL */
 static struct vector *_local_cache = NULL;
 
-static bool tree_node_alloc(struct expression **expression)
+static bool tree_node_alloc(__ast_node **expression)
 {
-	*expression = malloc(sizeof(struct expression));
+	*expression = malloc(sizeof(__ast_node));
 	if (!*expression) {
 		return (false);
 	}
-	(void)memset(*expression, 0x00, sizeof(struct expression));
+	(void)memset(*expression, 0x00, sizeof(__ast_node));
 	return (true);
 }
 
-void tree_node_dealloc(struct expression **expression)
+void tree_node_dealloc(__ast_node **expression)
 {
 	(void)free((void *)*expression);
 	*expression = NULL;
@@ -65,8 +66,7 @@ static ssize_t is_cached(const char *key)
 	return (-1);
 }
 
-static bool
-expression_is_scope_modifier(const struct expression *expression)
+static bool expression_is_scope_modifier(const __ast_node *expression)
 {
 	switch (__expression_kind(expression)) {
 	case __DO__:
@@ -82,7 +82,7 @@ expression_is_scope_modifier(const struct expression *expression)
 	}
 }
 
-static bool _is_scope_change(const struct expression *parent)
+static bool _is_scope_change(const __ast_node *parent)
 {
 	if (!parent) {
 		return (true);
@@ -108,19 +108,21 @@ static const char *format_value(const struct ast *ast)
 	}
 }
 
-struct vector *global_scope_vector	 = NULL;
-size_t	       global_scope_vector_index = 0;
+/* DEFINE GLOBAL */
+struct vector *global_scope_vector = NULL;
+
+/* DEFINE GLOBAL */
+size_t global_scope_vector_index = 0;
 
 static void frame_push(const object_t *object)
 {
 	vec_push(global_scope_vector, object);
 }
 
+/* DEFINE GLOBAL */
 int64_t global_frame_index = -1;
 void	frame_propagate_diff(
-	   struct expression *expression,
-	   int64_t	      frame_index_guard,
-	   int		      diff
+	   __ast_node *expression, int64_t frame_index_guard, int diff
    )
 {
 	if (global_frame_index == -1) {
@@ -186,23 +188,21 @@ void	frame_propagate_diff(
 }
 
 static bool runtime_tree_create(
-	struct ast	   *ast,
-	struct expression **statements,
-	bool		    is_scope_change
+	struct ast *ast, __ast_node **statements, bool is_scope_change
 )
 {
 	const char *format	       = NULL;
 	ssize_t	    self_cached_offset = -1;
 	size_t	    self_offset	       = 0;
 	size_t	    n;
-	struct port port = { .offset	  = -1,
-			     .pmask = O_TYPE_UNDEFINED };
+	struct port port = { .offset = -1,
+			     .pmask  = O_TYPE_UNDEFINED };
 
 	if (!tree_node_alloc(statements)) {
 		return (false);
 	}
 
-	struct expression *expression = *statements;
+	__ast_node *expression = *statements;
 
 	__expression_origin(expression) = (struct token *)&ast->token;
 	__expression_frame_locals(expression) =
@@ -234,10 +234,10 @@ static bool runtime_tree_create(
 	else if (__expression_kind(expression) ==
 		 __SEQUENCE_POINT__) {
 		n = vec_size(ast->seq);
-		__expression_sequence(expression
-		) = vec_create(sizeof(struct expression), n, NULL);
+		__expression_sequence(expression) =
+			vec_create(sizeof(__ast_node), n, NULL);
 		for (size_t i = 0; i < n; i++) {
-			struct expression *exp;
+			__ast_node *exp;
 			if (!runtime_tree_create(
 				    vec_access(ast->seq, i),
 				    &exp,
@@ -267,8 +267,7 @@ static bool runtime_tree_create(
 		}
 
 		__expression_ref_offset(expression) = self_offset;
-		__expression_ref_pmask(expression) =
-			O_TYPE_UNDEFINED;
+		__expression_ref_pmask(expression) = O_TYPE_UNDEFINED;
 
 		if (self_cached_offset == -1) {
 			object_t *object = NULL;
@@ -397,6 +396,9 @@ bool runtime_tree_init(struct ast *ast, struct runtime *runtime)
 	__trigger_bug_if(runtime == NULL);
 
 	bool ret = false;
+
+	global_scope_vector_index = 0;
+	global_scope_vector = NULL;
 
 	if (local_cache_alloc()) {
 		ret = runtime_tree_create(ast, &runtime->start, true);

@@ -45,11 +45,12 @@ extern int __trace_depth;
 		__builtin_unreachable();               \
 	} while (0)
 
-#define __trigger_bug_if(expr)           \
-	do {                             \
-		if (expr) {              \
-			__trigger_bug(); \
-		}                        \
+#define __trigger_bug_if(expr)                                     \
+	do {                                                       \
+		if (expr) {                                        \
+			(void)fprintf(stderr, "bug: %s\n", #expr); \
+			__trigger_bug();                           \
+		}                                                  \
 	} while (0)
 
 #define __trigger_bug_if_fail(expr)      \

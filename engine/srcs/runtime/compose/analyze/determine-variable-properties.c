@@ -2,17 +2,17 @@
 #include "xre_utils.h"
 #include <stdbool.h>
 
+/* DEFINE GLOBAL */
 struct vector *scope = NULL;
 
+/* DEFINE GLOBAL */
 int64_t assign_next_ref = false;
-int64_t assign_src_offset   = -1;
 
-void eval_variable_flow(struct expression *node)
+/* DEFINE GLOBAL */
+int64_t assign_src_offset = -1;
+
+static void analyzer(__ast_node *node)
 {
-	if (!scope) {
-		scope = vec_create(sizeof(object_t *), 64, NULL);
-	}
-
 	size_t i = 0;
 	while (i < vec_size(__expression_frame_locals(node))) {
 		object_t *op = (object_t *)vec_access(
@@ -29,20 +29,22 @@ void eval_variable_flow(struct expression *node)
 		);
 
 		if (assign_next_ref && assign_src_offset > -1) {
-			object_t *src =
-				*(object_t **)vec_access(
-					scope, assign_src_offset
-				);
-			
-			int64_t *dst_attr = &__object_objattrs(this_object);
+			object_t *src = *(object_t **)vec_access(
+				scope, assign_src_offset
+			);
+
+			int64_t *dst_attr =
+				&__object_objattrs(this_object);
 			int64_t *src_attr = &__object_objattrs(src);
 
 			if (*dst_attr & O_TYPE_UNDEFINED) {
-				*dst_attr = (*src_attr | O_ATTR_MUTABLE);
+				*dst_attr =
+					(*src_attr | O_ATTR_MUTABLE);
 			}
 		}
 
-		__expression_ref_pmask(node) = __object_objattrs(this_object);
+		__expression_ref_pmask(node) =
+			__object_objattrs(this_object);
 		return;
 	}
 
@@ -51,7 +53,7 @@ void eval_variable_flow(struct expression *node)
 	if (__expression_kind(node) == __SEQUENCE_POINT__) {
 		i = 0;
 		while (i < vec_size(__expression_sequence(node))) {
-			eval_variable_flow((struct expression *)vec_at(
+			analyzer((__ast_node *)vec_at(
 				__expression_sequence(node), i++
 			));
 		}
@@ -63,30 +65,27 @@ void eval_variable_flow(struct expression *node)
 		break;
 
 	case EXPR_OP_TYPE_UNIOP:
-		eval_variable_flow(__expression_binop_left(node));
+		analyzer(__expression_binop_left(node));
 		break;
 
 	case EXPR_OP_TYPE_BINOP:
 		assign_next_ref = false;
 
-		eval_variable_flow(
-			__expression_binop_left(node)
-		);
-		
+		analyzer(__expression_binop_left(node));
+
 		if (__expression_kind(node) == __ASSIGN__) {
 			assign_next_ref = true;
-			assign_src_offset = __expression_dest_offset(node);
-		
+			assign_src_offset =
+				__expression_dest_offset(node);
+
 		} else {
-			assign_next_ref = false;
+			assign_next_ref	  = false;
 			assign_src_offset = -1;
 		}
-		
-		eval_variable_flow(
-			__expression_binop_right(node)
-		);
-		
-		assign_next_ref = false;
+
+		analyzer(__expression_binop_right(node));
+
+		assign_next_ref	  = false;
 		assign_src_offset = -1;
 
 		break;
@@ -103,4 +102,12 @@ end:
 			vec_pop(scope, NULL);
 		}
 	}
+}
+
+bool determine_variable_properties(__ast_node *node)
+{
+	scope = vec_create(sizeof(object_t *), 64, NULL);
+	analyzer(node);
+	vec_kill(scope);
+	return (true);
 }

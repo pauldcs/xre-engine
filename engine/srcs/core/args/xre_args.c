@@ -17,11 +17,10 @@ void __attribute__((noreturn)) usage(void)
 		"XRE Interpreter v%s\n"
 		"usage: %s [-sdDhv] [-x [CODE]] [INFILES] ...\n\n"
 		"options:\n"
-		"    -x   [CODE]   Execute code from command line\n"
-		"    -d            Show the intermediate repr.\n"
-		"    -D            Show a more verbose intermediate repr.\n"
-		"    -h            Show this help message\n"
-		"    -v            Show the current version\n\n",
+		"    -x  [CODE]  Execute code from command line\n"
+		"    -d          Show the intermediate repr.\n"
+		"    -h          Show this help message\n"
+		"    -v          Show the current version\n\n",
 		__xre_state__.version,
 		__xre_state__.title
 	);
@@ -119,7 +118,7 @@ static int xre_getopts_next(t_xre_getopts *opts)
 	while (isspace(*ptr))
 		++ptr;
 
-	if (*ptr == '-' && *(ptr + 1) && !*(ptr + 2)) {
+	if (*ptr == '-' && *(ptr + 1) /* && !*(ptr + 2) */) {
 		if (*(ptr + 1) == '-')
 			return (-1);
 
@@ -186,16 +185,12 @@ t_xre_args *xre_args_parse(int ac, char *av[])
 		return (NULL);
 
 	bzero(args, sizeof(t_xre_args));
-	xre_getopts_init(&xopts, ac, (const char **)av, "dDhvx:");
+	xre_getopts_init(&xopts, ac, (const char **)av, "dhvx:");
 
 	while ((c = xre_getopts_next(&xopts)) != (char)-1) {
 		switch (c) {
 		case 'd':
 			args->flags |= FLAGS_DEBUG;
-			break;
-
-		case 'D':
-			args->flags |= FLAGS_DEBUG_VERBOSE;
 			break;
 
 		case 'x':

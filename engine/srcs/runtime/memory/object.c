@@ -73,30 +73,26 @@ const char *object_attr_to_str(int64_t attr)
 	int64_t type = attr & O_TYPE_MASK;
 	switch (type) {
 	case O_TYPE_NUMBER:
-		i += cpyf(&buffer[i], BUFFER_SIZE - i, "int64_t");
+		i += cpyf(&buffer[i], BUFFER_SIZE - i, "i64");
 		break;
 
 	case O_TYPE_SEQUENCE:
 		i += cpyf(
-			&buffer[i], BUFFER_SIZE - i, "vector(object)"
+			&buffer[i], BUFFER_SIZE - i, "vec(object)"
 		);
 		break;
 
 	case O_TYPE_BUFFER:
-		i += cpyf(
-			&buffer[i], BUFFER_SIZE - i, "vector(uint8_t)"
-		);
+		i += cpyf(&buffer[i], BUFFER_SIZE - i, "vec(u8)");
 		break;
 
 	case O_TYPE_STRING:
-		i += cpyf(
-			&buffer[i], BUFFER_SIZE - i, "dynamic_string"
-		);
+		i += cpyf(&buffer[i], BUFFER_SIZE - i, "dyn_string");
 		break;
 
 	case O_TYPE_UNDEFINED:
 	default:
-		i += cpyf(&buffer[i], BUFFER_SIZE - i, "any");
+		i += cpyf(&buffer[i], BUFFER_SIZE - i, "???");
 		break;
 	}
 	return (strdup(buffer));

@@ -27,8 +27,10 @@ static int64_t create_return_attrs(
 	return (attrs);
 }
 
+/* DEFINE GLOBAL */
 static size_t stack_size = 0;
-int64_t	      eval_return_attrs(struct expression *node)
+
+int64_t analyzer(__ast_node *node)
 {
 	int64_t left_attrs  = 0;
 	int64_t right_attrs = 0;
@@ -54,11 +56,11 @@ int64_t	      eval_return_attrs(struct expression *node)
 		bool all_const = true;
 
 		while (i < vec_size(__expression_sequence(node))) {
-			struct expression *exp = (struct expression *)
-				vec_at(__expression_sequence(node),
-				       i++);
+			__ast_node *exp = (__ast_node *)vec_at(
+				__expression_sequence(node), i++
+			);
 
-			right_attrs = eval_return_attrs(exp);
+			right_attrs = analyzer(exp);
 			if (!(right_attrs & O_ATTR_READABLE)) {
 				all_read = false;
 			}
@@ -80,20 +82,15 @@ int64_t	      eval_return_attrs(struct expression *node)
 
 	switch (__expression_type(node)) {
 	case EXPR_OP_TYPE_UNIOP:
-		left_attrs = eval_return_attrs(
-			__expression_binop_left(node)
-		);
+		left_attrs = analyzer(__expression_binop_left(node));
 
 		break;
 
 	case EXPR_OP_TYPE_BINOP:
-		left_attrs = eval_return_attrs(
-			__expression_binop_left(node)
-		);
+		left_attrs = analyzer(__expression_binop_left(node));
 
-		right_attrs = eval_return_attrs(
-			__expression_binop_right(node)
-		);
+		right_attrs =
+			analyzer(__expression_binop_right(node));
 
 		break;
 
@@ -126,4 +123,11 @@ int64_t	      eval_return_attrs(struct expression *node)
 	);
 	__expression_dest_pmask(node) = attrs;
 	return (attrs);
+}
+
+bool resolve_return_types(__ast_node *node)
+{
+	stack_size = 0;
+	(void)analyzer(node);
+	return (true);
 }

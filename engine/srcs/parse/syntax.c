@@ -10,7 +10,7 @@
 #define PREV_TOKEN_TYPE \
 	((struct token *)vec_at(tokens, idx - 2))->_type
 
-err_notif_t syntax_error_g;
+struct error syntax_error_g;
 
 bool xre_expr_syntax(struct vector *tokens)
 {
@@ -184,7 +184,7 @@ as_binop:
 	return (true);
 
 syntax_error:
-	syntax_error_g.orig = token;
+	syntax_error_g.source = token;
 	xre_error(&syntax_error_g);
 
 prison:

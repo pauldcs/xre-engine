@@ -9,12 +9,12 @@
 
 int __fdout__ = STDERR_FILENO;
 
-void xre_error(err_notif_t *notification)
+void xre_error(struct error *notification)
 {
 	static char err_buff[4096];
 	size_t	    i = 0;
 
-	const struct token *token = notification->orig;
+	const struct token *token = notification->source;
 
 	// i += cpyf(&err_buff[i], 4096 - i, "Exception: ");
 	// i +=
