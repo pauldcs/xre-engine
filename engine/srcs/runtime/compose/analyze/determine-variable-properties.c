@@ -9,84 +9,90 @@ struct vector *scope = NULL;
 int64_t assign_next_ref = false;
 
 /* DEFINE GLOBAL */
-int64_t assign_src_offset = -1;
+static struct pointer *assign_src_pointer;
 
 static void analyzer(__ast_node *node)
 {
 	size_t i = 0;
-	while (i < vec_size(__expression_frame_locals(node))) {
+	while (i < vec_size(__node_locals(node))) {
 		object_t *op = (object_t *)vec_access(
-			__expression_frame_locals(node), i
+			__node_locals(node), i
 		);
 
 		(void)vec_push(scope, &op);
 		i++;
 	}
 
-	if (__expression_type(node) == EXPR_TYPE_VALUE) {
+	if (__node_attr_kind(node) == REFERENCE) {
 		object_t *this_object = *(object_t **)vec_access(
-			scope, __expression_ref_offset(node)
+			scope,
+			__pointer_offset(__node_as_reference(node))
 		);
 
-		if (assign_next_ref && assign_src_offset > -1) {
+		if (assign_next_ref && assign_src_pointer) {
 			object_t *src = *(object_t **)vec_access(
-				scope, assign_src_offset
+				scope,
+				__pointer_offset(*assign_src_pointer)
 			);
 
-			int64_t *dst_attr =
-				&__object_objattrs(this_object);
-			int64_t *src_attr = &__object_objattrs(src);
+			struct port *dst_port = &this_object->port;
 
-			if (*dst_attr & O_TYPE_UNDEFINED) {
-				*dst_attr =
-					(*src_attr | O_ATTR_MUTABLE);
+			//struct port *src_port = &src->port;
+			//printf("dst_port %s %s\n", port_type_string(dst_port->type), port_prot_string(dst_port->prot));
+			//printf("src_port %s %s\n", port_type_string(src_port->type), port_prot_string(src_port->prot));
+			//(void)memcpy(dst_port, src_port, sizeof(struct port));
+
+			if (dst_port->type == UNDEFINED) {
+				dst_port->prot = RDWR;
+				dst_port->type = src->port.type;
 			}
+			return;
+		} else {
+			//printf("%s %s\n", port_type_string(this_object->port.type), port_prot_string(this_object->port.prot));
 		}
 
-		__expression_ref_pmask(node) =
-			__object_objattrs(this_object);
+		__node_as_reference(node).port.type =
+			this_object->port.type;
+		__node_as_reference(node).port.prot =
+			this_object->port.prot;
 		return;
 	}
 
 	i = 0;
 
-	if (__expression_kind(node) == __SEQUENCE_POINT__) {
+	if (__node_token_kind(node) == __SEQUENCE_POINT__) {
 		i = 0;
-		while (i < vec_size(__expression_sequence(node))) {
+		while (i < vec_size(__node_as_sequence(node))) {
 			analyzer((__ast_node *)vec_at(
-				__expression_sequence(node), i++
+				__node_as_sequence(node), i++
 			));
 		}
 		goto end;
 	}
 
-	switch (__expression_type(node)) {
-	case EXPR_TYPE_VALUE:
-		break;
-
+	switch (__node_token_type(node)) {
 	case EXPR_OP_TYPE_UNIOP:
-		analyzer(__expression_binop_left(node));
+		analyzer(__node_as_binop_l(node));
 		break;
 
 	case EXPR_OP_TYPE_BINOP:
 		assign_next_ref = false;
 
-		analyzer(__expression_binop_left(node));
+		analyzer(__node_as_binop_l(node));
 
-		if (__expression_kind(node) == __ASSIGN__) {
-			assign_next_ref = true;
-			assign_src_offset =
-				__expression_dest_offset(node);
+		if (__node_token_kind(node) == __ASSIGN__) {
+			assign_next_ref	   = true;
+			assign_src_pointer = &__node_pointer(node);
 
 		} else {
-			assign_next_ref	  = false;
-			assign_src_offset = -1;
+			assign_next_ref	   = false;
+			assign_src_pointer = NULL;
 		}
 
-		analyzer(__expression_binop_right(node));
+		analyzer(__node_as_binop_r(node));
 
-		assign_next_ref	  = false;
-		assign_src_offset = -1;
+		assign_next_ref	   = false;
+		assign_src_pointer = NULL;
 
 		break;
 
@@ -96,8 +102,8 @@ static void analyzer(__ast_node *node)
 	}
 end:
 
-	if (vec_size(__expression_frame_locals(node))) {
-		size_t i = vec_size(__expression_frame_locals(node));
+	if (vec_size(__node_locals(node))) {
+		size_t i = vec_size(__node_locals(node));
 		while (i--) {
 			vec_pop(scope, NULL);
 		}

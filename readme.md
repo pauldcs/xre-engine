@@ -1,7 +1,7 @@
 # xre-engine - Expression Evaluation Engine
 
 This is a learning project for me to better understand programming
-languages design
+languages design.
 
 ```r
 i = 0;

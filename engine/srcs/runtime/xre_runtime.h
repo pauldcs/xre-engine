@@ -2,119 +2,216 @@
 #define __XRE_RUNTIME_H__
 
 #include "xre_errors.h"
-#include "xre_builtin.h"
 #include "xre_args.h"
 #include "xre_nodes.h"
 #include "dstr.h"
 #include <stdbool.h>
 
-// struct frame {
-// 	struct vector *variables /* object_t */;
-// 	uintptr_t      pointer;
-// };
-
-struct meta {
-	const char   *iden;
-	struct token *source;
+enum expression_kind {
+	ARITHMETHIC_ADD,
+	ARITHMETHIC_SUB,
+	ARITHMETHIC_MUL,
+	ARITHMETHIC_MOD,
+	ARITHMETHIC_DIV,
+	ARITHMETHIC_POW,
+	LOGIC_AND,
+	LOGIC_OR,
+	LOGIC_DO,
+	LOGIC_ELSE,
+	LOGIC_LOOP,
+	LOGIC_NOT,
+	BIT_AND,
+	BIT_OR,
+	BIT_XOR,
+	BIT_LSHIFT,
+	BIT_RSHIFT,
+	COMPARE_LT,
+	COMPARE_GT,
+	COMPARE_LE,
+	COMPARE_GE,
+	COMPARE_EQ,
+	COMPARE_NE,
+	REFERENCE,
+	SEQUENCE,
+	CLOSURE,
+	ASSIGN,
+	SEPARATOR,
+	BUILTIN_CALL,
+	IMPOSSIBLE,
 };
 
-struct operation_info {
-	enum expr_kind kind;
-	int64_t	       _ret;
-	int64_t	       _p1;
-	int64_t	       _p2;
+enum expression_kind expression_get_new_kind(enum expr_kind kind);
+const char *expression_kind_string(enum expression_kind kind);
+
+enum memory_prot { PROT_NONE, RD, WR, RDWR };
+
+enum memory_type {
+	TYPE_NONE,
+	I64,
+	VEC_OBJECT,
+	VEC_U8,
+	STRING,
+	BUFFER,
+	UNDEFINED
 };
 
-extern const struct operation_info op_info_lookup[40];
+/*   A port defines how the memory offset that is applied to it
+ *   should be treated. */
+struct port {
+	enum memory_prot prot;
+	enum memory_type type;
+};
 
-struct operation_info *operation_info_lookup_kind(enum expr_kind kind
+const char *port_type_string(enum memory_type type);
+const char *port_prot_string(enum memory_prot prot);
+
+struct port default_number_port(void);
+struct port default_undefined_port(void);
+struct port default_string_port(void);
+struct port default_sequence_port(void);
+
+/*   This rules tell how the return type of an 
+ *   expression should be determined.
+ *
+ *       INHERIT: it is the same as the last parameter that was 
+ *                executed.
+ *          LINK: it is the same as the parameters if both are the same,
+ *                or undefined.
+ *          LEFT: it is the same as the left prameter 
+ *         RIGHT: it is the same as the left prameter 
+ */
+enum expr_ret_trule {
+	RETURN_TYPE_RULE_INHERIT,
+	RETURN_TYPE_RULE_LEFT,
+	RETURN_TYPE_RULE_RIGHT,
+};
+
+/*   This rules tell how the return pointer of an 
+ *   expression should be determined.
+ *
+ *        LEFT: it is the same as the left prameter 
+ *       RIGHT: it is the same as the left prameter 
+  *      YIELD: it is a new pointer
+ */
+enum expr_ret_orule {
+	RETURN_OFFSET_RULE_LEFT,
+	RETURN_OFFSET_RULE_RIGHT,
+	RETURN_OFFSET_RULE_INHERIT,
+	RETURN_OFFSET_RULE_YIELD
+};
+
+/*   The types of the parameters of an expression,
+ *   as well as the type of its return value.
+ */
+struct expression_profile {
+	struct port ret;
+	struct {
+		size_t	    count;
+		struct port ports[8];
+	} args;
+};
+
+#define __expr_prof_arg_count(__expr_prof) ((__expr_prof).args.count)
+#define __expr_prof_arg_ports(__expr_prof) ((__expr_prof).args.ports)
+
+struct expression_meta {
+	enum expression_kind	  kind;
+	struct expression_profile profile;
+	struct {
+		/* the rule for resolving the type */
+		enum expr_ret_trule t_rule;
+
+		/* the rule for resolving the offset */
+		enum expr_ret_orule o_rule;
+	};
+};
+
+extern struct expression_meta exp_meta_lookup[27];
+
+/* returns a `struct expression_meta` given a 
+ * `enum expression_kind`
+ */
+struct expression_meta *expr_profile_lookup(enum expression_kind kind
 );
 
-// enum operand {
-// 	P_REFERENCE,
-// 	P_SEQUENCE,
-// 	P_WEAK_SEQUENCE,
-// 	P_CLOSURE,
-// 	P_USER_UNIOP,
-// 	P_USER_BINOP,
-// 	P_ARITHMETHIC_ADD,
-// 	P_ARITHMETHIC_SUB,
-// 	P_ARITHMETHIC_MUL,
-// 	P_ARITHMETHIC_MOD,
-// 	P_ARITHMETHIC_DIV,
-// 	P_ARITHMETHIC_POW,
-// 	P_LOGIC_AND,
-// 	P_LOGIC_OR,
-// 	P_LOGIC_DO,
-// 	P_LOGIC_ELSE,
-// 	P_LOGIC_LOOP,
-// 	P_LOGIC_NOT,
-// 	P_BIT_AND,
-// 	P_BIT_OR,
-// 	P_BIT_XOR,
-// 	P_LSHIFT,
-// 	P_RSHIFT,
-// 	P_COMPARE_LT,
-// 	P_COMPARE_GT,
-// 	P_COMPARE_LE,
-// 	P_COMPARE_GE,
-// 	P_COMPARE_EQ,
-// 	P_COMPARE_NE,
-// };
-
-/*
- *    Used to access memory at runtime.
-*/
-struct port {
-	int64_t offset;
-	int64_t pmask;
+struct builtin {
+	const char	      *iden;
+	enum expr_type	       type;
+	struct expression_meta meta;
 };
 
-/*  If the unknown return value was known at compile time,
- *  it could be replaced by it.
- */
-#define F_ATTR_PURE  (1ULL << 1)
+extern const struct builtin builtin_lookup[2];
 
-/*  The return value is known at compile time.
- */
-#define F_ATTR_CONSTEXPR  (1ULL << 2)
+struct builtin *builtin_find(const char *lookup_name, size_t size);
 
-/*  Does not modify any variable.
- */
-#define F_ATTR_READONLY (1ULL << 3)
+#define __exp_profile_ret(__exp_profile)  ((__exp_profile)->ret)
+#define __exp_profile_args(__exp_profile) ((__exp_profile)->args)
 
-/*  Does not interact with any mutable variable.
+/*   This is the internal representation if a pointer.
  */
-#define F_ATTR_CONST (1ULL << 4)
+struct pointer {
+	struct {
+		bool	known_offset;
+		ssize_t offset;
+	};
+	struct {
+		bool	    known_port;
+		struct port port;
+	};
+};
 
-/*  Its return type is the same as its input
- *  parameter(s).
- */
-#define F_ATTR_LINK (1ULL << 5)
+#define __pointer_known_port(__pointer)	  ((__pointer).known_port)
+#define __pointer_known_offset(__pointer) ((__pointer).known_offset)
+#define __pointer_offset(__pointer)	  ((__pointer).offset)
+#define __pointer_port(__pointer)	  ((__pointer).port)
 
+/*    This structure contains everything we need to know about an expression.
+*/
+struct attributes {
+	enum expression_kind kind;
+
+	enum expr_ret_trule t_rule;
+	enum expr_ret_orule o_rule;
+
+	struct pointer pointer;
+
+	struct {
+		struct expression_profile actual; // expressed profile
+		struct expression_profile expected; // expected profile
+	} profiles; /* contains both the profile that would be expected
+	from the expression and the profile that was expressed by the code.
+	If both don't match, the expression is invalid. */
+};
+
+#define __exp_attr_kind(__exp_attr)   ((__exp_attr).kind)
+#define __exp_attr_return(__exp_attr) ((__exp_attr).return_pointer)
+#define __exp_attr_actual(__exp_attr) ((__exp_attr).profiles.actual)
+#define __exp_attr_expected(__exp_attr) \
+	((__exp_attr).profiles.expected)
+
+enum frame_mask {
+	CONSTEXPR, /*  The return value is known at compile time. */
+	READONLY,  /*  Does not modify any variable. */
+	CONST	   /*  Does not interact with any mutable variable. */
+};
 
 struct frame {
-	struct vector *locals;
-	int64_t        fmask;
-	// size_t	       alive_size;
-	// size_t	       hidden_size;
+	struct vector  *locals;
+	enum frame_mask mask;
 };
 
 #define __ast_node struct expression
 
 struct expression {
-	//enum operand    iden;
-	//enum operand    operand;
-	struct token   *origin;
-	struct builtin *builtin;
-	struct frame	frame;
-	struct port	dest;
+	const struct token *origin;
+	struct frame	    frame;
+	struct attributes   attributes;
+	struct builtin	   *builtin;
 
 	union {
-		struct vector *sequence;
+		struct vector *sequence; /* __ast_node */
+		struct pointer reference;
 		__ast_node    *uniop;
-		struct port    reference;
-
 		struct {
 			__ast_node *left;
 			__ast_node *right;
@@ -122,71 +219,44 @@ struct expression {
 	};
 };
 
-#define __expression_sequence(__expression) ((__expression)->sequence)
+#define __node_attributes(__expr_node_ptr) \
+	((__expr_node_ptr)->attributes)
+#define __node_attr_kind(__expr_node_ptr) \
+	(__exp_attr_kind(__node_attributes(__expr_node_ptr)))
 
-#define __expression_kind(__expression) \
-	((__expression)->origin->_kind)
+#define __node_token(__expr_node_ptr) ((__expr_node_ptr)->origin)
+#define __node_token_kind(__expr_node_ptr) \
+	(((__expr_node_ptr)->origin)->_kind)
+#define __node_token_type(__expr_node_ptr) \
+	(((__expr_node_ptr)->origin)->_type)
+#define __node_locals(__expr_node_ptr) \
+	((__expr_node_ptr)->frame.locals)
+#define __node_frame_mask(__expr_node_ptr) \
+	((__expr_node_ptr)->frame.mask)
+#define __node_builtin(__expr_node_ptr) ((__expr_node_ptr)->builtin)
+#define __node_as_sequence(__expr_node_ptr) \
+	((__expr_node_ptr)->sequence)
+#define __node_as_reference(__expr_node_ptr) \
+	((__expr_node_ptr)->reference)
+#define __node_as_uniop(__expr_node_ptr) ((__expr_node_ptr)->uniop)
+#define __node_as_binop_l(__expr_node_ptr) \
+	((__expr_node_ptr)->binop.left)
+#define __node_as_binop_r(__expr_node_ptr) \
+	((__expr_node_ptr)->binop.right)
+#define __node_pointer(__expr_node_ptr) \
+	((__expr_node_ptr)->attributes.pointer)
 
-#define __expression_type(__expression) \
-	((__expression)->origin->_type)
-#define __expression_operand(__expression) ((__expression)->operand)
-
-#define __expression_builtin(__expression) ((__expression)->builtin)
-#define __expression_origin(__expression)  ((__expression)->origin)
-#define __expression_dest(__expression)	   ((__expression)->dest)
-#define __expression_binop_left(__expression) \
-	((__expression)->binop.left)
-#define __expression_binop_right(__expression) \
-	((__expression)->binop.right)
-
-#define __expression_frame_locals(__expression) \
-	((__expression)->frame.locals)
-#define __expression_frame_user(__expression) \
-	((__expression)->frame.total_user)
-#define __expression_frame_meta(__expression) \
-	((__expression)->frame.total_meta)
-
-#define __expression_dest_offset(__expression) \
-	((__expression)->dest.offset)
-#define __expression_dest_pmask(__expression) \
-	((__expression)->dest.pmask)
-#define __expression_ref_offset(__expression) \
-	((__expression)->reference.offset)
-#define __expression_ref_pmask(__expression) \
-	((__expression)->reference.pmask)
-
-// Attribute flags (bits 0-15)
-#define O_ATTR_MUTABLE	(1ULL << 1)
-#define O_ATTR_READABLE (1ULL << 12)
-
-// Branch result flags (bits 16-31)
-#define O_BR_RESULT_LEFT  (1ULL << 16)
-#define O_BR_RESULT_RIGHT (1ULL << 17)
-#define O_BR_RESULT_ANY	  (1ULL << 18)
-
-// Type flags (bits 32-63)
-#define O_TYPE_NUMBER	 (1ULL << 32)
-#define O_TYPE_SEQUENCE	 (1ULL << 33)
-#define O_TYPE_BUFFER	 (1ULL << 34)
-#define O_TYPE_STRING	 (1ULL << 35)
-#define O_TYPE_UNDEFINED (1ULL << 36)
-#define O_TYPE_NONE	 (1ULL << 37)
-
-// Masks
-#define O_ATTR_MASK 0x000000000000FFFFULL
-#define O_BR_MASK   0x00000000FFFF0000ULL
-#define O_TYPE_MASK 0xFFFFFFFF00000000ULL
-#define O_META_
+struct expression_meta *find_expression_meta(__ast_node *node);
 
 typedef struct {
-	int64_t	    objattrs;
+	struct port port;
 	const char *str;
 	union {
 		uint64_t		      any;
+		int64_t			      number;
 		dstr_t			     *string;
 		struct vector /* uint8_t  */ *buffer;
 		struct vector /* object_t */ *sequence;
-		int64_t			      number;
 		//xre_bytes_t  bytes;
 	};
 
@@ -195,24 +265,16 @@ typedef struct {
 	bool (*_test)(void *);
 } object_t;
 
-#define __object_objattrs(__object) ((__object)->objattrs)
-
-#define __object_str(__object) ((__object)->str)
-
-#define __object_as_data(__object) ((__object)->any)
-
-#define __object_as_string(__object) ((__object)->string)
-
-#define __object_as_buffer(__object) ((__object)->buffer)
-
+#define __object_port(__object)	       ((__object)->port)
+#define __object_as_data(__object)     ((__object)->any)
+#define __object_as_string(__object)   ((__object)->string)
+#define __object_as_buffer(__object)   ((__object)->buffer)
 #define __object_as_sequence(__object) ((__object)->sequence)
-
-#define __object_as_number(__object) ((__object)->number)
+#define __object_as_number(__object)   ((__object)->number)
 
 bool object_init(
-	object_t **dest, int64_t objattrs, uint64_t default_value
+	object_t **dest, struct port port, uint64_t default_value
 );
-const char *object_attr_to_str(int64_t attr);
 
 struct runtime {
 	__ast_node *start;
@@ -228,7 +290,7 @@ bool runtime(struct ast *ast);
  *    It contains the instructions as well as frame info such
  *    as local variables.
  */
-bool runtime_tree_init(struct ast *ast, struct runtime *runtime);
+bool ast_init(struct ast *ast, struct runtime *runtime);
 
 void emit_ir(__ast_node *node, bool is_left);
 

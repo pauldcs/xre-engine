@@ -58,7 +58,7 @@ void xre_error(struct error *notification)
 	i +=
 		cpyf(&err_buff[i],
 		     4096 - i,
-		     "\n at %s line: %d, column: %d.\n  |",
+		     "\n at %s line: %d, column: %d.",
 		     expr_kind_to_string(token->_kind),
 		     token->_line,
 		     token->_cols);
@@ -86,7 +86,7 @@ void xre_error(struct error *notification)
 		     "%s) \033[0m",
 		     error_type_str(notification->type));
 
-	i += cpyf(&err_buff[i], 4096 - i, "\n  |\n");
+	i += cpyf(&err_buff[i], 4096 - i, "\n");
 
 	(void)write(STDERR_FILENO, err_buff, i);
 }

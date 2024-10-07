@@ -1,96 +1,107 @@
 #include "xre_runtime.h"
 #include "xre_utils.h"
+#include "xre_compiler.h"
 #include <stdbool.h>
 
-static int64_t create_return_attrs(
-	struct operation_info *operation_info,
-	int64_t		       left_attrs,
-	int64_t		       right_attrs
+static void copy_port(struct pointer *dst, struct pointer *src)
+{
+	dst->port	= src->port;
+	dst->known_port = src->known_port;
+}
+
+// static struct pointer *lowerize_type()
+
+static struct pointer *assign_type(
+	struct expression_meta *meta,
+	struct pointer	       *left_pointer,
+	struct pointer	       *right_pointer,
+	struct pointer	       *self_pointer
 )
 {
-	int64_t attrs = operation_info->_ret &
-			(O_ATTR_MASK | O_BR_MASK);
+	if (meta->t_rule == RETURN_TYPE_RULE_LEFT) {
+		if (left_pointer &&
+		    __pointer_known_port(*left_pointer)) {
+			copy_port(self_pointer, left_pointer);
+			goto return_pointer;
+		}
 
-	if (operation_info->_ret & O_BR_RESULT_LEFT) {
-		attrs |= (left_attrs & O_TYPE_MASK);
+	} else if (meta->t_rule == RETURN_TYPE_RULE_RIGHT) {
+		if (right_pointer &&
+		    __pointer_known_offset(*right_pointer)) {
+			copy_port(self_pointer, right_pointer);
+			goto return_pointer;
+		}
 
-	} else if (operation_info->_ret & O_BR_RESULT_RIGHT) {
-		attrs |= (right_attrs & O_TYPE_MASK);
-
-	} else if (operation_info->_ret & O_BR_RESULT_ANY) {
-		attrs |= ((left_attrs | right_attrs) & O_TYPE_MASK);
-
-	} else {
-		attrs |= (operation_info->_ret & O_TYPE_MASK);
+	} else if (meta->t_rule == RETURN_TYPE_RULE_INHERIT) {
+		if (left_pointer->port.type ==
+		    right_pointer->port.type) {
+			copy_port(self_pointer, left_pointer);
+		}
 	}
 
-	return (attrs);
+return_pointer:
+	if (meta->o_rule == RETURN_OFFSET_RULE_YIELD) {
+		self_pointer->port.prot = meta->profile.ret.prot;
+	}
+
+	return (self_pointer);
 }
 
 /* DEFINE GLOBAL */
-static size_t stack_size = 0;
+static struct vector *global_scope = NULL;
 
-int64_t analyzer(__ast_node *node)
+/* DEFINE GLOBAL */
+static size_t global_scope_size = 0;
+
+static void push_locals_to_scope(__ast_node *node)
 {
-	int64_t left_attrs  = 0;
-	int64_t right_attrs = 0;
+	struct vector *locals	= __node_locals(node);
+	size_t	       n_locals = vec_size(locals);
 
-	struct operation_info *operation_info =
-		operation_info_lookup_kind(__expression_kind(node));
+	(void)vec_append(global_scope, locals->_ptr, n_locals);
+	global_scope_size += n_locals;
+}
 
-	size_t i = 0;
-	while (i < vec_size(__expression_frame_locals(node))) {
-		stack_size++;
-		i++;
+static struct pointer *analyzer(__ast_node *node)
+{
+	struct pointer *left_pointer  = NULL;
+	struct pointer *right_pointer = NULL;
+
+	struct expression_meta *meta = find_expression_meta(node);
+
+	if (vec_size(__node_locals(node))) {
+		push_locals_to_scope(node);
 	}
 
-	if (__expression_type(node) == EXPR_TYPE_VALUE) {
-		return (operation_info->_ret);
+	if (__node_attr_kind(node) == REFERENCE) {
+		return (&__node_as_reference(node));
 	}
 
-	if (__expression_kind(node) == __SEQUENCE_POINT__) {
-		i		      = 0;
-		int64_t initial_attrs = O_TYPE_UNDEFINED;
-
-		bool all_read  = true;
-		bool all_const = true;
-
-		while (i < vec_size(__expression_sequence(node))) {
+	if (__node_token_kind(node) == __SEQUENCE_POINT__) {
+		size_t i = 0;
+		while (i < vec_size(__node_as_sequence(node))) {
 			__ast_node *exp = (__ast_node *)vec_at(
-				__expression_sequence(node), i++
+				__node_as_sequence(node), i++
 			);
 
-			right_attrs = analyzer(exp);
-			if (!(right_attrs & O_ATTR_READABLE)) {
-				all_read = false;
-			}
-
-			if (right_attrs & O_ATTR_MUTABLE) {
-				all_const = false;
-			}
-		}
-		if (all_read) {
-			initial_attrs |= O_ATTR_READABLE;
-		}
-		if (!all_const) {
-			initial_attrs |= O_ATTR_MUTABLE;
+			right_pointer = analyzer(exp);
 		}
 
-		__expression_dest_pmask(node) = initial_attrs;
-		return (initial_attrs);
+		__node_pointer(node).port.prot = PROT_NONE;
+		__node_pointer(node).port.type = TYPE_NONE;
+
+		return (&__node_as_reference(node));
 	}
 
-	switch (__expression_type(node)) {
+	switch (__node_token_type(node)) {
 	case EXPR_OP_TYPE_UNIOP:
-		left_attrs = analyzer(__expression_binop_left(node));
+		left_pointer = analyzer(__node_as_binop_l(node));
 
 		break;
 
 	case EXPR_OP_TYPE_BINOP:
-		left_attrs = analyzer(__expression_binop_left(node));
-
-		right_attrs =
-			analyzer(__expression_binop_right(node));
+		left_pointer  = analyzer(__node_as_binop_l(node));
+		right_pointer = analyzer(__node_as_binop_r(node));
 
 		break;
 
@@ -99,35 +110,29 @@ int64_t analyzer(__ast_node *node)
 		break;
 	}
 
-	if (vec_size(__expression_frame_locals(node))) {
-		stack_size -=
-			vec_size(__expression_frame_locals(node));
+	if (vec_size(__node_locals(node))) {
+		size_t i = 0;
+		while (i < vec_size(__node_locals(node))) {
+			vec_pop(global_scope, NULL);
+			i--;
+		}
+
+		global_scope_size -= vec_size(__node_locals(node));
 	}
 
-	struct operation_info o;
-	if (__expression_kind(node) == __BUILTIN_CALL__) {
-		o._ret = __expression_builtin(node)->self_attr;
-		o._p1  = __expression_builtin(node)->left_attr;
-		o._p2  = __expression_builtin(node)->right_attr;
-
-		int64_t ret = create_return_attrs(
-			&o, left_attrs, right_attrs
-		);
-
-		__expression_dest_pmask(node) = ret;
-		return (ret);
-	}
-
-	int64_t attrs = create_return_attrs(
-		operation_info, left_attrs, right_attrs
-	);
-	__expression_dest_pmask(node) = attrs;
-	return (attrs);
+	return (assign_type(
+		meta,
+		left_pointer,
+		right_pointer,
+		&__node_pointer(node)
+	));
 }
 
 bool resolve_return_types(__ast_node *node)
 {
-	stack_size = 0;
+	global_scope	  = vec_create(sizeof(object_t), 64, NULL);
+	global_scope_size = 0;
+
 	(void)analyzer(node);
 	return (true);
 }

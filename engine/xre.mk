@@ -13,6 +13,7 @@ CFLAGS_RELEASE := \
 
 CFLAGS := \
 	-g3 \
+	-Og  \
 	-Wall   \
 	-Wextra \
 	-Werror \
@@ -78,15 +79,15 @@ SRCS := \
 \
 	runtime/xre_runtime.c \
 \
-	runtime/compose/analyze/determine-variable-properties.c \
+	runtime/compose/ast_emit.c \
+	runtime/compose/ast_init.c \
+	runtime/compose/profiles.c \
+	runtime/compose/port.c \
 	runtime/compose/analyze/resolve-return-locations.c \
+	runtime/compose/analyze/determine-variable-properties.c \
 	runtime/compose/analyze/resolve-return-types.c \
-	runtime/compose/ast.c \
-	runtime/compose/debug.c \
-	runtime/compose/operations.c \
-\
-	runtime/memory/object.c \
-#\
+	runtime/memory/object.c 
+
 #	runtime/operations/scope_resolution.c \
 #	runtime/operations/eq.c \
 #	runtime/operations/gt.c \

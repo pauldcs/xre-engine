@@ -18,7 +18,7 @@ int __registers[64] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 };
 
-static int assign_register(void)
+static int assign_register_internal(void)
 {
 	size_t i = 2;
 	while (i < 64 - 2) {
@@ -33,82 +33,83 @@ static int assign_register(void)
 
 static void release_register(int reg)
 {
+	//printf("%d\n", reg);
+
 	__registers[reg] = 0;
 }
 
-static size_t alloc_register(
-	struct operation_info *operation_info,
-	int64_t		       left_offset,
-	int64_t		       right_offset
-)
+static void copy_pointer(struct pointer *dst, struct pointer *src)
 {
-	if (operation_info->_ret & O_BR_RESULT_LEFT) {
-		if (left_offset == -1) {
-			return (-assign_register());
-		}
-		return (left_offset);
-	}
-	if (operation_info->_ret & O_BR_RESULT_RIGHT) {
-		if (right_offset == -1) {
-			return (-assign_register());
-		}
-		return (right_offset);
-	}
-
-	if (operation_info->_ret & O_BR_RESULT_ANY) {
-		return (-1);
-	}
-
-	if (left_offset != -1 && left_offset < 0) {
-		return (left_offset);
-	}
-
-	if (right_offset != -1 && right_offset < 0) {
-		return (right_offset);
-	}
-
-	return (-assign_register());
+	(void)memcpy(dst, src, sizeof(struct pointer));
 }
 
-static int64_t analyzer(__ast_node *node)
+static void assign_register(
+	struct expression_meta *meta,
+	struct pointer	       *left_pointer,
+	struct pointer	       *right_pointer,
+	struct pointer	       *self_pointer
+)
 {
-	int64_t left_offset  = -1;
-	int64_t right_offset = -1;
+	if (meta->o_rule == RETURN_OFFSET_RULE_LEFT) {
+		if (left_pointer &&
+		    __pointer_known_offset(*left_pointer)) {
+			copy_pointer(self_pointer, left_pointer);
+			return;
+		}
+
+	} else if (meta->o_rule == RETURN_OFFSET_RULE_RIGHT) {
+		if (right_pointer &&
+		    __pointer_known_offset(*right_pointer)) {
+			copy_pointer(self_pointer, right_pointer);
+			return;
+		}
+
+	} else if (meta->o_rule == RETURN_OFFSET_RULE_INHERIT) {
+		// checking
+		return;
+	}
+
+	__pointer_known_offset(*self_pointer) = true;
+	__pointer_offset(*self_pointer) = -assign_register_internal();
+}
+
+static struct pointer *analyzer(__ast_node *node)
+{
+	struct pointer *left_pointer  = NULL;
+	struct pointer *right_pointer = NULL;
 
 	size_t i = 0;
-	while (i < vec_size(__expression_frame_locals(node))) {
+	while (i < vec_size(__node_locals(node))) {
 		stack_size++;
 		i++;
 	}
 
-	if (__expression_type(node) == EXPR_TYPE_VALUE) {
+	if (__node_token_type(node) == EXPR_TYPE_VALUE) {
 		is_leaf = true;
-		return (__expression_ref_offset(node));
+		return (&__node_as_reference(node));
 	}
 
-	if (__expression_kind(node) == __SEQUENCE_POINT__) {
+	if (__node_token_kind(node) == __SEQUENCE_POINT__) {
 		i = 0;
-		while (i < vec_size(__expression_sequence(node))) {
+		while (i < vec_size(__node_as_sequence(node))) {
 			analyzer((__ast_node *)vec_at(
-				__expression_sequence(node), i++
+				__node_as_sequence(node), i++
 			));
 		}
 		goto end;
 	}
 
-	switch (__expression_type(node)) {
+	switch (__node_token_type(node)) {
 	case EXPR_OP_TYPE_UNIOP:
-		is_leaf	    = false;
-		left_offset = analyzer(__expression_binop_left(node));
+		is_leaf	     = false;
+		left_pointer = analyzer(__node_as_binop_l(node));
 
 		break;
 
 	case EXPR_OP_TYPE_BINOP:
-		is_leaf	    = false;
-		left_offset = analyzer(__expression_binop_left(node));
-
-		right_offset =
-			analyzer(__expression_binop_right(node));
+		is_leaf	      = false;
+		left_pointer  = analyzer(__node_as_binop_l(node));
+		right_pointer = analyzer(__node_as_binop_r(node));
 
 		break;
 
@@ -118,40 +119,48 @@ static int64_t analyzer(__ast_node *node)
 	}
 end:
 
-	if (vec_size(__expression_frame_locals(node))) {
-		stack_size -=
-			vec_size(__expression_frame_locals(node));
+	if (vec_size(__node_locals(node))) {
+		stack_size -= vec_size(__node_locals(node));
 	}
 
-	struct operation_info *operation_info =
-		operation_info_lookup_kind(__expression_kind(node));
+	struct expression_meta *meta = find_expression_meta(node);
 
-	int64_t offset = alloc_register(
-		operation_info, left_offset, right_offset
+	assign_register(
+		meta,
+		left_pointer,
+		right_pointer,
+		&__node_pointer(node)
 	);
 
-	if (left_offset > -1 && offset != left_offset) {
-		release_register(-left_offset);
+	if (left_pointer && __pointer_known_offset(*left_pointer) &&
+	    __pointer_known_offset(__node_pointer(node)) &&
+	    __pointer_offset(__node_pointer(node)) !=
+		    __pointer_offset(*left_pointer) &&
+	    __pointer_offset(*left_pointer) < 0) {
+		release_register(-__pointer_offset(*left_pointer));
 	}
 
-	if (right_offset > -1 && offset != right_offset) {
-		release_register(-right_offset);
+	if (right_pointer && __pointer_known_offset(*right_pointer) &&
+	    __pointer_known_offset(__node_pointer(node)) &&
+	    __pointer_offset(__node_pointer(node)) !=
+		    __pointer_offset(*right_pointer) &&
+	    __pointer_offset(*right_pointer) < 0) {
+		release_register(-__pointer_offset(*right_pointer));
 	}
-	__expression_dest_offset(node) = offset;
 
-	return (offset);
+	return (&__node_pointer(node));
 }
 
 bool resolve_return_locations(__ast_node *node)
 {
 	stack_size = 0;
-	is_leaf = false;
+	is_leaf	   = false;
 
 	(void)memset(__registers, 0x00, sizeof(__registers));
-	
+
 	__registers[0] = 1;
 	__registers[1] = 1;
-	
+
 	(void)analyzer(node);
 	return (true);
 }

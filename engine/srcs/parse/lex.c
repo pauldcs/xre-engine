@@ -1,7 +1,7 @@
 #include "vec.h"
 #include "xre_compiler.h"
 #include "xre_errors.h"
-#include "xre_builtin.h"
+#include "xre_runtime.h"
 #include "xre_nodes.h"
 #include "xre_utils.h"
 #include <ctype.h>

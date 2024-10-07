@@ -29,13 +29,13 @@ static bool runtime_init(struct ast *ast, struct runtime **rt)
 		return (false);
 	}
 
-	if (!runtime_tree_init(ast, *rt)) {
+	if (!ast_init(ast, *rt)) {
 		goto prison;
 	}
 
+	(void)determine_variable_properties((*rt)->start);
 	(void)resolve_return_locations((*rt)->start);
 	(void)resolve_return_types((*rt)->start);
-	(void)determine_variable_properties((*rt)->start);
 
 	if (__xre_args__.flags & FLAGS_DEBUG) {
 		(void)emit_ir((*rt)->start, true);

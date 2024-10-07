@@ -1,24 +1,30 @@
 #include "xre_nodes.h"
-#include "xre_builtin.h"
 #include "xre_runtime.h"
+#include "defaults.h"
 
 const struct builtin builtin_lookup[] = {
-	{ "std_map",
-	  EXPR_OP_TYPE_BINOP,
-	  O_TYPE_SEQUENCE | O_ATTR_READABLE | O_ATTR_MUTABLE,
-	  O_TYPE_SEQUENCE | O_TYPE_UNDEFINED,
-	  O_TYPE_UNDEFINED },
-
-	{ "std_out",
-	  EXPR_OP_TYPE_UNIOP,
-	  O_TYPE_UNDEFINED,
-	  O_ATTR_READABLE,
-	  O_TYPE_UNDEFINED },
-	{ "std_buf",
-	  EXPR_OP_TYPE_UNIOP,
-	  O_TYPE_BUFFER | O_ATTR_READABLE | O_ATTR_MUTABLE,
-	  O_ATTR_READABLE,
-	  O_TYPE_UNDEFINED }
+	{
+		.iden = "std_map",
+		.type = EXPR_OP_TYPE_BINOP,
+		.meta = { .kind	   = BUILTIN_CALL,
+			  .t_rule  = RETURN_TYPE_RULE_LEFT,
+			  .o_rule  = RETURN_OFFSET_RULE_YIELD,
+			  .profile = { .ret  = { .prot = RDWR,
+						 .type = VEC_OBJECT },
+				       .args = { .count = 2,
+						 .ports = { __undefined_port,
+							    __undefined_port } } } },
+	},
+	{
+		.iden = "std_out",
+		.type = EXPR_OP_TYPE_UNIOP,
+		.meta = { .kind	   = BUILTIN_CALL,
+			  .t_rule  = RETURN_TYPE_RULE_LEFT,
+			  .o_rule  = RETURN_OFFSET_RULE_LEFT,
+			  .profile = { .ret  = __undefined_port,
+				       .args = { .count = 1,
+						 .ports = { __undefined_port } } } },
+	},
 };
 
 struct builtin *builtin_find(const char *lookup_name, size_t size)
