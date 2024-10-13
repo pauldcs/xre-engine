@@ -7,7 +7,7 @@ struct vector *scope = NULL;
 
 /* DEFINE GLOBAL */
 int64_t assign_next_ref = false;
-int64_t save_next_ref = false;
+int64_t save_next_ref	= false;
 
 /* DEFINE GLOBAL */
 static struct port *assign_src;
@@ -38,12 +38,12 @@ static void analyzer(struct expression *node)
 
 			//printf("dst_port %s %s\n", port_type_string(dst_port->type), port_prot_string(dst_port->protection));
 			//printf("src_port %s %s\n", port_type_string(src_port->type), port_prot_string(src_port->protection));
-			
+
 			//(void)memcpy(dst_port, src_port, sizeof(struct port));
 
 			if (dst_port->type == UNDEFINED) {
 				dst_port->protection = RDWR;
-				dst_port->type = src_port->type;
+				dst_port->type	     = src_port->type;
 			}
 			return;
 		} else {
@@ -75,29 +75,29 @@ static void analyzer(struct expression *node)
 
 	case EXPR_OP_TYPE_BINOP:
 		if (__node_token_kind(node) == __ASSIGN__) {
-			assign_next_ref	= false;
-			save_next_ref = true;
+			assign_next_ref = false;
+			save_next_ref	= true;
 		} else {
-			assign_next_ref	 = false;
-			save_next_ref = false;
+			assign_next_ref = false;
+			save_next_ref	= false;
 		}
 
 		analyzer(__node_as_binop_l(node));
 
 		if (__node_token_kind(node) == __ASSIGN__) {
-			assign_next_ref	= true;
-			save_next_ref = false;
+			assign_next_ref = true;
+			save_next_ref	= false;
 		} else {
-			assign_next_ref	   = false;
-			save_next_ref = false;
+			assign_next_ref = false;
+			save_next_ref	= false;
 		}
 
 		analyzer(__node_as_binop_r(node));
 
 		if (__node_token_kind(node) == __ASSIGN__) {
-			assign_next_ref	   = false;
-			save_next_ref = false;
-			assign_src = NULL;
+			assign_next_ref = false;
+			save_next_ref	= false;
+			assign_src	= NULL;
 		}
 
 		break;

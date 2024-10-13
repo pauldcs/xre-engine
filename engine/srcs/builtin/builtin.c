@@ -6,9 +6,9 @@ const struct builtin builtin_lookup[] = {
 	{
 		.iden = "std_map",
 		.type = EXPR_OP_TYPE_BINOP,
-		.meta = { .kind	   = BUILTIN_CALL,
-			  .type_rule  = RETURN_TYPE_RULE_LEFT,
-			  .offset_rule  = RETURN_OFFSET_RULE_YIELD,
+		.meta = { .kind	       = BUILTIN_CALL,
+			  .type_rule   = RETURN_TYPE_RULE_LEFT,
+			  .offset_rule = RETURN_OFFSET_RULE_YIELD,
 			  .profile = { .ret  = { .protection = RDWR,
 						 .type = VEC_OBJECT },
 				       .args = { .count = 2,
@@ -18,12 +18,12 @@ const struct builtin builtin_lookup[] = {
 	{
 		.iden = "std_out",
 		.type = EXPR_OP_TYPE_UNIOP,
-		.meta = { .kind	   = BUILTIN_CALL,
-			  .type_rule  = RETURN_TYPE_RULE_LEFT,
-			  .offset_rule  = RETURN_OFFSET_RULE_LEFT,
-			  .profile = { .ret  = __undefined_port,
-				       .args = { .count = 1,
-						 .ports = { __undefined_port } } } },
+		.meta = { .kind	       = BUILTIN_CALL,
+			  .type_rule   = RETURN_TYPE_RULE_LEFT,
+			  .offset_rule = RETURN_OFFSET_RULE_LEFT,
+			  .profile     = { .ret	 = __undefined_port,
+					   .args = { .count = 1,
+						     .ports = { __undefined_port } } } },
 	},
 };
 

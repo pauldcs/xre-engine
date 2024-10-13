@@ -10,3 +10,4 @@ tools/tester/outfiles
 *.DS_Store
 __old
 .env
+shared/xre

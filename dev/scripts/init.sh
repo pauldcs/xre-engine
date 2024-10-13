@@ -3,6 +3,7 @@
 set -eu 
 
 readonly LOGFILE="/root/logfile.log"
+(cd /root/engine && make release && cp xre /root/shared)
 
 touch ${LOGFILE}
 

@@ -14,10 +14,6 @@ services:
       - ./engine:/root/engine
       - ./tools:/root/tools
       - ./shared:/root/shared
-    command: >
-      sh -c "
-        make release && cp xre /root/shared
-      "
 
   webapp:
     build:

@@ -41,7 +41,8 @@ static struct pointer *assign_type(
 
 return_pointer:
 	if (meta->offset_rule == RETURN_OFFSET_RULE_YIELD) {
-		self_pointer->port.protection = meta->profile.ret.protection;
+		self_pointer->port.protection =
+			meta->profile.ret.protection;
 	}
 
 	return (self_pointer);
@@ -80,15 +81,14 @@ static struct pointer *analyzer(struct expression *node)
 	if (__node_token_kind(node) == __SEQUENCE_POINT__) {
 		size_t i = 0;
 		while (i < vec_size(__node_as_sequence(node))) {
-			struct expression *exp = (struct expression *)vec_at(
-				__node_as_sequence(node), i++
-			);
+			struct expression *exp = (struct expression *)
+				vec_at(__node_as_sequence(node), i++);
 
 			right_pointer = analyzer(exp);
 		}
 
 		__node_pointer(node).port.protection = PROT_NONE;
-		__node_pointer(node).port.type = TYPE_NONE;
+		__node_pointer(node).port.type	     = TYPE_NONE;
 
 		return (&__node_as_reference(node));
 	}

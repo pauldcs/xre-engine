@@ -195,7 +195,8 @@ enum expression_kind expression_get_new_kind(enum expr_kind kind)
 	}
 }
 
-static bool expression_is_scope_modifier(const struct expression *node)
+static bool expression_is_scope_modifier(const struct expression *node
+)
 {
 	switch (__node_token_kind(node)) {
 	case __DO__:
@@ -373,7 +374,9 @@ static void create_reference_pointer(
 }
 
 static bool ast_create(
-	struct ast *ast, struct expression **statements, bool is_scope_change
+	struct ast	   *ast,
+	struct expression **statements,
+	bool		    is_scope_change
 )
 {
 	const char *format	       = NULL;
@@ -411,8 +414,8 @@ static bool ast_create(
 	} else if (__node_token_kind(node) == __SEQUENCE_POINT__) {
 		n = vec_size(ast->seq);
 
-		__node_as_sequence(node) =
-			vec_create(sizeof(struct expression), n, NULL);
+		__node_as_sequence(node
+		) = vec_create(sizeof(struct expression), n, NULL);
 
 		for (size_t i = 0; i < n; i++) {
 			struct expression *exp = NULL;

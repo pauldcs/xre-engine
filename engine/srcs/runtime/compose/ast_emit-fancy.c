@@ -246,9 +246,9 @@ static const char *pointer_string(struct pointer *pointer)
 		ret_type =
 			port_type_string(__pointer_port(*pointer).type
 			);
-		ret_prot =
-			port_prot_string(__pointer_port(*pointer).protection
-			);
+		ret_prot = port_prot_string(
+			__pointer_port(*pointer).protection
+		);
 	}
 
 	return (format_string(
@@ -283,7 +283,8 @@ static void emit_builtin_call(struct expression *node, bool is_left)
 	emit_code_internal(format, true, is_left);
 }
 
-static void emit_basic_operation(struct expression *node, bool is_left)
+static void
+emit_basic_operation(struct expression *node, bool is_left)
 {
 	const char *kind_str =
 		expression_kind_string(__node_attr_kind(node));
@@ -348,7 +349,8 @@ static void emit_stack_free(void)
 	emit_code_internal(format, false, false);
 }
 
-static void emit_expression_sequence(struct expression *node, bool is_left)
+static void
+emit_expression_sequence(struct expression *node, bool is_left)
 {
 	size_t	       i	= 0;
 	struct vector *children = __node_as_sequence(node);

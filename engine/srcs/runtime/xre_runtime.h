@@ -169,7 +169,7 @@ struct pointer {
 struct attributes {
 	enum expression_kind kind;
 	struct {
-		enum expr_type_rule type_rule;
+		enum expr_type_rule   type_rule;
 		enum expr_offset_rule offset_rule;
 	};
 
@@ -207,9 +207,9 @@ struct expression {
 	struct builtin	   *builtin;
 
 	union {
-		struct vector *sequence; /* struct expression */
-		struct pointer reference;
-		struct expression    *uniop;
+		struct vector	  *sequence; /* struct expression */
+		struct pointer	   reference;
+		struct expression *uniop;
 		struct {
 			struct expression *left;
 			struct expression *right;
@@ -287,7 +287,7 @@ bool object_init(
 
 struct runtime {
 	struct expression *start;
-	const char *name;
+	const char	  *name;
 };
 
 /*    Execute the ast

@@ -158,9 +158,8 @@ const char *expression_kind_string(enum expression_kind kind)
 	};
 }
 
-bool with_skip = false;
-static void
-emit_code_internal(const char *code)
+bool	    with_skip = false;
+static void emit_code_internal(const char *code)
 {
 	size_t i = 0;
 	while (i++ < d) {
@@ -180,13 +179,11 @@ static const char *pointer_string(struct pointer *pointer)
 	if (__pointer_known_offset(*pointer)) {
 		if (pointer->offset < 0) {
 			ret_offset = format_string(
-				"[local_%04lld]",
-				-pointer->offset
+				"[local_%04lld]", -pointer->offset
 			);
 		} else {
 			ret_offset = format_string(
-				"[var_%04lld]",
-				pointer->offset
+				"[var_%04lld]", pointer->offset
 			);
 		}
 	}
@@ -195,16 +192,13 @@ static const char *pointer_string(struct pointer *pointer)
 		ret_type =
 			port_type_string(__pointer_port(*pointer).type
 			);
-		ret_prot =
-			port_prot_string(__pointer_port(*pointer).protection
-			);
+		ret_prot = port_prot_string(
+			__pointer_port(*pointer).protection
+		);
 	}
 
 	return (format_string(
-		"%s %s %s",
-		ret_prot,
-		ret_type,
-		ret_offset
+		"%s %s %s", ret_prot, ret_type, ret_offset
 	));
 }
 
@@ -234,9 +228,7 @@ static void emit_basic_operation(struct expression *node)
 	struct pointer pointer = __node_pointer(node);
 
 	const char *format = format_string(
-		"%s %s",
-		kind_str,
-		pointer_string(&pointer)
+		"%s %s", kind_str, pointer_string(&pointer)
 	);
 
 	emit_code_internal(format);
@@ -274,9 +266,8 @@ static void emit_static_object(object_t *object)
 
 static void emit_stack_free(void)
 {
-	const char *format = format_string(
-		"drop var_%04zu", __counter-- - 1
-	);
+	const char *format =
+		format_string("drop var_%04zu", __counter-- - 1);
 
 	emit_code_internal(format);
 }
@@ -298,15 +289,13 @@ static void emit_reference(struct expression *node)
 {
 	struct pointer pointer = __node_as_reference(node);
 
-	const char *format = format_string(
-		"&%s", pointer_string(&pointer)
-	);
+	const char *format =
+		format_string("&%s", pointer_string(&pointer));
 
 	emit_code_internal(format);
 }
 
-static void
-handle_frame_change(struct expression *node, bool in)
+static void handle_frame_change(struct expression *node, bool in)
 {
 	struct vector *frame	  = __node_locals(node);
 	size_t	       frame_size = vec_size(frame);
