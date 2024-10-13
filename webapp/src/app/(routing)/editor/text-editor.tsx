@@ -2,9 +2,9 @@
 import { Editor } from '@monaco-editor/react';
 import { useEffect, useState } from 'react';
 
-const EDITOR_FONT_SIZE = 15;
+const EDITOR_FONT_SIZE = 17;
 
-const COLOR_BACKGROUND = '#ffffff';
+const COLOR_BACKGROUND = '#fffff0';
 const COLOR_FOREGROUND = '#000000';
 const COLOR_CURSOR_FOREGROUND = '#000000';
 
@@ -47,6 +47,33 @@ const ops = [
   'Impossible',
 ];
 
+const op_signs = [
+  '::',
+  '+',
+  '-',
+  '*',
+  '/',
+  '^^',
+  '%',
+  '<',
+  '>',
+  '<=',
+  '>=',
+  '<<',
+  '>>',
+  '&&',
+  '||',
+  '==',
+  '=>',
+  '!=',
+  '&',
+  '|',
+  '^',
+  '=',
+  ':',
+  '!',
+];
+
 const types = ['i64', 'vec<object_t>', 'vec<u8>', 'string', 'buffer', 'any', 'type none'];
 export const TextEditor = ({
   onChange,
@@ -79,23 +106,15 @@ export const TextEditor = ({
   return (
     <Editor
       options={{
-        minimap: { enabled: false },
         renderLineHighlight: 'none',
         contextmenu: false,
         fontSize: EDITOR_FONT_SIZE,
-        links: true,
         autoClosingBrackets: 'always',
         autoClosingQuotes: 'always',
         foldingHighlight: false,
         padding: { top: 5 },
-        roundedSelection: false,
-        overviewRulerBorder: false,
-        scrollBeyondLastLine: false,
-        scrollPredominantAxis: false,
-        scrollbar: {
-          horizontalScrollbarSize: 5,
-          verticalScrollbarSize: 5,
-        },
+        fontFamily: 'Courier New, Lucida Console, Monaco, monospace',
+        overviewRulerLanes: 0,
       }}
       width='50%'
       height={'100vh'}
@@ -153,6 +172,10 @@ export const TextEditor = ({
               foreground: '#b22222',
             },
             {
+              token: 'languageSigns',
+              foreground: '#b22222',
+            },
+            {
               token: 'variables',
               fontStyle: 'bold',
               foreground: '#b22222',
@@ -188,6 +211,15 @@ export const TextEditor = ({
             root: [
               [new RegExp('(' + keywords.join('|') + ')'), 'languageKeywords'],
               [new RegExp('(' + builtins.join('|') + ')'), 'languageBultins'],
+              [
+                new RegExp(
+                  op_signs
+                    .map((op) => op.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')) // Escape special regex characters
+                    .sort((a, b) => b.length - a.length) // Sort by length to match multi-character ops first
+                    .join('|')
+                ),
+                'languageSigns',
+              ],
               [new RegExp('(' + types.join('|') + ')'), 'types'],
               [new RegExp('(' + ops.join('|') + ')'), 'outputOps'],
               [new RegExp('(' + ['reserve', 'drop'].join('|') + ')'), 'memory'],

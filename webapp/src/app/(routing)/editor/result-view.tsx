@@ -1,7 +1,7 @@
 'use client';
 import { Editor } from '@monaco-editor/react';
 
-const EDITOR_FONT_SIZE = 15;
+const EDITOR_FONT_SIZE = 17;
 
 export const ResultView = ({ content }: { content: string }) => {
   return (
@@ -13,13 +13,7 @@ export const ResultView = ({ content }: { content: string }) => {
         links: true,
         lineNumbers: 'off',
         padding: { top: 5 },
-        overviewRulerBorder: false,
-        scrollBeyondLastLine: false,
-        scrollPredominantAxis: false,
-        scrollbar: {
-          horizontalScrollbarSize: 5,
-          verticalScrollbarSize: 5,
-        },
+        fontFamily: 'Courier New, Lucida Console, Monaco, monospace',
       }}
       language='keywords'
       width='50%'
