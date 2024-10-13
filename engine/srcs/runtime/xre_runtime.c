@@ -38,7 +38,7 @@ static bool runtime_init(struct ast *ast, struct runtime **rt)
 	(void)resolve_return_types((*rt)->start);
 
 	if (__xre_args__.flags & FLAGS_DEBUG) {
-		(void)emit_ir((*rt)->start, true);
+		(void)emit_ir((*rt)->start);
 	}
 
 	return (true);

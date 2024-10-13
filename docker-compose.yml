@@ -1,5 +1,4 @@
 version: '3.9'
-
 services:
   xre-dev:
     hostname: xre-dev
@@ -13,9 +12,26 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./engine:/root/engine
-      - ./pp:/root/pp
       - ./tools:/root/tools
+      - ./shared:/root/shared
+    command: >
+      sh -c "
+        make release && cp xre /root/shared
+      "
+
+  webapp:
+    build:
+      context: ./webapp
+      dockerfile: Dockerfile
     ports:
-      - '0.0.0.0:8000:3000'
-    expose:
-      - 7000
+      - '9009:3000'
+    volumes:
+      - ./webapp:/app
+      - /app/node_modules
+      - ./shared:/app/shared
+    environment:
+      - NODE_ENV=development
+    command: npm run dev
+    restart: unless-stopped
+    depends_on:
+      - xre-dev

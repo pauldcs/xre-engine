@@ -78,12 +78,11 @@ void xre_error(struct error *notification)
 		i += cpyf(&err_buff[i], 4096 - i, " ");
 	}
 
-	i += cpyf(&err_buff[i], 4096 - i, "\033[1;31m");
 	i += cpyf(&err_buff[i], 4096 - i, "^(");
 	i +=
 		cpyf(&err_buff[i],
 		     4096 - i,
-		     "%s) \033[0m",
+		     "%s)",
 		     error_type_str(notification->type));
 
 	i += cpyf(&err_buff[i], 4096 - i, "\n");

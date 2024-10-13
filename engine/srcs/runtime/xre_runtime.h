@@ -58,7 +58,7 @@ enum memory_type {
 /*   A port defines how the memory offset that is applied to it
  *   should be treated. */
 struct port {
-	enum memory_prot prot;
+	enum memory_prot protection;
 	enum memory_type type;
 };
 
@@ -80,7 +80,7 @@ struct port default_sequence_port(void);
  *          LEFT: it is the same as the left prameter 
  *         RIGHT: it is the same as the left prameter 
  */
-enum expr_ret_trule {
+enum expr_type_rule {
 	RETURN_TYPE_RULE_INHERIT,
 	RETURN_TYPE_RULE_LEFT,
 	RETURN_TYPE_RULE_RIGHT,
@@ -93,7 +93,7 @@ enum expr_ret_trule {
  *       RIGHT: it is the same as the left prameter 
   *      YIELD: it is a new pointer
  */
-enum expr_ret_orule {
+enum expr_offset_rule {
 	RETURN_OFFSET_RULE_LEFT,
 	RETURN_OFFSET_RULE_RIGHT,
 	RETURN_OFFSET_RULE_INHERIT,
@@ -119,10 +119,9 @@ struct expression_meta {
 	struct expression_profile profile;
 	struct {
 		/* the rule for resolving the type */
-		enum expr_ret_trule t_rule;
-
+		enum expr_type_rule type_rule;
 		/* the rule for resolving the offset */
-		enum expr_ret_orule o_rule;
+		enum expr_offset_rule offset_rule;
 	};
 };
 
@@ -169,9 +168,10 @@ struct pointer {
 */
 struct attributes {
 	enum expression_kind kind;
-
-	enum expr_ret_trule t_rule;
-	enum expr_ret_orule o_rule;
+	struct {
+		enum expr_type_rule type_rule;
+		enum expr_offset_rule offset_rule;
+	};
 
 	struct pointer pointer;
 
@@ -200,8 +200,6 @@ struct frame {
 	enum frame_mask mask;
 };
 
-#define __ast_node struct expression
-
 struct expression {
 	const struct token *origin;
 	struct frame	    frame;
@@ -209,12 +207,12 @@ struct expression {
 	struct builtin	   *builtin;
 
 	union {
-		struct vector *sequence; /* __ast_node */
+		struct vector *sequence; /* struct expression */
 		struct pointer reference;
-		__ast_node    *uniop;
+		struct expression    *uniop;
 		struct {
-			__ast_node *left;
-			__ast_node *right;
+			struct expression *left;
+			struct expression *right;
 		} binop;
 	};
 };
@@ -225,28 +223,39 @@ struct expression {
 	(__exp_attr_kind(__node_attributes(__expr_node_ptr)))
 
 #define __node_token(__expr_node_ptr) ((__expr_node_ptr)->origin)
+
 #define __node_token_kind(__expr_node_ptr) \
 	(((__expr_node_ptr)->origin)->_kind)
+
 #define __node_token_type(__expr_node_ptr) \
 	(((__expr_node_ptr)->origin)->_type)
+
 #define __node_locals(__expr_node_ptr) \
 	((__expr_node_ptr)->frame.locals)
+
 #define __node_frame_mask(__expr_node_ptr) \
 	((__expr_node_ptr)->frame.mask)
+
 #define __node_builtin(__expr_node_ptr) ((__expr_node_ptr)->builtin)
+
 #define __node_as_sequence(__expr_node_ptr) \
 	((__expr_node_ptr)->sequence)
+
 #define __node_as_reference(__expr_node_ptr) \
 	((__expr_node_ptr)->reference)
+
 #define __node_as_uniop(__expr_node_ptr) ((__expr_node_ptr)->uniop)
+
 #define __node_as_binop_l(__expr_node_ptr) \
 	((__expr_node_ptr)->binop.left)
+
 #define __node_as_binop_r(__expr_node_ptr) \
 	((__expr_node_ptr)->binop.right)
+
 #define __node_pointer(__expr_node_ptr) \
 	((__expr_node_ptr)->attributes.pointer)
 
-struct expression_meta *find_expression_meta(__ast_node *node);
+struct expression_meta *find_expression_meta(struct expression *node);
 
 typedef struct {
 	struct port port;
@@ -277,7 +286,7 @@ bool object_init(
 );
 
 struct runtime {
-	__ast_node *start;
+	struct expression *start;
 	const char *name;
 };
 
@@ -292,10 +301,10 @@ bool runtime(struct ast *ast);
  */
 bool ast_init(struct ast *ast, struct runtime *runtime);
 
-void emit_ir(__ast_node *node, bool is_left);
+void emit_ir(struct expression *node);
 
-bool determine_variable_properties(__ast_node *node);
-bool resolve_return_locations(__ast_node *node);
-bool resolve_return_types(__ast_node *node);
+bool determine_variable_properties(struct expression *node);
+bool resolve_return_locations(struct expression *node);
+bool resolve_return_types(struct expression *node);
 
 #endif

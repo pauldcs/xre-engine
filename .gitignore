@@ -9,3 +9,4 @@ tools/tester/outfiles
 .cache
 *.DS_Store
 __old
+.env

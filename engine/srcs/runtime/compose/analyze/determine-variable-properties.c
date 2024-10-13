@@ -7,11 +7,12 @@ struct vector *scope = NULL;
 
 /* DEFINE GLOBAL */
 int64_t assign_next_ref = false;
+int64_t save_next_ref = false;
 
 /* DEFINE GLOBAL */
-static struct pointer *assign_src_pointer;
+static struct port *assign_src;
 
-static void analyzer(__ast_node *node)
+static void analyzer(struct expression *node)
 {
 	size_t i = 0;
 	while (i < vec_size(__node_locals(node))) {
@@ -29,32 +30,29 @@ static void analyzer(__ast_node *node)
 			__pointer_offset(__node_as_reference(node))
 		);
 
-		if (assign_next_ref && assign_src_pointer) {
-			object_t *src = *(object_t **)vec_access(
-				scope,
-				__pointer_offset(*assign_src_pointer)
-			);
+		__node_as_reference(node).port = this_object->port;
 
+		if (assign_next_ref && assign_src) {
 			struct port *dst_port = &this_object->port;
+			struct port *src_port = assign_src;
 
-			//struct port *src_port = &src->port;
-			//printf("dst_port %s %s\n", port_type_string(dst_port->type), port_prot_string(dst_port->prot));
-			//printf("src_port %s %s\n", port_type_string(src_port->type), port_prot_string(src_port->prot));
+			//printf("dst_port %s %s\n", port_type_string(dst_port->type), port_prot_string(dst_port->protection));
+			//printf("src_port %s %s\n", port_type_string(src_port->type), port_prot_string(src_port->protection));
+			
 			//(void)memcpy(dst_port, src_port, sizeof(struct port));
 
 			if (dst_port->type == UNDEFINED) {
-				dst_port->prot = RDWR;
-				dst_port->type = src->port.type;
+				dst_port->protection = RDWR;
+				dst_port->type = src_port->type;
 			}
 			return;
 		} else {
 			//printf("%s %s\n", port_type_string(this_object->port.type), port_prot_string(this_object->port.prot));
 		}
 
-		__node_as_reference(node).port.type =
-			this_object->port.type;
-		__node_as_reference(node).port.prot =
-			this_object->port.prot;
+		if (save_next_ref) {
+			assign_src = &this_object->port;
+		}
 		return;
 	}
 
@@ -63,7 +61,7 @@ static void analyzer(__ast_node *node)
 	if (__node_token_kind(node) == __SEQUENCE_POINT__) {
 		i = 0;
 		while (i < vec_size(__node_as_sequence(node))) {
-			analyzer((__ast_node *)vec_at(
+			analyzer((struct expression *)vec_at(
 				__node_as_sequence(node), i++
 			));
 		}
@@ -76,23 +74,31 @@ static void analyzer(__ast_node *node)
 		break;
 
 	case EXPR_OP_TYPE_BINOP:
-		assign_next_ref = false;
+		if (__node_token_kind(node) == __ASSIGN__) {
+			assign_next_ref	= false;
+			save_next_ref = true;
+		} else {
+			assign_next_ref	 = false;
+			save_next_ref = false;
+		}
 
 		analyzer(__node_as_binop_l(node));
 
 		if (__node_token_kind(node) == __ASSIGN__) {
-			assign_next_ref	   = true;
-			assign_src_pointer = &__node_pointer(node);
-
+			assign_next_ref	= true;
+			save_next_ref = false;
 		} else {
 			assign_next_ref	   = false;
-			assign_src_pointer = NULL;
+			save_next_ref = false;
 		}
 
 		analyzer(__node_as_binop_r(node));
 
-		assign_next_ref	   = false;
-		assign_src_pointer = NULL;
+		if (__node_token_kind(node) == __ASSIGN__) {
+			assign_next_ref	   = false;
+			save_next_ref = false;
+			assign_src = NULL;
+		}
 
 		break;
 
@@ -110,7 +116,7 @@ end:
 	}
 }
 
-bool determine_variable_properties(__ast_node *node)
+bool determine_variable_properties(struct expression *node)
 {
 	scope = vec_create(sizeof(object_t *), 64, NULL);
 	analyzer(node);

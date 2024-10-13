@@ -50,21 +50,21 @@ static void assign_register(
 	struct pointer	       *self_pointer
 )
 {
-	if (meta->o_rule == RETURN_OFFSET_RULE_LEFT) {
+	if (meta->offset_rule == RETURN_OFFSET_RULE_LEFT) {
 		if (left_pointer &&
 		    __pointer_known_offset(*left_pointer)) {
 			copy_pointer(self_pointer, left_pointer);
 			return;
 		}
 
-	} else if (meta->o_rule == RETURN_OFFSET_RULE_RIGHT) {
+	} else if (meta->offset_rule == RETURN_OFFSET_RULE_RIGHT) {
 		if (right_pointer &&
 		    __pointer_known_offset(*right_pointer)) {
 			copy_pointer(self_pointer, right_pointer);
 			return;
 		}
 
-	} else if (meta->o_rule == RETURN_OFFSET_RULE_INHERIT) {
+	} else if (meta->offset_rule == RETURN_OFFSET_RULE_INHERIT) {
 		// checking
 		return;
 	}
@@ -73,7 +73,7 @@ static void assign_register(
 	__pointer_offset(*self_pointer) = -assign_register_internal();
 }
 
-static struct pointer *analyzer(__ast_node *node)
+static struct pointer *analyzer(struct expression *node)
 {
 	struct pointer *left_pointer  = NULL;
 	struct pointer *right_pointer = NULL;
@@ -92,7 +92,7 @@ static struct pointer *analyzer(__ast_node *node)
 	if (__node_token_kind(node) == __SEQUENCE_POINT__) {
 		i = 0;
 		while (i < vec_size(__node_as_sequence(node))) {
-			analyzer((__ast_node *)vec_at(
+			analyzer((struct expression *)vec_at(
 				__node_as_sequence(node), i++
 			));
 		}
@@ -151,7 +151,7 @@ end:
 	return (&__node_pointer(node));
 }
 
-bool resolve_return_locations(__ast_node *node)
+bool resolve_return_locations(struct expression *node)
 {
 	stack_size = 0;
 	is_leaf	   = false;

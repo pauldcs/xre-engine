@@ -18,21 +18,21 @@ static struct pointer *assign_type(
 	struct pointer	       *self_pointer
 )
 {
-	if (meta->t_rule == RETURN_TYPE_RULE_LEFT) {
+	if (meta->type_rule == RETURN_TYPE_RULE_LEFT) {
 		if (left_pointer &&
 		    __pointer_known_port(*left_pointer)) {
 			copy_port(self_pointer, left_pointer);
 			goto return_pointer;
 		}
 
-	} else if (meta->t_rule == RETURN_TYPE_RULE_RIGHT) {
+	} else if (meta->type_rule == RETURN_TYPE_RULE_RIGHT) {
 		if (right_pointer &&
 		    __pointer_known_offset(*right_pointer)) {
 			copy_port(self_pointer, right_pointer);
 			goto return_pointer;
 		}
 
-	} else if (meta->t_rule == RETURN_TYPE_RULE_INHERIT) {
+	} else if (meta->type_rule == RETURN_TYPE_RULE_INHERIT) {
 		if (left_pointer->port.type ==
 		    right_pointer->port.type) {
 			copy_port(self_pointer, left_pointer);
@@ -40,8 +40,8 @@ static struct pointer *assign_type(
 	}
 
 return_pointer:
-	if (meta->o_rule == RETURN_OFFSET_RULE_YIELD) {
-		self_pointer->port.prot = meta->profile.ret.prot;
+	if (meta->offset_rule == RETURN_OFFSET_RULE_YIELD) {
+		self_pointer->port.protection = meta->profile.ret.protection;
 	}
 
 	return (self_pointer);
@@ -53,7 +53,7 @@ static struct vector *global_scope = NULL;
 /* DEFINE GLOBAL */
 static size_t global_scope_size = 0;
 
-static void push_locals_to_scope(__ast_node *node)
+static void push_locals_to_scope(struct expression *node)
 {
 	struct vector *locals	= __node_locals(node);
 	size_t	       n_locals = vec_size(locals);
@@ -62,7 +62,7 @@ static void push_locals_to_scope(__ast_node *node)
 	global_scope_size += n_locals;
 }
 
-static struct pointer *analyzer(__ast_node *node)
+static struct pointer *analyzer(struct expression *node)
 {
 	struct pointer *left_pointer  = NULL;
 	struct pointer *right_pointer = NULL;
@@ -80,14 +80,14 @@ static struct pointer *analyzer(__ast_node *node)
 	if (__node_token_kind(node) == __SEQUENCE_POINT__) {
 		size_t i = 0;
 		while (i < vec_size(__node_as_sequence(node))) {
-			__ast_node *exp = (__ast_node *)vec_at(
+			struct expression *exp = (struct expression *)vec_at(
 				__node_as_sequence(node), i++
 			);
 
 			right_pointer = analyzer(exp);
 		}
 
-		__node_pointer(node).port.prot = PROT_NONE;
+		__node_pointer(node).port.protection = PROT_NONE;
 		__node_pointer(node).port.type = TYPE_NONE;
 
 		return (&__node_as_reference(node));
@@ -128,7 +128,7 @@ static struct pointer *analyzer(__ast_node *node)
 	));
 }
 
-bool resolve_return_types(__ast_node *node)
+bool resolve_return_types(struct expression *node)
 {
 	global_scope	  = vec_create(sizeof(object_t), 64, NULL);
 	global_scope_size = 0;

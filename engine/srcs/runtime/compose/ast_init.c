@@ -24,17 +24,17 @@ struct local_cache_entry {
 	struct port port;
 };
 
-static bool ast_node_alloc(__ast_node **node)
+static bool ast_node_alloc(struct expression **node)
 {
-	*node = malloc(sizeof(__ast_node));
+	*node = malloc(sizeof(struct expression));
 	if (!*node) {
 		return (false);
 	}
-	(void)memset(*node, 0x00, sizeof(__ast_node));
+	(void)memset(*node, 0x00, sizeof(struct expression));
 	return (true);
 }
 
-void ast_node_dealloc(__ast_node **node)
+void ast_node_dealloc(struct expression **node)
 {
 	(void)free((void *)*node);
 	*node = NULL;
@@ -195,7 +195,7 @@ enum expression_kind expression_get_new_kind(enum expr_kind kind)
 	}
 }
 
-static bool expression_is_scope_modifier(const __ast_node *node)
+static bool expression_is_scope_modifier(const struct expression *node)
 {
 	switch (__node_token_kind(node)) {
 	case __DO__:
@@ -211,7 +211,7 @@ static bool expression_is_scope_modifier(const __ast_node *node)
 	}
 }
 
-static bool _is_scope_change(const __ast_node *parent)
+static bool _is_scope_change(const struct expression *parent)
 {
 	if (!parent) {
 		return (true);
@@ -237,7 +237,7 @@ static const char *format_ast_value(const struct ast *ast)
 	}
 }
 
-struct expression_meta *find_expression_meta(__ast_node *node)
+struct expression_meta *find_expression_meta(struct expression *node)
 {
 	struct expression_meta *meta = NULL;
 	if (__node_attr_kind(node) == BUILTIN_CALL) {
@@ -252,7 +252,7 @@ struct expression_meta *find_expression_meta(__ast_node *node)
 	return (meta);
 }
 
-static void expression_init(__ast_node *node, struct ast *ast)
+static void expression_init(struct expression *node, struct ast *ast)
 {
 	enum expression_kind kind =
 		expression_get_new_kind(ast->kind);
@@ -265,8 +265,8 @@ static void expression_init(__ast_node *node, struct ast *ast)
 
 	struct attributes attr = {
 		.kind = kind,
-			.o_rule = meta->o_rule,
-			.t_rule = meta->t_rule,
+			.offset_rule = meta->offset_rule,
+			.type_rule = meta->type_rule,
 			.pointer = {
 				.known_offset = false,
 				.known_port = false,
@@ -294,7 +294,7 @@ end:
 }
 
 void frame_propagate_diff(
-	__ast_node *node, int64_t frame_index_guard, int diff
+	struct expression *node, int64_t frame_index_guard, int diff
 )
 {
 	if (global_frame_index == -1) {
@@ -359,21 +359,21 @@ void frame_propagate_diff(
 }
 
 static void create_reference_pointer(
-	__ast_node *node, struct port *src_port, size_t offset
+	struct expression *node, struct port *src_port, size_t offset
 )
 {
 	__node_attr_kind(node)				  = REFERENCE;
 	__pointer_known_port(__node_as_reference(node))	  = true;
 	__pointer_known_offset(__node_as_reference(node)) = true;
-	__pointer_port(__node_as_reference(node)).prot =
-		src_port->prot;
+	__pointer_port(__node_as_reference(node)).protection =
+		src_port->protection;
 	__pointer_port(__node_as_reference(node)).type =
 		src_port->type;
 	__pointer_offset(__node_as_reference(node)) = offset;
 }
 
 static bool ast_create(
-	struct ast *ast, __ast_node **statements, bool is_scope_change
+	struct ast *ast, struct expression **statements, bool is_scope_change
 )
 {
 	const char *format	       = NULL;
@@ -385,7 +385,7 @@ static bool ast_create(
 		return (false);
 	}
 
-	__ast_node *node = *statements;
+	struct expression *node = *statements;
 
 	(void)expression_init(node, ast);
 
@@ -412,10 +412,10 @@ static bool ast_create(
 		n = vec_size(ast->seq);
 
 		__node_as_sequence(node) =
-			vec_create(sizeof(__ast_node), n, NULL);
+			vec_create(sizeof(struct expression), n, NULL);
 
 		for (size_t i = 0; i < n; i++) {
-			__ast_node *exp = NULL;
+			struct expression *exp = NULL;
 
 			if (!ast_create(
 				    vec_access(ast->seq, i),
