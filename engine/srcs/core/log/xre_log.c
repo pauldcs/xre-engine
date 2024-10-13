@@ -25,8 +25,9 @@ static const char *level_tags[] = {
 };
 
 static const char *level_colors[] = {
-	[verbose] = "\x1b[90m",	  [debug] = "\033[0;33m", [info] = "\033[0;34m",
-	[warning] = "\033[0;35m", [error] = "\033[0;31m", [fatal] = "\033[1;31m"
+	[verbose] = "\x1b[90m", [debug] = "\033[0;33m",
+	[info] = "\033[0;34m",	[warning] = "\033[0;35m",
+	[error] = "\033[0;31m", [fatal] = "\033[1;31m"
 };
 
 /**
@@ -42,21 +43,36 @@ static const char *level_colors[] = {
  * @param ...
  */
 
-void xre_logger(t_log_level level, const char *filename, const char *func,
-		uint32_t lineno, const char *format, ...)
+void xre_logger(
+	t_log_level level,
+	const char *filename,
+	const char *func,
+	uint32_t    lineno,
+	const char *format,
+	...
+)
 {
 	if (level < log_level)
 		return;
 
 	const char *level_string = level_tags[level];
-	const char *level_color = level_colors[level];
+	const char *level_color	 = level_colors[level];
 
 	if (level == info) {
-		fprintf(stderr, "[%s%s%s]: ", level_color, level_string,
+		fprintf(stderr,
+			"[%s%s%s]: ",
+			level_color,
+			level_string,
 			"\033[0m");
 	} else {
-		fprintf(stderr, "[%s%s%s] (%s: %s: %u): ", level_color,
-			level_string, "\033[0m", filename, func, lineno);
+		fprintf(stderr,
+			"[%s%s%s] (%s: %s: %u): ",
+			level_color,
+			level_string,
+			"\033[0m",
+			filename,
+			func,
+			lineno);
 	}
 
 	va_list args;

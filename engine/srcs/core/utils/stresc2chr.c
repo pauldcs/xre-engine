@@ -6,8 +6,8 @@
 size_t stresc2chr(char *s)
 {
 	char *p, *q, c;
-	int esc = 0;
-	int x;
+	int   esc = 0;
+	int   x;
 
 	for (p = q = s; (c = *p) != '\0'; p++) {
 		if (esc) {
@@ -63,9 +63,11 @@ size_t stresc2chr(char *s)
 					if (c >= '0' && c <= '9')
 						x = x * 16 + c - '0';
 					else if (c >= 'a' && c <= 'f')
-						x = x * 16 + c - 'a' + 10;
+						x = x * 16 + c - 'a' +
+						    10;
 					else if (c >= 'A' && c <= 'F')
-						x = x * 16 + c - 'A' + 10;
+						x = x * 16 + c - 'A' +
+						    10;
 					else
 						break;
 				}

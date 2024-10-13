@@ -9,7 +9,7 @@ ssize_t xwrite(int fd, const unsigned char *buf, size_t nbytes)
 	int ntry = 0;
 
 	size_t limit = 0x7FFFFFFF;
-	size_t n = nbytes < limit ? nbytes : limit;
+	size_t n     = nbytes < limit ? nbytes : limit;
 
 	for (;;) {
 		i = write(fd, buf, n);

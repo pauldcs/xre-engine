@@ -1,4 +1,4 @@
-#include "xre_assert.h"
+#include "xre_compiler.h"
 #include <stdlib.h>
 #include <unistd.h>
 

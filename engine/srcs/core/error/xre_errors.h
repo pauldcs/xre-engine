@@ -1,7 +1,7 @@
 #ifndef __XRE_REPL_ERROR_H__
 #define __XRE_REPL_ERROR_H__
 
-#include "xre_parse.h"
+#include "xre_nodes.h"
 
 typedef enum {
 	XRE_ARITHMETIC_ERROR_C,
@@ -44,22 +44,23 @@ typedef enum {
 	XRE_INVALID_ASSIGMENT_ERROR,
 	XRE_UNEXPECTED_OPERATOR_ERROR,
 	XRE_UNEXPECTED_OPERAND_ERROR,
-	XRE_UNMATCHED_PARENTHESIS_ERROR,
+	XRE_UNMATCHED_BRACKETS_ERROR,
 	XRE_UNTERMINATED_STRING_ERROR,
 } error_type_e;
 
-typedef struct {
-	xre_token_t *orig;
+struct error {
+	struct token *source;
 	error_class_e class;
 	error_type_e type;
-} err_notif_t;
+};
 
 error_class_e error_type_to_class(error_type_e type);
-const char *error_class_str(error_class_e class);
-const char *error_type_str(error_type_e type);
-void xre_error(err_notif_t *notification);
+const char   *error_class_str(error_class_e class);
+const char   *error_type_str(error_type_e type);
+void	      xre_error(struct error *notification);
 
-#define __return_error(frame, error_type) return (set_error(frame, error_type));
+#define __return_error(frame, error_type) \
+	return (set_error(frame, error_type));
 /* #define __return_error(frame, error_type) do { \
         __xre_logger(debug, "trace"); \
         return (set_error(frame, error_type)); \

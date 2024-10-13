@@ -3,8 +3,6 @@ CC             := clang
 SRCS_DIR       := srcs
 OBJS_DIR       := .objs
 INCS_DIR       := incs
-LIBARRAY_DIR   := srcs/core/array
-LIBARRAY_NAME  := libarray.a
 
 #MAKEFLAGS += -j6
 
@@ -14,8 +12,8 @@ CFLAGS_RELEASE := \
 	-D XRE_DISABLE_ASSERTS=1
 
 CFLAGS := \
-	-O0     \
-	-g3     \
+	-g3 \
+	-Og  \
 	-Wall   \
 	-Wextra \
 	-Werror \
@@ -33,7 +31,9 @@ SRCS := \
 	core/args/xre_args.c \
 	core/fs/xre_fs.c \
 	core/log/xre_log.c \
-	core/ds/dynstr.c \
+	core/ds/vec.c \
+	core/ds/list.c \
+	core/ds/dstr.c \
 \
 	core/utils/stringf/xre_stringf.c \
 	core/utils/hex/xre_xdp.c \
@@ -47,6 +47,7 @@ SRCS := \
 	core/utils/timespec_to_string.c \
 	core/utils/stresc2chr.c \
 	core/utils/hash_string.c \
+	core/utils/format_string.c \
 	core/utils/str_to_int32.c \
 	core/error/xre_errors.c \
 	core/error/xre_print_error.c \
@@ -74,41 +75,53 @@ SRCS := \
 	repl/readline/rl_editor_mode.c \
 	repl/readline/rl_buffer.c \
 \
+	builtin/builtin.c \
+\
 	runtime/xre_runtime.c \
-	runtime/common.c \
 \
-	runtime/operations/scope_resolution.c \
-	runtime/operations/eq.c \
-	runtime/operations/gt.c \
-	runtime/operations/le.c \
-	runtime/operations/ge.c \
-	runtime/operations/lt.c \
-	runtime/operations/ne.c \
-	runtime/operations/not.c \
-	runtime/operations/value.c \
-	runtime/operations/string.c \
-	runtime/operations/assign.c \
-	runtime/operations/or.c \
-	runtime/operations/loop.c \
-	runtime/operations/and.c \
-	runtime/operations/do.c \
-	runtime/operations/else.c \
-	runtime/operations/separator.c \
-	runtime/operations/sequence.c \
-	runtime/operations/symbol.c \
-	runtime/operations/mul.c \
-	runtime/operations/rshift.c \
-	runtime/operations/mod.c \
-	runtime/operations/lshift.c \
-	runtime/operations/div.c \
-	runtime/operations/bw_xor.c \
-	runtime/operations/pow.c \
-	runtime/operations/bw_and.c \
-	runtime/operations/add.c \
-	runtime/operations/sub.c \
-	runtime/operations/bw_or.c \
-	runtime/operations/symbol.c \
-\
+	runtime/compose/ast_emit.c \
+	runtime/compose/ast_init.c \
+	runtime/compose/profiles.c \
+	runtime/compose/port.c \
+	runtime/compose/analyze/resolve-return-locations.c \
+	runtime/compose/analyze/determine-variable-properties.c \
+	runtime/compose/analyze/resolve-return-types.c \
+	runtime/memory/object.c 
+
+#	runtime/operations/scope_resolution.c \
+#	runtime/operations/eq.c \
+#	runtime/operations/gt.c \
+#	runtime/operations/le.c \
+#	runtime/operations/ge.c \
+#	runtime/operations/lt.c \
+#	runtime/operations/ne.c \
+#	runtime/operations/not.c \
+#	runtime/operations/value.c \
+#	runtime/operations/string.c \
+#	runtime/operations/assign.c \
+#	runtime/operations/or.c \
+#	runtime/operations/loop.c \
+#	runtime/operations/and.c \
+#	runtime/operations/do.c \
+#	runtime/operations/else.c \
+#	runtime/operations/separator.c \
+#	runtime/operations/closure.c \
+#	runtime/operations/sequence.c \
+#	runtime/operations/attribute.c \
+#	runtime/operations/symbol.c \
+#	runtime/operations/mul.c \
+#	runtime/operations/rshift.c \
+#	runtime/operations/mod.c \
+#	runtime/operations/lshift.c \
+#	runtime/operations/div.c \
+#	runtime/operations/bw_xor.c \
+#	runtime/operations/pow.c \
+#	runtime/operations/bw_and.c \
+#	runtime/operations/add.c \
+#	runtime/operations/sub.c \
+#	runtime/operations/bw_or.c \
+#	runtime/operations/symbol.c \
+#\
 	runtime/memory/heap.c \
 	runtime/memory/stack.c \
 	runtime/memory/symtab.c \
@@ -116,13 +129,17 @@ SRCS := \
 	runtime/memory/object/number.c \
 	runtime/memory/object/sequence.c \
 	runtime/memory/object/string.c \
-	runtime/memory/object/symbol.c \
+	runtime/memory/object/buffer.c \
 	runtime/memory/object/undefined.c \
 \
 	runtime/builtin/builtins.c \
 	runtime/builtin/xre_builtin.c \
 \
 	runtime/builtin/std/print.c \
-	runtime/builtin/std/yes.c \
+	runtime/builtin/std/__u8.c \
+	runtime/builtin/std/__str.c \
+	runtime/builtin/std/__map.c \
+	runtime/builtin/std/__foreach.c \
+	runtime/builtin/std/__filter.c \
 	runtime/builtin/std/typeof.c
 	

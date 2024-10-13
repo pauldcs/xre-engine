@@ -1,4 +1,4 @@
-#include "xre_assert.h"
+#include "xre_compiler.h"
 #include "xre_readline.h"
 #include <errno.h>
 #include <stdbool.h>
@@ -8,22 +8,27 @@
 #include <termcap.h>
 #include <termios.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 bool rl_init_termcaps(void)
 {
 	char *term_type;
-	int ret;
+	int   ret;
 
 	if (__is_termcap_inited__)
 		return (true);
 
 	term_type = getenv("TERM");
-	__return_val_if_fail__(term_type && "TERM must be set (see 'env')",
-			       false);
+	__return_val_if_fail__(
+		term_type && "TERM must be set (see 'env')", false
+	);
 
 	ret = tgetent(NULL, term_type);
 	__return_val_if_fail__(
-		ret != -1 && "The terminfo database could not be found", false);
+		ret != -1 &&
+			"The terminfo database could not be found",
+		false
+	);
 
 	(void)ret;
 
@@ -67,7 +72,8 @@ bool rl_raw_mode_disable(void)
 	if (!__terminal_in_raw_mode__)
 		return (true);
 
-	if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &config.orig_termios) == -1) {
+	if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &config.orig_termios) ==
+	    -1) {
 		fprintf(stderr, "tcsetattr: %s\n", strerror(errno));
 		return (false);
 	}
@@ -96,7 +102,7 @@ bool rl_raw_mode_enable(void)
 
 	raw.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
 
-	raw.c_cc[VMIN] = 0;
+	raw.c_cc[VMIN]	= 0;
 	raw.c_cc[VTIME] = 1;
 
 	if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) {
@@ -111,7 +117,7 @@ bool rl_raw_mode_enable(void)
 bool rl_get_window_size(size_t *rows, size_t *cols)
 {
 	struct winsize ws;
-	int ret;
+	int	       ret;
 
 	ret = ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
 

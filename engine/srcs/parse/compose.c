@@ -1,37 +1,48 @@
 #include "xre_args.h"
-#include "xre_assert.h"
+#include "xre_compiler.h"
 #include "xre_parse.h"
+#include "xre_nodes.h"
 
-xre_ast_t *xre_ast_compose(const char *expr)
+// void fuck_with_tokens(struct vector *tokens) {
+// 	size_t size = vec_size(tokens);
+// 	for (size_t i = 0; i < size; i++) {
+// 		printf("'%s'\n", expr_kind_to_string(((struct token *)vec_at(tokens, i))->_kind));
+// 	}
+// 	(void)tokens;
+// }
+
+struct ast *xre_ast_compose(const char *expr)
 {
 	__return_val_if_fail__(expr, NULL);
 
-	array_t *tokens = NULL;
-	xre_ast_t *ast = NULL;
+	struct vector *tokens = NULL;
+	struct ast    *ast    = NULL;
 
-	tokens = array_create(sizeof(xre_token_t), 16, NULL);
-	if (!tokens)
+	tokens = vec_create(sizeof(struct token), 16, NULL);
+	if (!tokens) {
 		return (NULL);
+	}
 
-	if (!xre_expr_lex(expr, tokens) || !xre_expr_syntax(tokens))
+	if (!xre_expr_lex(expr, tokens) || !xre_expr_syntax(tokens)) {
 		goto prison;
+	}
+
+	//fuck_with_tokens(tokens);
 
 	ast = xre_expr_parse(tokens);
-	if (!ast)
+	if (!ast) {
 		goto prison;
+	}
 
 	/* success */
 	goto beach;
 
 prison:
-	array_kill(tokens);
+	vec_kill(tokens);
 	return (NULL);
 
 beach:
-	if (__xre_args__.flags & FLAGS_DEBUG) {
-		ast_show(ast);
-	}
 
-	array_kill(tokens);
+	vec_kill(tokens);
 	return (ast);
 }

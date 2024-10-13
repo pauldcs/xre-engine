@@ -1,5 +1,5 @@
 #include "list.h"
-#include "xre_assert.h"
+#include "xre_compiler.h"
 #include <stdbool.h>
 #include <string.h>
 
@@ -33,7 +33,7 @@ list_node_t *list_new_node(void *data, size_t size)
 		return (NULL);
 
 	(void)memset(n, 0, sizeof(list_node_t));
-	n->_data.ptr = data;
+	n->_data.ptr  = data;
 	n->_data.size = size;
 
 	return (n);
@@ -64,7 +64,7 @@ void list_kill(list_t *self)
 
 	list_node_t *temp1 = self->_list.head;
 	list_node_t *temp2 = NULL;
-	size_t size = self->_list.nmemb;
+	size_t	     size  = self->_list.nmemb;
 
 	while (size--) {
 		temp2 = temp1;
@@ -125,10 +125,10 @@ void list_pop(list_t *self)
 	__return_if_fail__(self->_list.nmemb > 0);
 
 	list_node_t *temp = self->_list.head;
-	list_node_t *ptr = NULL;
+	list_node_t *ptr  = NULL;
 
 	while (temp->_next) {
-		ptr = temp;
+		ptr  = temp;
 		temp = temp->_next;
 	}
 

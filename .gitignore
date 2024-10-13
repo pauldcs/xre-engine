@@ -8,3 +8,6 @@ tools/tester/outfiles
 .vscode
 .cache
 *.DS_Store
+__old
+.env
+shared/xre

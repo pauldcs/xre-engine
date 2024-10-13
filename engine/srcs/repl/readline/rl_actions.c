@@ -1,4 +1,4 @@
-#include "xre_assert.h"
+#include "xre_compiler.h"
 #include "xre_readline.h"
 #include "xre_stringf.h"
 #include <stdio.h>
@@ -70,8 +70,12 @@ void rl_move_cursor_down(size_t n)
 
 void rl_move_cursor_to(size_t x, size_t y)
 {
-	(void)fputstr(STDOUT_FILENO, tgoto(tgetstr("cm", NULL), x, y), 1,
-		      &rl_xputchar);
+	(void)fputstr(
+		STDOUT_FILENO,
+		tgoto(tgetstr("cm", NULL), x, y),
+		1,
+		&rl_xputchar
+	);
 }
 
 void rl_scroll_forward(size_t n)

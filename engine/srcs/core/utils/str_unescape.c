@@ -26,8 +26,8 @@ static bool hex_to_byte(uint8_t *val, uint8_t c)
 int str_unescape(char *buf)
 {
 	unsigned char ch = 0, ch2 = 0;
-	int err = 0;
-	int i;
+	int	      err = 0;
+	int	      i;
 
 	for (i = 0; buf[i]; i++) {
 		if (buf[i] != '\\') {
@@ -101,7 +101,7 @@ int str_unescape(char *buf)
 				return (0);
 			}
 
-			buf[i] = (ch << 4) + ch2;
+			buf[i]	    = (ch << 4) + ch2;
 			esc_seq_len = 4;
 
 			break;
@@ -113,7 +113,7 @@ int str_unescape(char *buf)
 		default:
 			if (IS_OCTAL(buf[i + 1])) {
 				int num_digits = 1;
-				buf[i] = buf[i + 1] - '0';
+				buf[i]	       = buf[i + 1] - '0';
 
 				if (IS_OCTAL(buf[i + 2])) {
 					num_digits++;
@@ -122,8 +122,11 @@ int str_unescape(char *buf)
 
 					if (IS_OCTAL(buf[i + 3])) {
 						num_digits++;
-						buf[i] = (uint8_t)buf[i] * 8 +
-							 (buf[i + 3] - '0');
+						buf[i] = (uint8_t
+							 )buf[i] *
+								 8 +
+							 (buf[i + 3] -
+							  '0');
 					}
 				}
 				esc_seq_len = 1 + num_digits;
@@ -132,7 +135,8 @@ int str_unescape(char *buf)
 				esc_seq_len = 1;
 			}
 		}
-		memmove(buf + i + 1, buf + i + esc_seq_len,
+		memmove(buf + i + 1,
+			buf + i + esc_seq_len,
 			strlen(buf + i + esc_seq_len) + 1);
 	}
 	return i;

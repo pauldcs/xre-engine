@@ -1,22 +1,60 @@
 # xre-engine - Expression Evaluation Engine
 
-This is a learning project for me to better understand interpreted programming
-languages design
+This is a learning project for me to better understand programming
+languages design.
 
-```C
-// finding prime numbers in range 0, 20
+```r
+i = 0;
 
-i=0;{i=i+1}<=20 loop{f=0;j=1;j<20 loop{!{i%j}do{f=f+1};j=j+1};f==2 do print i}
+(i = i + 1) <= 50 loop {
+    std_out ({1, 2, (3, i), 5} std_map {
+		@ => std_buf @
+	})
+}
+```
 
-output:
-2
-3
-5
-7
-11
-13
-17
-19
+```r
+'Separator' [local_0000] # as r- any
+├── Alloc [var_0000] # as r- int64_t (0x0) token: '0'
+├── Alloc [var_0001] # as rw int64_t (0x0) token: 'i'
+├── Alloc [var_0002] # as r- int64_t (0x1) token: '1'
+├── Alloc [var_0003] # as r- int64_t (0x32) token: '50'
+├── 'Assign' [var_0000] # as r- int64_t
+│   ├── *var_0000 # as r- int64_t
+│   └── *var_0001 # as rw int64_t
+└── 'Loop' [local_-2147483648] # as r- any
+    ├── 'Less or equal' [local_0000] # as r- int64_t
+    │   ├── 'Assign' [local_0000] # as r- int64_t
+    │   │   ├── 'Addition' [local_0000] # as r- int64_t
+    │   │   │   ├── *var_0001 # as rw int64_t
+    │   │   │   └── *var_0002 # as r- int64_t
+    │   │   └── *var_0001 # as rw int64_t
+    │   └── *var_0003 # as r- int64_t
+    └── 'Builtin call' `std_out` [local_0002] # as -- any
+        ├── Alloc [var_0004] # as r- int64_t (0x5) token: '5'
+        ├── Alloc [var_0005] # as r- int64_t (0x3) token: '3'
+        ├── Alloc [var_0006] # as r- int64_t (0x2) token: '2'
+        ├── Alloc [var_0007] # as -w any (0x0) token: '@'
+        └── 'Builtin call' `std_map` [local_0002] # as rw vector(object)
+            ├── 'Sequence' [local_0002] # as -w any
+            │   ├── *var_0004 # as r- int64_t
+            │   ├── 'Sequence' [local_0001] # as -w any
+            │   │   ├── *var_0001 # as rw int64_t
+            │   │   └── *var_0005 # as r- int64_t
+            │   ├── *var_0006 # as r- int64_t
+            │   └── *var_0002 # as r- int64_t
+            └── 'Closure' [local_0003] # as rw vector(uint8_t)
+                ├── *var_0007 # as -w any
+                └── 'Builtin call' `std_buf` [local_0003] # as rw vector(uint8_t)
+                    └── *var_0007 # as -w any
+        Drop [var_0007]
+        Drop [var_0006]
+        Drop [var_0005]
+        Drop [var_0004]
+Drop [var_0003]
+Drop [var_0002]
+Drop [var_0001]
+Drop [var_0000]
 ```
 
 ## Installation
@@ -25,7 +63,8 @@ install xre via Git using the install script:
 
 ```bash
 $ git clone https://github.com/pauldcs/xre-engine
-$ ./xre-engine/install.sh
+$ cd xre-engine
+$ ./install.sh
  ...
 $ xre -h
 ```
@@ -42,7 +81,6 @@ The container is created by running:
 
 ```bash
 $ make
-# Ctrl-D to stop the container
 ```
 
 Once the container is created, you get a bash shell to it by

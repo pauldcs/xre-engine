@@ -1,4 +1,4 @@
-#include "xre_assert.h"
+#include "xre_compiler.h"
 #include "xre_core.h"
 #include "xre_log.h"
 #include "xre_utils.h"
@@ -104,7 +104,7 @@ bool xre_fd_is_valid(const int fd)
 {
 	__return_val_if_fail__(fd != -1, 0);
 
-	errno = 0;
+	errno	= 0;
 	int ret = fcntl(fd, F_GETFD);
 	return (ret != -1 || errno != EBADF);
 }
@@ -161,25 +161,39 @@ bool xre_fd_read_at(int fd, void *dest, size_t n, off_t offset)
 
 	ret = lseek(fd, offset, SEEK_SET);
 	if (ret == -1) {
-		__xre_logger(error, "Cannot lseek to offset: %s",
-			     strerror(errno));
+		__xre_logger(
+			error,
+			"Cannot lseek to offset: %s",
+			strerror(errno)
+		);
 		return (false);
 	}
 	if (ret != (ssize_t)offset) {
-		__xre_logger(error, "Seeked to offset %d instead of %d", ret,
-			     offset);
+		__xre_logger(
+			error,
+			"Seeked to offset %d instead of %d",
+			ret,
+			offset
+		);
 		return (false);
 	}
 
 	ret = read(fd, dest, n);
 	if (ret == -1) {
-		__xre_logger(error, "Cannot read the file: %s",
-			     strerror(errno));
+		__xre_logger(
+			error,
+			"Cannot read the file: %s",
+			strerror(errno)
+		);
 		return (false);
 	}
 	if (ret != (ssize_t)n) {
-		__xre_logger(error, "Could only read %d bytes out of %d", ret,
-			     n);
+		__xre_logger(
+			error,
+			"Could only read %d bytes out of %d",
+			ret,
+			n
+		);
 		return (false);
 	}
 	return (true);
@@ -189,35 +203,50 @@ bool xre_fd_sneek_read(int fd, void *dest, size_t n)
 {
 	__return_val_if_fail__(fd != -1, 0);
 
-	off_t start_offset;
+	off_t	start_offset;
 	ssize_t ret;
 
 	start_offset = lseek(fd, 0, SEEK_CUR);
 	if (start_offset == -1) {
-		__xre_logger(error, "Lseek failed: %s", strerror(errno));
+		__xre_logger(
+			error, "Lseek failed: %s", strerror(errno)
+		);
 		return (false);
 	}
 
 	ret = read(fd, dest, n);
 	if (ret == -1) {
-		__xre_logger(error, "Cannot read the file: %s",
-			     strerror(errno));
+		__xre_logger(
+			error,
+			"Cannot read the file: %s",
+			strerror(errno)
+		);
 		return (false);
 	}
 	if (ret != (ssize_t)n) {
-		__xre_logger(error, "Could only read %d bytes out of %d", ret,
-			     n);
+		__xre_logger(
+			error,
+			"Could only read %d bytes out of %d",
+			ret,
+			n
+		);
 		return (false);
 	}
 
 	ret = lseek(fd, start_offset, SEEK_SET);
 	if (ret == -1) {
-		__xre_logger(error, "Lseek failed: %s", strerror(errno));
+		__xre_logger(
+			error, "Lseek failed: %s", strerror(errno)
+		);
 		return (false);
 	}
 	if (ret != (ssize_t)start_offset) {
-		__xre_logger(error, "Seeked to offset %d instead of %d", ret,
-			     start_offset);
+		__xre_logger(
+			error,
+			"Seeked to offset %d instead of %d",
+			ret,
+			start_offset
+		);
 		return (false);
 	}
 	return (true);
@@ -229,12 +258,18 @@ bool xre_fd_read(int fd, void *dest, size_t n)
 
 	ret = read(fd, dest, n);
 	if (ret == -1) {
-		__xre_logger(error, "Read failed: %s", strerror(errno));
+		__xre_logger(
+			error, "Read failed: %s", strerror(errno)
+		);
 		return (false);
 	}
 	if (ret != (ssize_t)n) {
-		__xre_logger(error, "Could only read %d bytes out of %d", ret,
-			     n);
+		__xre_logger(
+			error,
+			"Could only read %d bytes out of %d",
+			ret,
+			n
+		);
 		return (false);
 	}
 	return (true);

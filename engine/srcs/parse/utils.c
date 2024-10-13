@@ -1,21 +1,30 @@
 #include "xre_parse.h"
 #include <sys/types.h>
 #include <unistd.h>
+#include <stdlib.h>
 
-static void inner(xre_ast_t *ast, size_t depth);
+static void inner(struct ast *ast, size_t depth);
 
-static void put_binop(xre_ast_t *ast, size_t depth)
+static void put_binop(struct ast *ast, size_t depth)
 {
 	inner(ast->_binop.left, depth + 1);
 	inner(ast->_binop.right, depth + 1);
 }
 
-static void put_uniop(xre_ast_t *ast, size_t depth)
+static void put_sequence(struct ast *ast, size_t depth)
+{
+	for (size_t c = 0; c < vec_size(ast->seq); c++) {
+		inner((struct ast *)vec_access(ast->seq, c),
+		      depth + 1);
+	}
+}
+
+static void put_uniop(struct ast *ast, size_t depth)
 {
 	inner(ast->uniop, depth + 1);
 }
 
-static void inner(xre_ast_t *ast, size_t depth)
+static void inner(struct ast *ast, size_t depth)
 {
 	size_t i;
 
@@ -42,18 +51,20 @@ static void inner(xre_ast_t *ast, size_t depth)
 		printf("<%s>\n", expr_kind_to_string(ast->kind));
 	}
 
-	if (ast->token._type & (EXPR_OP_TYPE_BINOP))
+	if (ast->type & (EXPR_OP_TYPE_BINOP))
 		put_binop(ast, depth);
-	else if (ast->token._type & EXPR_OP_TYPE_UNIOP)
+	else if (ast->type & (EXPR_OP_TYPE_SEQUENCE)) {
+		put_sequence(ast, depth);
+	} else if (ast->type & EXPR_OP_TYPE_UNIOP)
 		put_uniop(ast, depth);
 }
 
-void ast_show(xre_ast_t *ast)
+void ast_show(struct ast *ast)
 {
 	inner(ast, 0);
 }
 
-void ast_free(xre_ast_t *ast)
+void ast_free(struct ast *ast)
 {
 	if (!ast)
 		return;
@@ -73,6 +84,9 @@ void ast_free(xre_ast_t *ast)
 		ast_free(ast->uniop);
 		break;
 
+	case __SEQUENCE__:
+		break;
+
 	case __VAL__:
 		break;
 
@@ -83,85 +97,116 @@ void ast_free(xre_ast_t *ast)
 	free(ast);
 }
 
-const char *expr_kind_to_string(xre_expr_kind_t kind)
+const char *expr_type_to_string(enum expr_type type)
 {
-	switch (kind) {
-	case __START__:
-		return "start";
-	case __END__:
-		return "end";
-	case __VAL__:
-		return "value";
-	case __STRING_LITERAL__:
-		return "string_literal";
-	case __VARIABLE__:
-		return "variable";
-	case __NOT__:
-		return "not";
-	case __BUILTIN_CALL__:
-		return "builtin_call";
-	case __ADD__:
-		return "addition";
-	case __SUB__:
-		return "substraction";
-	case __MUL__:
-		return "multiplication";
-	case __DIV__:
-		return "division";
-	case __MOD__:
-		return "modulus";
-	case __LSHIFT__:
-		return "left_shift";
-	case __RSHIFT__:
-		return "right_shift";
-	case __ASSIGN__:
-		return "assign";
-	case __LT__:
-		return "less_than";
-	case __GT__:
-		return "greater_than";
-	case __LE__:
-		return "less_or_eaqual";
-	case __GE__:
-		return "greater_than_or_equal";
-	case __LPAREN__:
-		return "left_parenthesis";
-	case __RPAREN__:
-		return "right_parenthesis";
-	case __POW__:
-		return "power";
-	case __BXOR__:
-		return "bitwise_xor";
-	case __BAND__:
-		return "bitwise_and";
-	case __BOR__:
-		return "bitwise_or";
-	case __AND__:
-		return "logical_and";
-	case __OR__:
-		return "logical_or";
-	case __EQ__:
-		return "equals";
-	case __NE__:
-		return "not_equal";
-	case __SEQUENCE__:
-		return "sequence_point";
-	case __SEPARATOR__:
-		return "separator";
-	case __LOOP__:
-		return "loop";
-	case __SCOPE_RESOLUTION__:
-		return "scope_resolution";
-	case __DO__:
-		return "do";
-	case __ELSE__:
-		return "else";
+	switch (type) {
+	case EXPR_TYPE_VALUE:
+		return ("value");
+	case EXPR_OP_TYPE_SEQUENCE:
+		return ("sequence");
+	case EXPR_OP_TYPE_BINOP:
+		return ("binop");
+	case EXPR_OP_TYPE_UNIOP:
+		return ("uniop");
+	case EXPR_TYPE_OTHER:
+		return ("other");
 	}
 
 	__builtin_unreachable();
 }
 
-xre_expr_type_t expr_type_by_kind(xre_expr_kind_t kind)
+const char *expr_kind_to_string(enum expr_kind kind)
+{
+	switch (kind) {
+	case __START__:
+		return "Start";
+	case __END__:
+		return "End";
+	case __VAL__:
+		return "Value";
+	case __STRING_LITERAL__:
+		return "String literal";
+	case __VARIABLE__:
+		return "Variable";
+	case __NOT__:
+		return "Not";
+	case __BUILTIN_CALL__:
+		return "Builtin call";
+	case __ADD__:
+		return "Addition";
+	case __SUB__:
+		return "Substraction";
+	case __MUL__:
+		return "Multiplication";
+	case __DIV__:
+		return "Division";
+	case __MOD__:
+		return "Modulus";
+	case __LSHIFT__:
+		return "Left shift";
+	case __RSHIFT__:
+		return "Right shift";
+	case __ASSIGN__:
+		return "Assign";
+	case __LT__:
+		return "Less than";
+	case __GT__:
+		return "Greater than";
+	case __LE__:
+		return "Less or equal";
+	case __GE__:
+		return "Greater than or equal";
+	case __LBRACK__:
+		return "Left bracket";
+	case __RBRACK__:
+		return "Right bracket";
+	case __LPAREN__:
+		return "Left parenthesis";
+	case __RPAREN__:
+		return "Right parenthesis";
+	case __POW__:
+		return "Power";
+	case __BXOR__:
+		return "Bitwise xor";
+	case __BAND__:
+		return "Bitwise and";
+	case __BOR__:
+		return "Bitwise or";
+	case __AND__:
+		return "Logical and";
+	case __OR__:
+		return "Logical or";
+	case __EQ__:
+		return "Equals";
+	case __CLOSURE__:
+		return "Closure";
+	case __NE__:
+		return "Not equal";
+	case __SEQUENCE_POINT__:
+		return "Sequence";
+	case __SEQUENCE__:
+		return "Sequence";
+	case __ATTRIBUTE__:
+		return "Attribute";
+	case __SEPARATOR__:
+		return "Separator";
+	case __LOOP__:
+		return "Loop";
+	case __SCOPE_RESOLUTION__:
+		return "Scope resolution";
+	case __DO__:
+		return "Do";
+	case __ELSE__:
+		return "Else";
+	default:
+		printf("%d??\n", kind);
+		return "";
+	}
+
+	__builtin_unreachable();
+}
+
+enum expr_type expr_type_by_kind(enum expr_kind kind)
 {
 	switch (kind) {
 	case __VAL__:
@@ -169,6 +214,9 @@ xre_expr_type_t expr_type_by_kind(xre_expr_kind_t kind)
 	case __VARIABLE__:
 		return (EXPR_TYPE_VALUE);
 
+	case __SEQUENCE__:
+		return (EXPR_OP_TYPE_SEQUENCE);
+
 	case __ADD__:
 	case __SUB__:
 	case __MUL__:
@@ -188,13 +236,15 @@ xre_expr_type_t expr_type_by_kind(xre_expr_kind_t kind)
 	case __EQ__:
 	case __NE__:
 	case __SEPARATOR__:
-	case __SEQUENCE__:
+	case __SEQUENCE_POINT__:
+	case __ATTRIBUTE__:
 	case __SCOPE_RESOLUTION__:
 	case __LOOP__:
 	case __DO__:
 	case __ELSE__:
 	case __AND__:
 	case __OR__:
+	case __CLOSURE__:
 		return (EXPR_OP_TYPE_BINOP);
 
 	case __NOT__:
@@ -203,6 +253,8 @@ xre_expr_type_t expr_type_by_kind(xre_expr_kind_t kind)
 
 	case __START__:
 	case __END__:
+	case __LBRACK__:
+	case __RBRACK__:
 	case __LPAREN__:
 	case __RPAREN__:
 		return (EXPR_TYPE_OTHER);

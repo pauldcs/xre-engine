@@ -1,28 +1,31 @@
-#include "xre_assert.h"
-#include "xre_parse.h"
+#include "xre_compiler.h"
+#include "xre_nodes.h"
 
-int get_precedence_by_kind(xre_expr_kind_t kind)
+int get_precedence_by_kind(enum expr_kind kind)
 {
-	// if (kind == __BUILTIN_CALL__) {
-	// 	switch (expr_type_by_kind(kind)) {
-	// 		case EXPR_OP_TYPE_BINOP:
-	// 			goto builtin_binop;
+	if (kind == __BUILTIN_CALL__) {
+		switch (expr_type_by_kind(kind)) {
+		case EXPR_OP_TYPE_BINOP:
+			goto builtin_binop;
 
-	// 		case EXPR_OP_TYPE_UNIOP:
-	// 			goto uniop;
+		case EXPR_OP_TYPE_UNIOP:
+			goto uniop;
 
-	// 		default:
-	// 			goto prison;
-	// 	}
-	// }
+		default:
+			goto value;
+		}
+	}
 
 	switch (kind) {
 	case __SCOPE_RESOLUTION__:
 	case __START__:
 	case __END__:
+	case __ATTRIBUTE__:
 		return (0);
 
 	case __NOT__:
+
+uniop:
 	case __BUILTIN_CALL__:
 		return (-1);
 
@@ -58,6 +61,7 @@ int get_precedence_by_kind(xre_expr_kind_t kind)
 	case __BXOR__:
 		return (-10);
 
+builtin_binop:
 	case __BOR__:
 		return (-11);
 
@@ -74,21 +78,28 @@ int get_precedence_by_kind(xre_expr_kind_t kind)
 		return (-16);
 
 	case __LOOP__:
+	case __SEQUENCE__:
 		return (-17);
 
-	case __SEQUENCE__:
+	case __SEQUENCE_POINT__:
 		return (-18);
 
 	case __ASSIGN__:
 		return (-19);
 
-	case __SEPARATOR__:
-		return (-20);
+	case __CLOSURE__:
+		return (-21);
 
+	case __SEPARATOR__:
+		return (-22);
+
+	case __LBRACK__:
+	case __RBRACK__:
 	case __LPAREN__:
 	case __RPAREN__:
 		return (-1000);
 
+value:
 	case __VAL__:
 	case __STRING_LITERAL__:
 	case __VARIABLE__:
